@@ -1,4 +1,4 @@
-# Homer - Extensible home automation using Ruby and MQTT
+# Homer
 tbd
 
 ## Installation
