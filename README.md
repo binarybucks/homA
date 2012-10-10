@@ -1,4 +1,11 @@
-homer
-=====
+# Homer - Extensible home automation using Ruby and MQTT
+tbd
 
-Home automation made easy
+## Installation
+tbd
+
+## Configuration
+tbd
+
+## Adding devices
+tbd
