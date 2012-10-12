@@ -1,51 +1,63 @@
-require 'oauth'
-
-require 'oauth2'
-
-OAUTH_CREDENTIALS={
-  :google => {
-    :key => "127336077993.apps.googleusercontent.com",
-    :secret => "lBBwOd7p_w27qvE9WeyzmFX_",
-    :refreshToken => "1/NGwpD_Q14uSmSgrMcRNbP9aj8MxWPkVOcik-rpakRJw"
-   }
-}
 
 
 class CalendarProxy
 
-	def initialize(calendarID)
-		@client_id = OAUTH_CREDENTIALS[:google][:key]
-		@client_secret = OAUTH_CREDENTIALS[:google][:secret]		
-		@refreshToken = OAUTH_CREDENTIALS[:google][:refreshToken]
+	def initialize()
+		puts "(ThreadID #{Thread.current.object_id}) Initializing calendar proxy"
+
+		@client_id = CONFIG['googlecalendar']['apiKey']
+		@client_secret = CONFIG['googlecalendar']['apiSecret']		
+		@refreshToken = CONFIG['googlecalendar']['refreshToken'] # Optional
 		@scope =  "https://www.googleapis.com/auth/calendar"
-
 		@accessToken = nil
+		@calendarID = CONFIG['googlecalendar']['calendarID']
 
 
-		queryOAuth2("calendar/v3/users/me/calendarList")
+		raise "Missing googlecalendar:apiKey config parameter" if @client_id.to_s.empty?
+		raise "Missing googlecalendar:apiSecret config parameter" if @client_secret.to_s.empty?
+		raise "Missing googlecalendar:calendarID config parameter" if @calendarID.to_s.empty?
 
+		getNextEvent()
+	end
+
+
+	def pollPeriodically(interval = 10)
+	 timer = EventMachine::PeriodicTimer.new(interval) do
+		getNextEvent()
+	 end
 	end
 
 
 
+	def getNextEvent() 
+		# Test to get list of calendars
+		# getQuery("/calendar/v3/users/me/calendarList")
 
-	def autorizeOAuth2()
-		puts "Checking Google Calendar Oauth2 authentication"
-		raise "Missing client_id variable" if @client_id.to_s.empty?
-		raise "Missing client_secret variable" if @client_secret.to_s.empty?
-		raise "Missing scope variable" if @scope.to_s.empty?
+		# Formats minimal start date of events according to te wishes of the Google Calendar API (2012-10-12T11:50:00+02:00) and URL escapes ':' and '+' characters
+		startTime = "#{Time.now.strftime('%Y-%m-%dT%H%%3A%M%%3A%S%:z').sub( "+", "%2B" ).sub(":", "%3A")}"
+		result = getQuery("calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(description%2Cstart%2Csummary)&orderBy=startTime&timeMin=#{startTime}")	
+		puts result.body
+	end
 
-		if (@accessToken == nil || @accessToken.isExpired?) then
+	def getQuery(query)
+		authorizeOAuth2IfRequired()
+		api_client_obj = OAuth2::Client.new(@client_id, @client_secret, {:site => 'https://www.googleapis.com'})
+		api_access_token_obj = OAuth2::AccessToken.new(api_client_obj, @accessToken.token)
+		result = api_access_token_obj.get(query)
+	end
 
-			#Request new access token with our refresh token
+
+
+	def authorizeOAuth2IfRequired()
+		#puts "Checking Google Calendar Oauth2 authentication"
+
+		if (@accessToken == nil || @accessToken.expired?) then
+
+			#Request new access token with refresh token if request token exists
 			unless (@refreshToken == "") then
 				refreshTokens()
-
-
-				# auth_client_obj = OAuth2::Client.new(@client_id, @client_secret, {:site => 'https://accounts.google.com', :authorize_url => "/o/oauth2/auth", :token_url => "/o/oauth2/token"})
-				# @accessToken = OAuth2::AccessToken.from_hash(auth_client_obj, {:access_token => OAUTH_CREDENTIALS[:google][:accessTokenToken], :refresh_token => OAUTH_CREDENTIALS[:google][:accessTokenRefreshToken], :token_type => "Bearer"})
-			else # If no access token and no refresh token is found, we have to request authentication again
-				puts "Client is not authorized yet. Now Autorizing for Google Calendar with OAuth2"
+			else # If no access token and no refresh token exists, we have to request authentication again
+				puts "Client is not authorized yet. Autorizing for Google Calendar with OAuth2"
 
 				redirect_uri = 'http://localhost/oauth2callback'
 				auth_client_obj = OAuth2::Client.new(@client_id, @client_secret, {:site => 'https://accounts.google.com', :authorize_url => "/o/oauth2/auth", :token_url => "/o/oauth2/token"})
@@ -58,45 +70,20 @@ class CalendarProxy
 
 				code = gets.chomp.strip
 				@accessToken = auth_client_obj.auth_code.get_token(code, { :redirect_uri => redirect_uri, :token_method => :post })
+				puts "4) Set the config parameter googlecalendar:refreshToken to #{@accessToken.refresh_token}"
 			end
 
-			puts "Got OAuth2 access token: #{@accessToken.token} (SAVE THIS)"
-			puts "Got OAuth2 access token refresh token: #{@accessToken.refresh_token} (SAVE THIS)"
-			puts "Access token refresh token expired?: #{@accessToken.expired?} "
+			unless (@accessToken.refresh_token.nil?) then
+				@refreshToken = @accessToken.refresh_token
+			end
 
 		else 
-			puts "Client is already authorized"
+			# puts "Client is already authorized"
 		end
-
-
-			refreshTokens()
-
-		# if (@accessToken.expired? == true || @accessToken.expires_at == nil) then
-		# 	refreshTokens()
-		# 	refreshTokens()
-
-		# end
-
 	end
-
-	def queryCalendar(method, query)
-		autorizeOAuth2()
-
-
-		#puts "api_access_token_obj.get('some_relative_path_here') OR in your browser: http://www.googleapis.com/some_relative_path_here?access_token=#{access_token_obj.token}"
-
-
-		puts "Querying API at #{query}"
-		api_client_obj = OAuth2::Client.new(@client_id, @client_secret, {:site => 'https://www.googleapis.com'})
-		api_access_token_obj = OAuth2::AccessToken.new(api_client_obj, @accessToken.token)
-		result = api_access_token_obj.get("/#{query}?access_token=#{@accessToken.token}")
-
-		puts "Got API result: #{result.body	}"
-	end
-
 
 	def refreshTokens()
-		puts "Refreshing Google Calendar OAuth2 token using refreshToken #{@refreshToken}"
+		#puts "Refreshing Google Calendar OAuth2 token using refreshToken #{@refreshToken}"
 		accessTokenStr = ""
 		if (@accessToken != nil && @accessToken.token != nil) then 
 			accessTokenStr = @accessToken.token
@@ -113,12 +100,6 @@ class CalendarProxy
 		if (@accessToken.refresh_token != nil && @accessToken.refresh_token != "") then 
 			@refreshToken = @accessToken.refresh_token
 		end
-
-		# puts "Refreshed OAuth2 access token: #{@accessToken.token}"
-		# puts "Refreshed OAuth2 access token refresh token: #{@accessToken.refresh_token} (SAVE THIS)"
-		# puts "Refreshed Access token refresh token expired?: #{@accessToken.expired?}"
-		# puts "Refreshed Access token refresh token expires in: #{@accessToken.expires_in}"
-
 	end
 
 

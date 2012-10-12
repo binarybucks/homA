@@ -1,8 +1,10 @@
 
 class MqttProxy
-	def initialize(server = "localhost", port = 1833)
-		@server = server
-		@port = port
+	def initialize()
+		puts "(ThreadID #{Thread.current.object_id}) Initializing MQTT proxy"
+
+		@server = CONFIG['mqtt']['server']
+		@port = 1833
 		@topicCallbacks = {}
 		connect()
 	end 
@@ -31,7 +33,7 @@ private
 	end
 
 	def connect()
-		puts "(ThreadID #{Thread.current.object_id}) Starting MQTT proxy for server #{@server}:#{@port} "
+		#puts "(ThreadID #{Thread.current.object_id}) Starting MQTT proxy for server #{@server}:#{@port} "
 		@mqtt = MQTT::Client.connect(@server) 
  	
   	Thread.new do 

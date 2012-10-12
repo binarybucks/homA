@@ -1,11 +1,13 @@
 class SerialProxy
-	def initialize(device = "/dev/ttyACM0", baudRate = 9600, dataBits = 8, stopBits = 1, parity = SerialPort::NONE)
+	def initialize()
+		puts "(ThreadID #{Thread.current.object_id}) Initializing serial proxy"
 
-		@device = device
-		@baudRate = baudRate
-		@dataBits = dataBits
-		@stopBits = stopBits
-		@parity = parity
+		@device = CONFIG['serialport']['device']
+		@baudRate = CONFIG['serialport']['baudRate']
+		@dataBits = 8
+		@stopBits = 1
+		@parity = SerialPort::NONE
+
 
 		connect()
 	end 
@@ -24,8 +26,6 @@ class SerialProxy
 
 	private
 		def connect()
-			puts "Starting serial proxy for device #{@device}"
-
 			begin
 				@sp = SerialPort.new(@device, @baudRate, @dataBits, @stopBits, @parity)
 			rescue Exception
