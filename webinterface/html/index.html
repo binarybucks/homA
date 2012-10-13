@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <link href="css/app.css" media="screen" rel="stylesheet" type="text/css"/>
+    <script src="js/app.js" type="text/javascript"> </script>
+  </head>
+  <body>
+    <div id="container">
+     <div id="switches"> 
+        <input class="mqttEnabled" data-topic="/devices/1/status" id="switch1" type="checkbox" /> 
+        <input class="mqttEnabled" data-topic="/devices/2/status" id="switch2" type="checkbox" />
+        <input class="mqttEnabled" data-topic="/devices/3/status" id="switch3" type="checkbox" />
+        <input class="mqttEnabled" data-topic="/devices/3/fading" id="ambilightFade" type="checkbox" />
+     </div>
+    <div id="sensors">
+      <div>Arduino Temperature sensor: <span id ="arduinoTemperature" class="mqttEnabled" data-topic="/sensors/arduino/temperature">Unknown</span> </div>
+    </div>
+    </div>
+  </body>
+</html>

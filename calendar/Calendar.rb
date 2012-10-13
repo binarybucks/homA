@@ -1,6 +1,15 @@
+require 'oauth2'
+require 'json'
+require 'yaml'
+
+# Load Config
+CONFIG = YAML.load_file("config/config.yml") unless defined? CONFIG
 
 
-class CalendarProxy
+class Calendar
+	include Singleton
+	# Events take openHAB format "/AttributePath AttributeValue" e.g "/devices/1/status 1"
+
 
 	def initialize()
 		puts "(ThreadID #{Thread.current.object_id}) Initializing calendar proxy"
@@ -16,18 +25,18 @@ class CalendarProxy
 		raise "Missing googlecalendar:apiKey config parameter" if @client_id.to_s.empty?
 		raise "Missing googlecalendar:apiSecret config parameter" if @client_secret.to_s.empty?
 		raise "Missing googlecalendar:calendarID config parameter" if @calendarID.to_s.empty?
-
-		getNextEvent()
 	end
 
-
-	def pollPeriodically(interval = 10)
-	 timer = EventMachine::PeriodicTimer.new(interval) do
-		getNextEvent()
-	 end
+	def run()
+		calendarPollPeriodically()
 	end
 
-
+	def calendarPollPeriodically(interval = 10)
+		@pollIntervall = interval
+		 timer = EventMachine::PeriodicTimer.new(interval) do
+			getNextEvent()
+		 end
+	end
 
 	def getNextEvent() 
 		# Test to get list of calendars
@@ -35,8 +44,29 @@ class CalendarProxy
 
 		# Formats minimal start date of events according to te wishes of the Google Calendar API (2012-10-12T11:50:00+02:00) and URL escapes ':' and '+' characters
 		startTime = "#{Time.now.strftime('%Y-%m-%dT%H%%3A%M%%3A%S%:z').sub( "+", "%2B" ).sub(":", "%3A")}"
-		result = getQuery("calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(description%2Cstart%2Csummary)&orderBy=startTime&timeMin=#{startTime}")	
-		puts result.body
+		puts "querying starttime #{startTime}"
+		query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(description%2Cstart%2Csummary)&orderBy=startTime&timeMin=#{startTime}"
+		puts query 
+		result = getQuery(query)	
+		
+		JSON.parse(result.body)['items'].each do |event|
+			parsed = event['summary'].split(" ")
+
+			topic = parsed[0]
+			payload = parsed[1]
+ 			timediff = time - Time.parse(event['start']['dateTime'])
+
+ 			$mqttProxy.publish(topic, payload) if (timediff < @pollIntervall && timediff > 0)
+
+ 			puts "Got topic #{topic} with payload #{payload} in #{timediff} seconds"
+		end
+
+
+
+
+
+# Check if event is scheduled  scheduler.find_by_tag(t)
+
 	end
 
 	def getQuery(query)
@@ -105,3 +135,8 @@ class CalendarProxy
 
 end
 
+# Start the whole thing
+EventMachine.run {
+	Calendar.instance().run()
+	Signal.trap("INT") {  EventMachine.stop }
+}

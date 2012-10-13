@@ -8,6 +8,7 @@ require 'eventmachine'
 require 'yaml'
 require 'open-uri'
 require 'oauth2'
+require 'rufus/scheduler'
 
 
 # Proxies
@@ -29,12 +30,19 @@ $serialProxy = SerialProxy.new()
 $mqttProxy = MqttProxy.new()
 $calendarProxy = CalendarProxy.new()
 
+# Initialize onboard sensors
+$sesors = Sensors.new()
+
 # Initialize devices
 Ab440RemotePowerplug.new("1");
 Ab440RemotePowerplug.new("2");
 Ambilight.new("3");
 
+
+
 EventMachine.run {
 	$calendarProxy.pollPeriodically()
+	$sensors.pollPeriodically()
+
 	Signal.trap("INT") {  EventMachine.stop }
 }
