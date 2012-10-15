@@ -13,7 +13,6 @@ Move config/config-sample.yml to config/config.yml
 
 ## Usage
 Start Arduino component ``` ruby arduino/Arduino.rb```
-Start Webinterface component ``` ruby webinterface/Webinterface.rb```
 Start Calendar component ``` ruby calendar/Calendar.rb```
 
 Single components can be started and stopped independently of others. 
