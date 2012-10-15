@@ -39,7 +39,7 @@ class MqttProxy
 
 	def publish(topic, payload)
 		puts "(ThreadID #{Thread.current.object_id}) MQTT publishing to \"#{topic}\": #{payload} "
-		@mqtt.publish(topic, payload, retain=false)
+		@mqtt.publish(topic, payload, true, 0)
 	end
 
 private 
@@ -51,7 +51,6 @@ private
 
 	def onMessage(topicOfMessage, message)
 		puts "(ThreadID #{Thread.current.object_id}) MQTT message received on #{topicOfMessage}: #{message} "
-		puts "Callbacks #{@topicCallbacks}"
 
 		@topicCallbacks.keys.each do|key|  
 			if (key == topicOfMessage or positiveWildcardMatch?(key, topicOfMessage)) then

@@ -20,11 +20,11 @@ class SerialProxy
 
 	def write(s)
 		 writeOperation = proc {
-			puts "Writing to serialport " + s.to_s
-			@writeSp.write(s.to_s)
+			#puts "Writing to serialport " + s.to_s
+			@sp.write(s.to_s)
     }
     completionCallback = proc {|result|
-    	puts "Done writing to serialport"
+    	#puts "Done writing to serialport"
     }
     EventMachine.defer(writeOperation, completionCallback)
 	end
@@ -32,7 +32,7 @@ class SerialProxy
 	def read()
 
 		 readOperation = proc {
-		 	r = @readSp.gets()
+		 	r = @sp.gets()
      }
      completionCallback = proc {|result|
      	#puts "read #{result}"
@@ -45,9 +45,8 @@ class SerialProxy
 	private
 		def run()
 			begin
-				@readSp = SerialPort.new(@device, @baudRate, @dataBits, @stopBits, @parity)
-				@readSp.read_timeout = 4 # A random value seems to be required here to prevent the serialport gem from going haywire 
-				@writeSp = SerialPort.new(@device, @baudRate, @dataBits, @stopBits, @parity)
+				@sp = SerialPort.new(@device, @baudRate, @dataBits, @stopBits, @parity)
+				@sp.read_timeout = 4 # A random value seems to be required here to prevent the serialport gem from going haywire 
 
 			rescue Exception
 				puts "Unable to open serial device " + @device + ". Exiting!"

@@ -77,7 +77,7 @@ private
 		@currentr = r
 		@currentg = g
 		@currentb = b
-		MqttProxy.instance().publish("/devices/#{@identifier}/color", "%02x" % @currentr + "%02x" % @currentg + "%02x" % @currentb)
+		MqttProxy.instance().publish("/devices/3/color", "%02x" % @currentr + "%02x" % @currentg + "%02x" % @currentb)
 	end
 
 	# 433MHZ REMOTE POWERPLUG SPECIFIC CODE
