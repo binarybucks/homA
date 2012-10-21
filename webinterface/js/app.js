@@ -149,19 +149,15 @@ $(document).ready(function() {
 	}
 
 	function setRange(topic, payload, domElement) {
-			domElement.val(payload);
-					positionRangeBackground(domElement);
-
-	}	
-	function setToggle(topic, payload, domElement) {
-		console.log("here");
-						domElement.attr('data-value', payload)
+		domElement.val(payload);
+		positionRangeBackground(domElement);
 	}
 
-
+	function setToggle(topic, payload, domElement) {
+		domElement.attr('data-value', payload)
+	}
 
 	function publishToggle(domElement) {
-		console.log("foo");
 		var topic=domElement.data('topic');
 		var currentValue=domElement.attr('data-value');
 		var payload = currentValue == '1' ? "0" : "1"; // Toggle value
