@@ -4,27 +4,89 @@ $(document).ready(function() {
   var queuedMessages = new Array();
 
 
-	function subscribe() {
-		mqttSocket.subscribe('/devices/#', 0);
-	}
+  /*
+   * 
+   * INITIALIZATION 
+   *
+   */ 
+  
 
-	function publish(topic, payload) {
-		console.log("Publishing "+topic+":"+payload);
-		mqttSocket.publish(topic, payload, 0, true);
-	}
-
-	function elementsExistForTopic(bareTopic) {
-		var elements = $('[data-topic=\'' + bareTopic +'\']');
-		if (elements.size() != 0) {
-			console.log("Found elements for: " + bareTopic);
-			return true;
+  function bootstrap () {
+		if (typeof(Storage) !== "undefined") {
+		 	console.log("Client supports local storage");
+		 	attachBindings();
+		 	populatePreferences();
+		 	connect();
 		} else {
-			console.log("Did not find elements for:" + bareTopic)
-			return false;
-		}
+		 	console.log("No local storage support");
+		}  	
+  }
+
+  function attachBindings() {
+		$('#settings-save').click(function() {
+	    savePreferences();
+	  });
+
+		$('#connect').click(function() {
+	    connect();
+	  });
+
+		$('#container').delegate("[data-type=\'switch\']", "click",function() {
+	    publishToggle($(this));
+	  });
+
+		$('#container').delegate("[data-type=\'range\']", "change",function() {
+			publishRange($(this));
+			positionRangeBackground($(this));
+		});
 	}
 
-	// topic is /devices/deviceID/attribute/type
+	function populatePreferences() {
+		$('#settings-server').val(localStorage.server);			
+	}
+
+
+	/* 
+	 *
+	 * CONNECTION HANDLING AND MESSAGE DISPATCHING
+	 *
+	 */ 
+
+
+	function connect() {	
+		console.log("Checking for server");
+	 	if (!localStorage.server) {
+	 		console.log("Server not set");
+	 		return;
+	 	}
+	 	
+	 	console.log("Connecting to "+ localStorage.server);
+	 	mqttSocket.connect(localStorage.server);
+ 	}
+
+  mqttSocket.onconnect = function(rc){
+  	console.log("Connection established");
+  	$('#disconnected').css('display', 'none')
+  	subscribe();
+	};
+
+	mqttSocket.ondisconnect = function(rc){
+		console.log("Connection terminated");
+  	$('#disconnected').css('display', 'block')
+	};
+
+	mqttSocket.onmessage = function(topic, payload, qos){
+		receive(topic, payload);
+	};
+
+
+	/*
+	 *
+	 * INTERFACE CREATION AND MESSAGE HANDING
+	 *
+	 */
+
+
 	function createControll(bareTopic, type) {
 		var deviceId = bareTopic.split("/")[2]
 		var device = $("#device-" + deviceId + "");
@@ -54,25 +116,25 @@ $(document).ready(function() {
 
 	function handleDataMessage(topic, payload) {
 		if (elementsExistForTopic(topic)) {
-			console.log("Seting data");
 			$('[data-topic=\'' + topic +'\']').each(function(index) {
-			if ($(this).attr("data-type") == "switch") {
-				console.log("switch for "+topic+":"+payload);
-				setToggle(topic, payload, $(this));
-			} else if ($(this).attr("data-type") == "range") {
-				console.log("range for "+topic+":"+payload);
-				setRange(topic, payload, $(this));
-			} else {
-			  console.log("handleDataMessage for type ("+ $(this).attr("type") +") is not implemented");
-			}
-		}); 
+				if ($(this).attr("data-type") == "switch") {
+					console.log("switch for "+topic+":"+payload);
+					setToggle(topic, payload, $(this));
+				} else if ($(this).attr("data-type") == "range") {
+					console.log("range for "+topic+":"+payload);
+					setRange(topic, payload, $(this));
+				} else {
+				  console.log("handleDataMessage for type ("+ $(this).attr("type") +") is not implemented");
+				}
+			}); 
 		} else {
-			console.log("Data message queued until controll created");
+			console.log("Data message queued");
 			queuedMessages[topic] = payload;
 		}
 	}
+
 	function receive(topic, payload) {
-		console.log("-----------MARK-----------");
+		console.log("-----------RECEIVE-----------");
 		console.log("Receive "+topic+":"+payload);		
 	
 		// Check if it is type or data message
@@ -83,12 +145,7 @@ $(document).ready(function() {
 			console.log("Got data message");
 			handleDataMessage(topic, payload)
 		}
-
-
-
-
-
-		
+		console.log("-----------/ RECEIVE-----------");
 	}
 
 	function setRange(topic, payload, domElement) {
@@ -100,6 +157,8 @@ $(document).ready(function() {
 		console.log("here");
 						domElement.attr('data-value', payload)
 	}
+
+
 
 	function publishToggle(domElement) {
 		console.log("foo");
@@ -115,66 +174,42 @@ $(document).ready(function() {
 		publish(topic, payload);
 	}
 
- 
-  mqttSocket.onconnect = function(rc){
-  	console.log("Connection established");
-  	subscribe();
-	};
 
-	mqttSocket.ondisconnect = function(rc){
-		console.log("Connection terminated");
-		$('#container').html("Connection terminated");
-	};
+	/* 
+	 * 
+	 * HELPER 
+	 *
+	 */
 
-	mqttSocket.onmessage = function(topic, payload, qos){
-		receive(topic, payload);
-	};
 
-	function attachBindings() {
-		$('#settings-save').click(function() {
-	    savePreferences();
-	  });
-
-		$('#container').delegate("[data-type=\'switch\']", "click",function() {
-	    publishToggle($(this));
-	  });
-
-		$('#container').delegate("[data-type=\'range\']", "change",function() {
-			publishRange($(this));
-			positionRangeBackground($(this));
-		});
+	function subscribe() {
+		mqttSocket.subscribe('/devices/#', 0);
 	}
 
-	function connect(server) {	
-	 	console.log("Connecting to "+ server);
-	 	mqttSocket.connect(server);
- 	}
+	function publish(topic, payload) {
+		console.log("Publishing "+topic+":"+payload);
+		mqttSocket.publish(topic, payload, 0, true);
+	}
+
+	function elementsExistForTopic(bareTopic) {
+		var elements = $('[data-topic=\'' + bareTopic +'\']');
+		if (elements.size() != 0) {
+			console.log("Found elements for: " + bareTopic);
+			return true;
+		} else {
+			console.log("Did not find elements for:" + bareTopic)
+			return false;
+		}
+	}
 
 	function positionRangeBackground(domElement) {
 		$(domElement).css('background-position-x', (-(400-$(domElement).val()*($(domElement).outerWidth()/100)))+"px");
 	}
-
-	function populatePreferences() {
-		$('#settings-server').val(localStorage.server);			
-	}
-
+	
 	function savePreferences() {
 		console.log("saving preferences");
 		localStorage.server = $('#settings-server').val();
 	}
 
-	if (typeof(Storage) !== "undefined") {
-	 	console.log("Client supports local storage");
-	 	attachBindings();
-	 	populatePreferences();
-
-	 	console.log("Checking for server");
-	 	if (localStorage.server) {
-	 		connect(localStorage.server);
-	 	} else {
-	 		console.log("Server not set");
-	 	}
-	} else {
-	 	console.log("No local storage support");
-	}
+	bootstrap();
 }); 

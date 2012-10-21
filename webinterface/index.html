@@ -5,8 +5,6 @@
     <link href="css/app.css" media="screen" rel="stylesheet" type="text/css"/>
     <script type="text/javascript" src="js/mosquitto-1.0.js"> </script>
     <script type="text/javascript" src="js/jquery-1.8.2.js"> </script>
-<script type="text/javascript" src="js/jquery.slideControl.min.js"></script>
-
     <script type="text/javascript" src="js/app.js" > </script>
   </head>
   <body>
@@ -27,24 +25,10 @@
     <div id="settings">
       <label> Server</label>
       <input id="settings-server" type="text" /> 
-      <input id="settings-save" type="submit"/>
+       <a href="#" id="settings-save">Save</a>
     </div>
-
-
-
-<!-- 
-     <div id="switches"> 
-      <form>
-        <input class="mqttEnabled" data-topic="/devices/1/status" id="switch1" type="checkbox" /> 
-        <input class="mqttEnabled" data-topic="/devices/2/status" id="switch2" type="checkbox" />
-        <input class="mqttEnabled" data-topic="/devices/3/status" id="switch3" type="checkbox" />
-        <input class="mqttEnabled" data-topic="/devices/3/fading" id="ambilightFade" type="checkbox" />
-      </form>
-     </div>
-    <div id="sensors">
-      <div>Arduino Temperature sensor: <span id ="arduinoTemperature" class="mqttEnabled" data-topic="/sensors/arduino/temperature">Unknown</span> </div>
+    <div id="disconnected">
+      Disconnected      <a href="#" id="connect">Connect</a>
     </div>
-    </div>
- -->
   </body>
 </html>
