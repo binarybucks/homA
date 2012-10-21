@@ -90,17 +90,24 @@ $(document).ready(function() {
 	function createControll(bareTopic, type) {
 		var deviceId = bareTopic.split("/")[2]
 		var device = $("#device-" + deviceId + "");
-
+		var attribute = bareTopic.split("/")[3]
+console.log("attribute: " + attribute);
 		if (device.size() == 0) {		// create new device if it does not exists
-			device =  $("<div class='appliance' id='device-"+ deviceId + "'> <div class='body'> <div class='powerSwitch' data-topic='/devices/"+deviceId+"/status' data-type='switch' data-value='" + queuedMessages[bareTopic] + "'> </div><div class='name'>" + deviceId +"</div></div> <div class='controlls'> </div></div>").appendTo("#container");
+			// device =  $("<div class='appliance' id='device-"+ deviceId + "'> <div class='body'> <div class='powerSwitch' data-topic='/devices/"+deviceId+"/status' data-type='switch' data-value='" + queuedMessages[bareTopic] + "'> </div><div class='name'>" + deviceId +"</div></div> <div class='controlls'> </div></div>").appendTo("#container");
+			device = $("<div class='appliance' id='device-"+ deviceId + "'> <div class='name'>"+ deviceId +"</div></div>").appendTo('#container');
 		} 
+
+
 
 		// Create controll according to type and append it to device
 		if (type == "range") {
-			var control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").appendTo(device.children(".controlls"));
+			var control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").prependTo(device);
 			positionRangeBackground(control);			
 		} else if (type == "switch") {
-			// not yet implemented
+			var control = $("<div data-topic='"+ bareTopic +"' data-type='switch' data-value='" + queuedMessages[bareTopic] + "' ></div>").prependTo(device);
+			if (attribute == "power") {
+				control.addClass("power");
+			}
 		}
 	}
 
