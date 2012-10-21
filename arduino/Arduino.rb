@@ -14,12 +14,21 @@ class Arduino
 	include Singleton 
 
 	def initialize()
-		registerCallbackOnMQTTTopic(:remotePowerplug1StatusChanged, "/devices/1/status")
-		registerCallbackOnMQTTTopic(:remotePowerplug2StatusChanged, "/devices/2/status")
+		registerCallbackOnMQTTTopic(:remotePowerplug1StatusChanged, "/devices/1/power")
+		MqttProxy.instance().publish("/devices/1/power/type", "switch");
+		
+		registerCallbackOnMQTTTopic(:remotePowerplug2StatusChanged, "/devices/2/power")
+		MqttProxy.instance().publish("/devices/1/power/type", "switch");
 
-		registerCallbackOnMQTTTopic(:ambilightStatusChanged, "/devices/3/status")
+		registerCallbackOnMQTTTopic(:ambilightStatusChanged, "/devices/3/power")
+		MqttProxy.instance().publish("/devices/1/power/type", "switch");
+
 		registerCallbackOnMQTTTopic(:ambilightFadingChanged, "/devices/3/fading")
+		MqttProxy.instance().publish("/devices/1/power/type", "switch");
+
 		registerCallbackOnMQTTTopic(:ambilightColorChanged, "/devices/3/color")
+		MqttProxy.instance().publish("/devices/1/power/type", "range");
+
 	end
 
 	def run()

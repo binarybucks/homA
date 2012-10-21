@@ -121,23 +121,26 @@ div.appliance {
     position: relative;
     border: 2px solid #ececec;
     background: #FFF;
-    padding: 14px;
+    padding-left: 14px;
+    padding-right: 14px;
+
     margin-right: 0;
     margin-top: 92px;
     margin-bottom: 92px;
 }
 
 div.appliance > *{
-    margin-top: 14px;
+        margin-bottom: 14px;
+
 }
 div.appliance > *:first-child{
-    margin-top: 0;
+    margin-top: 14px;
 }
 
 .name {
     position: absolute;
     left: 14px;
-    top: -85px;
+    top: -42px;
     width: 374px;
     height: 68px;
     color: #FFF;
@@ -153,20 +156,29 @@ div.appliance > *:first-child{
     margin-left: -28px;
     margin-right: -28px;
     margin-top: -28px;
+    margin-bottom: 0 !important;
+}
+
+.power {
+    position: absolute;
+    left: -14px;
+    top: -70px;
+    z-index: 99;
+        height: 68px !important;
+    width: 68px !important;
+    margin: 0 !important;
 }
 
 .power[data-value="1"]  {
-    background-color: #428baa !important;
-    border-color: #3c8399 !important;
+  
 
-    /*  
-    height: 20px;
-    width: 40px;
-    background: url('../images/power-glyph.png') no-repeat center center #aeaeae;
-    border: 1px solid #a7a7a7;
+     
+
+/*    background: url('../images/power-glyph.png') no-repeat center center #aeaeae;
+*/    border: 1px solid #a7a7a7;
     cursor: pointer;
     border-radius: 2px 0 0 2px;
-    */
+    
 }
 
 .power[data-value="1"] ~ .name {
@@ -179,7 +191,16 @@ div.appliance > *:first-child{
 [data-type="switch"] {
     height: 20px;
     width: 40px;
+
+
     cursor: pointer;
+}
+
+
+[data-type="switch"][data-value="1"] {
+        background-color: #428baa !important;
+    border-color: #3c8399 !important;
+
 }
 
 [data-type="range"] {

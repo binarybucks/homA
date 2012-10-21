@@ -67,11 +67,15 @@ $(document).ready(function() {
   mqttSocket.onconnect = function(rc){
   	console.log("Connection established");
   	$('#disconnected').css('display', 'none')
+  	  	$('#settings').css('display', 'none')
+
   	subscribe();
 	};
 
 	mqttSocket.ondisconnect = function(rc){
 		console.log("Connection terminated");
+		  	  	$('#settings').css('display', 'block')
+
   	$('#disconnected').css('display', 'block')
 	};
 
@@ -91,8 +95,9 @@ $(document).ready(function() {
 		var deviceId = bareTopic.split("/")[2]
 		var device = $("#device-" + deviceId + "");
 		var attribute = bareTopic.split("/")[3]
-console.log("attribute: " + attribute);
+		
 		if (device.size() == 0) {		// create new device if it does not exists
+			console.log("Creating new device");
 			// device =  $("<div class='appliance' id='device-"+ deviceId + "'> <div class='body'> <div class='powerSwitch' data-topic='/devices/"+deviceId+"/status' data-type='switch' data-value='" + queuedMessages[bareTopic] + "'> </div><div class='name'>" + deviceId +"</div></div> <div class='controlls'> </div></div>").appendTo("#container");
 			device = $("<div class='appliance' id='device-"+ deviceId + "'> <div class='name'>"+ deviceId +"</div></div>").appendTo('#container');
 		} 
@@ -101,9 +106,12 @@ console.log("attribute: " + attribute);
 
 		// Create controll according to type and append it to device
 		if (type == "range") {
+			console.log("Creating new range control");
 			var control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").prependTo(device);
 			positionRangeBackground(control);			
 		} else if (type == "switch") {
+			console.log("Creating new switch control");
+
 			var control = $("<div data-topic='"+ bareTopic +"' data-type='switch' data-value='" + queuedMessages[bareTopic] + "' ></div>").prependTo(device);
 			if (attribute == "power") {
 				control.addClass("power");
@@ -125,10 +133,8 @@ console.log("attribute: " + attribute);
 		if (elementsExistForTopic(topic)) {
 			$('[data-topic=\'' + topic +'\']').each(function(index) {
 				if ($(this).attr("data-type") == "switch") {
-					console.log("switch for "+topic+":"+payload);
 					setToggle(topic, payload, $(this));
 				} else if ($(this).attr("data-type") == "range") {
-					console.log("range for "+topic+":"+payload);
 					setRange(topic, payload, $(this));
 				} else {
 				  console.log("handleDataMessage for type ("+ $(this).attr("type") +") is not implemented");
@@ -197,10 +203,10 @@ console.log("attribute: " + attribute);
 	function elementsExistForTopic(bareTopic) {
 		var elements = $('[data-topic=\'' + bareTopic +'\']');
 		if (elements.size() != 0) {
-			console.log("Found elements for: " + bareTopic);
+			console.log("Control exists for: " + bareTopic);
 			return true;
 		} else {
-			console.log("Did not find elements for:" + bareTopic)
+			console.log("Control does not exist for:" + bareTopic)
 			return false;
 		}
 	}
