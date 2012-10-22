@@ -1,16 +1,20 @@
 Homer MQTT-protocol
 
-Devices are controlled by publishing values and subscribing to 
-/devices/$devicename/$attribute
+Device meta attributes for building app interfaces dynamically are available at
+/devices/$uniquedeviceid/meta/name
+														 /room
+
+Device controlls are a available at
+/devices/$uniquedeviceid/controlls/power = controll-value
 	
-For each attribute, the device has to publish a type to 
-/devices/$devicename/$attribute/type
-
-Currently possible values for type are: "switch", "range"
-
-Additionally, each device has to publish an attribute of name "power" with type "switch" that controlls 
-it's general power status
+For each controll, the type has to be published at 
+/devices/$uniquedeviceid/controlls/power/type = {"switch", "range"}
 
 
 Sensors publish to 
 /sensors/sensorname
+
+Addionally, each sensor has to publish the type for each sensor to 
+/sensors/sensorname/type
+
+Currently possible values for type are: "temperature", "brightness", "count"
