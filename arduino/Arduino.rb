@@ -16,7 +16,7 @@ class Arduino
 	def initialize()
 		registerCallbackOnMQTTTopic(:remotePowerplug1StatusChanged, "/devices/1/power")
 		MqttProxy.instance().publish("/devices/1/power/type", "switch");
-		
+
 		registerCallbackOnMQTTTopic(:remotePowerplug2StatusChanged, "/devices/2/power")
 		MqttProxy.instance().publish("/devices/1/power/type", "switch");
 
@@ -40,8 +40,6 @@ private
 		MqttProxy.instance().registerCallbackOnMQTTTopic(lambda { |topic, message| method(callbackIdentifier).call(topic, message) }, topic)
 	end
 
-
-	# AMBILIGHT SPECIFIC CODE
 	def ambilightStatusChanged(topic, message)
 		remotePowerplugStatusChanged(3, message)
 	end

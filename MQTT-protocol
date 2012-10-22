@@ -1,0 +1,16 @@
+Homer MQTT-protocol
+
+Devices are controlled by publishing values and subscribing to 
+/devices/$devicename/$attribute
+	
+For each attribute, the device has to publish a type to 
+/devices/$devicename/$attribute/type
+
+Currently possible values for type are: "switch", "range"
+
+Additionally, each device has to publish an attribute of name "power" with type "switch" that controlls 
+it's general power status
+
+
+Sensors publish to 
+/sensors/sensorname
