@@ -18,16 +18,18 @@ class Arduino
 		MqttProxy.instance().publish("/devices/1/power/type", "switch");
 
 		registerCallbackOnMQTTTopic(:remotePowerplug2StatusChanged, "/devices/2/power")
-		MqttProxy.instance().publish("/devices/1/power/type", "switch");
+		MqttProxy.instance().publish("/devices/2/power/type", "switch");
+		MqttProxy.instance().publish("/devices/2/meta/room", "bedroom");
 
 		registerCallbackOnMQTTTopic(:ambilightStatusChanged, "/devices/3/power")
-		MqttProxy.instance().publish("/devices/1/power/type", "switch");
+		MqttProxy.instance().publish("/devices/3/power/type", "switch");
 
 		registerCallbackOnMQTTTopic(:ambilightFadingChanged, "/devices/3/fading")
-		MqttProxy.instance().publish("/devices/1/power/type", "switch");
+		MqttProxy.instance().publish("/devices/3/power/type", "switch");
 
 		registerCallbackOnMQTTTopic(:ambilightColorChanged, "/devices/3/color")
-		MqttProxy.instance().publish("/devices/1/power/type", "range");
+		MqttProxy.instance().publish("/devices/3/color/type", "range");
+		MqttProxy.instance().publish("/devices/3/meta/room", "kitchen");
 
 	end
 
@@ -98,11 +100,11 @@ private
 
 	def remotePowerplugStatusChanged(plugIdentifier, message)
 		puts "statusChanged: #{message}"
-		SerialProxy.instance().write( "{w: {'t': 'dip10','f': '101010','l': '#{plugIdentifier}','s': #{message}  }}")
+		SerialProxy.instance().write( "{w: {'t': 'dip10','f': '11011','l': '#{plugIdentifier}','s': #{message}  }}")
 	end
 
 	# SENSOR SPECIFIC CODE
-	def sensorsPollPeriodically(interval = 4)
+	def sensorsPollPeriodically(interval = 1)
 		@pollIntervall = interval
 
 	 	timer = EventMachine::PeriodicTimer.new(interval) do

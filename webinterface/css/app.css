@@ -1,96 +1,5 @@
 /*html5doctor.com Reset Stylesheet v1.6.1 Last Updated: 2010-09-17 Author: Richard Clark - http://richclarkdesign.com  Twitter: @rich_clark */
-html, body, div, span, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-abbr, address, cite, code,
-del, dfn, em, img, ins, kbd, q, samp,
-small, strong, sub, sup, var,
-b, i,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, figcaption, figure, 
-footer, header, hgroup, menu, nav, section, summary,
-time, mark, audio, video {
-    margin:0;
-    padding:0;
-    border:0;
-    outline:0;
-    font-size:100%;
-    vertical-align:baseline;
-    background:transparent;
-}
-
-body {
-    line-height:1;
-}
-
-article,aside,details,figcaption,figure,
-footer,header,hgroup,menu,nav,section { 
-    display:block;
-}
-
-nav ul {
-    list-style:none;
-}
-
-blockquote, q {
-    quotes:none;
-}
-
-blockquote:before, blockquote:after,
-q:before, q:after {
-    content:'';
-    content:none;
-}
-
-a {
-    margin:0;
-    padding:0;
-    font-size:100%;
-    vertical-align:baseline;
-    background:transparent;
-}
-
-ins {
-    background-color:#ff9;
-    color:#000;
-    text-decoration:none;
-}
-
-mark {
-    background-color:#ff9;
-    color:#000; 
-    font-style:italic;
-    font-weight:bold;
-}
-
-del {
-    text-decoration: line-through;
-}
-
-abbr[title], dfn[title] {
-    border-bottom:1px dotted;
-    cursor:help;
-}
-
-table {
-    border-collapse:collapse;
-    border-spacing:0;
-}
-
-hr {
-    display:block;
-    height:1px;
-    border:0;   
-    border-top:1px solid #cccccc;
-    margin:1em 0;
-    padding:0;
-}
-
-input, select {
-    vertical-align:middle;
-}
-
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{ margin:0; padding:0; border:0; outline:0; font-size:100%; vertical-align:baseline; background:transparent}body{ line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{ display:block}nav ul{ list-style:none}blockquote,q{ quotes:none}blockquote:before,blockquote:after,q:before,q:after{ content:''; content:none}a{ margin:0; padding:0; font-size:100%; vertical-align:baseline; background:transparent}ins{ background-color:#ff9; color:#000; text-decoration:none}mark{ background-color:#ff9; color:#000; font-style:italic; font-weight:bold}del{ text-decoration:line-through}abbr[title],dfn[title]{ border-bottom:1px dotted; cursor:help}table{ border-collapse:collapse; border-spacing:0}hr{ display:block; height:1px; border:0;  border-top:1px solid #ccc; margin:1em 0; padding:0}input,select{ vertical-align:middle}
 
 
 /*
@@ -98,50 +7,124 @@ Homer Stylesheet
 */
 
 html, body {
-    font-family: "Gotham Book", "Helvetica Neue", sans-serif;
+    font-family: "Gotham Light", "Helvetica Neue", sans-serif;
     line-height: 1.5em;
+    height: 100%;
+    width: 100%;
+
+    /*Disable anoying text select on elements that act like buttons*/
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 body {
-    background: url('../images/bg.png') repeat;
+/*    background: url('../images/bg.png') repeat;
+*/}
+
+#sidebar {
+   /* position: fixed;
+    left: 0;
+    top: 0;
+    width: 180px;
+    height: 100%;
+    padding-left: 60px;
+    padding-right: 60px;*/
+    display: block;
+    position:fixed;
+    height:auto;
+    width: 180px;
+
+    bottom:0;
+    top:0;
+    left:0;
+    right:0;
+    margin: 60px;
+    margin-right: 0;
+    padding-right: 60px;
+        border-right: 1px dashed #dddddd;
+
+
 }
 
-div#container {
-    width: 350px;
-    margin: 0 auto;
-    position: absolute;
-    left: 50%;
-    margin-top: 40px;
-    margin-left: -150px;
+h1 {
+    color: #d3d3d3;
+    font-size: 45px;
+    margin-bottom: 60px;
+    padding-top: 10px;
+        text-transform: capitalize;
+        text-indent: -3px;
+}
+
+#settings, #disconnected {
+    display:none;
 }
 
 
 
-div.appliance {
-    position: relative;
+
+
+
+
+
+
+div#rooms {
+    margin-top: 60px;
+    margin-bottom: 0;
+    margin-left: 360px;
+
+}
+
+ul#rooms-menu {
+
+}
+
+ul#rooms-menu li {
+    list-style: none;
+    font-size: 18px;
+    color: #d3d3d3;
+    cursor: pointer;
+    text-transform: capitalize;
+    margin-bottom: 10px;
+}
+
+#rooms-menu li.over {
+    color: #000;
+}
+
+.device {
+    width: 320px;
+}
+
+
+.controls {
+        position: relative;
     border: 2px solid #ececec;
     background: #FFF;
     padding-left: 14px;
     padding-right: 14px;
-
-    margin-right: 0;
-    margin-top: 92px;
-    margin-bottom: 92px;
-}
-
-div.appliance > *{
-        margin-bottom: 14px;
+    margin-left: 15px;
+    margin-right: 15px;
 
 }
-div.appliance > *:first-child{
+.controls *:last-child {
+    margin-bottom: 14px;
+}
+
+.controls > * {
     margin-top: 14px;
 }
 
-.name {
-    position: absolute;
-    left: 14px;
-    top: -42px;
-    width: 374px;
+.rooms {
+    display:none;
+}
+
+
+
+.header {
     height: 68px;
     color: #FFF;
     font-size: 22px;
@@ -153,35 +136,25 @@ div.appliance > *:first-child{
     border: 1px solid #a7a7a7;
     text-align: center;
     border-radius: 2px; 
-    margin-left: -28px;
-    margin-right: -28px;
-    margin-top: -28px;
-    margin-bottom: 0 !important;
 }
 
 .power {
     position: absolute;
-    left: -14px;
-    top: -70px;
-    z-index: 99;
-        height: 68px !important;
+    left: -16px;
+    top: -72px;
+    z-index: 2;
+    height: 68px !important;
     width: 68px !important;
     margin: 0 !important;
 }
 
 .power[data-value="1"]  {
-  
-
-     
-
-/*    background: url('../images/power-glyph.png') no-repeat center center #aeaeae;
-*/    border: 1px solid #a7a7a7;
+    border: 1px solid #a7a7a7;
     cursor: pointer;
-    border-radius: 2px 0 0 2px;
-    
+    border-radius: 2px 0 0 2px;    
 }
 
-.power[data-value="1"] ~ .name {
+.device[data-value="1"] .header {
     text-shadow: 0 1px 1px #204E5A ;
     background-color: #51a3bc ;
     border: 1px solid #3c8399 ;
@@ -231,4 +204,19 @@ div.appliance > *:first-child{
     width: 21px;
     -webkit-appearance: none;
 }
+
+.device .settings {
+    cursor: pointer;
+}
+
+#basic-modal-content {display:none;}
+
+/* Overlay */
+#device-settings-overlay {    z-index: 50;
+opacity: 0.5; position: absolute; top: 0; left: 0; height: 100%; width: 100%;background-color:#000; cursor:wait;}
+
+/* Container */
+#device-settings {z-index: 60; margin-top: -180px; margin-left: -300px; position: absolute; left: 50%; top: 50%; height:360px; width:600px; color:#bbb; background-color:#FFF; }
+
+
 

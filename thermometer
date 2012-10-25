@@ -1,0 +1,33 @@
+ISR(ADC_vect)
+{
+  Serial.print("This is what I got: ");
+  Serial.println(ADCL | ADCH << 8);
+}
+
+
+ISR(TIMER2_OVF_vect){
+  static unsigned int count = 600; // 600 makes 0,1Hz
+  if(!(--count)){
+    ADCSRA |= B01000000; // start analog read
+    count = 600;
+  }
+}
+
+
+void setup(){
+  Serial.begin(9600);
+  ADMUX = B01000000; // 1,1V as reference, right adjusted result, channel 0 selection
+  ADCSRA = B10001111; // enabled, not started, not automatically triggered
+  ADCSRB = B01000000; // MUX enabled
+  ADCSRA |= B01000000; // start analog read
+  
+  TCCR2A = 0x00;        //Timer2 Control Reg A: Wave Gen Mode normal
+  TCCR2B = 0x00;        //Timer2 Control Reg B: Disable Timer0 while we set it up
+  TCNT2  = 0xFF;        //Set Timer2 Count to 255 (start first read immediately)
+  TIFR2  = 0x00;        //Timer2 INT Flag Reg: Clear Timer Overflow Flag
+  TIMSK2 = 0x01;        //Timer2 INT Mask Reg: Timer2 Overflow Interrupt Enable
+  TCCR2B = 0x07;        //Timer2 Control Reg B: Timer Prescaler prescaler to 1024
+}
+
+void loop(){
+}

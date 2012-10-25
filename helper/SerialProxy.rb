@@ -19,12 +19,13 @@ class SerialProxy
 	end 
 
 	def write(s)
+
 		 writeOperation = proc {
-			#puts "Writing to serialport " + s.to_s
+			puts "Writing to serialport " + s.to_s
 			@sp.write(s.to_s)
     }
     completionCallback = proc {|result|
-    	#puts "Done writing to serialport"
+    	puts "Done writing to serialport"
     }
     EventMachine.defer(writeOperation, completionCallback)
 	end
@@ -35,7 +36,7 @@ class SerialProxy
 		 	r = @sp.gets()
      }
      completionCallback = proc {|result|
-     	#puts "read #{result}"
+     	puts "read #{result}"
      	yield result unless result.nil?
      }
      EventMachine.defer(readOperation, completionCallback)

@@ -2,27 +2,31 @@
 $(document).ready(function() {
   var mqttSocket = new Mosquitto();
   var queuedMessages = new Array();
-
+  var rooms = new Array();
+  bootstrap();
 
   /*
    * 
    * INITIALIZATION 
    *
-   */ 
-  
+   */
 
   function bootstrap () {
-		if (typeof(Storage) !== "undefined") {
-		 	console.log("Client supports local storage");
-		 	attachBindings();
-		 	populatePreferences();
-		 	connect();
-		} else {
-		 	console.log("No local storage support");
-		}  	
+		if (typeof(Storage) == "undefined") {
+		 	console.log("Browser does not support local storage");
+		 	return;
+		}
+
+	 	if (!localStorage.server) {
+	 		console.log("Server not set");
+	 		return;
+	 	}
+
+	 	prepareCallbacks();
+		connect();
   }
 
-  function attachBindings() {
+  function prepareCallbacks() {
 		$('#settings-save').click(function() {
 	    savePreferences();
 	  });
@@ -31,143 +35,297 @@ $(document).ready(function() {
 	    connect();
 	  });
 
-		$('#container').delegate("[data-type=\'switch\']", "click",function() {
+		$('#rooms').delegate("[data-type=\'switch\']", "click",function() {
 	    publishToggle($(this));
 	  });
 
-		$('#container').delegate("[data-type=\'range\']", "change",function() {
+		$('#rooms').delegate("input[data-type=\'range\']", "change",function() {
 			publishRange($(this));
 			positionRangeBackground($(this));
 		});
+
+		$('#rooms-menu').delegate("li", "click",function() {
+			showRoom($(this).attr("data-room"));
+		});
+
+		mqttSocket.onconnect = function(rc){
+  		console.log("Connection established");
+  		subscribe();
+		};
+
+		mqttSocket.ondisconnect = function(rc){ 
+			console.log("Connection terminated");
+		};
+
+		mqttSocket.onmessage = function(topic, payload, qos){
+			receive(topic, payload);
+		};
+
+
+
+
+
 	}
 
-	function populatePreferences() {
-		$('#settings-server').val(localStorage.server);			
-	}
-
-
-	/* 
-	 *
-	 * CONNECTION HANDLING AND MESSAGE DISPATCHING
-	 *
-	 */ 
-
-
-	function connect() {	
-		console.log("Checking for server");
-	 	if (!localStorage.server) {
-	 		console.log("Server not set");
-	 		return;
-	 	}
-	 	
+	function connect() {		 	
 	 	console.log("Connecting to "+ localStorage.server);
 	 	mqttSocket.connect(localStorage.server);
  	}
 
-  mqttSocket.onconnect = function(rc){
-  	console.log("Connection established");
-  	$('#disconnected').css('display', 'none')
-  	  	$('#settings').css('display', 'none')
+  /*
+   * 
+   * MQTT MESSAGE PARSING 
+   *
+   */
 
-  	subscribe();
-	};
+	function receive(topic, payload) {
+		console.log("-----------RECEIVE-----------");
+		console.log("Received: "+topic+":"+payload);		
+	
+		var splitTopic = topic.split("/");
+		/*
+		 * splitTopic[0] = undefined
+		 * splitTopic[1] = {devices}
+		 * splitTopic[2] = {uniqueDeviceId}
+		 * splitTopic[3] = {controls, meta,}
+		 * splitTopic[4] = {controllName, room, name}
+		 * splitTopic[3] = {type}
+		 */
 
-	mqttSocket.ondisconnect = function(rc){
-		console.log("Connection terminated");
-		  	  	$('#settings').css('display', 'block')
-
-  	$('#disconnected').css('display', 'block')
-	};
-
-	mqttSocket.onmessage = function(topic, payload, qos){
-		receive(topic, payload);
-	};
-
-
-	/*
-	 *
-	 * INTERFACE CREATION AND MESSAGE HANDING
-	 *
-	 */
-
-
-	function createControll(bareTopic, type) {
-		var deviceId = bareTopic.split("/")[2]
-		var device = $("#device-" + deviceId + "");
-		var attribute = bareTopic.split("/")[3]
+		ensureDevieExists(topic); 		// creates device if it does not exist
 		
-		if (device.size() == 0) {		// create new device if it does not exists
-			console.log("Creating new device");
-			// device =  $("<div class='appliance' id='device-"+ deviceId + "'> <div class='body'> <div class='powerSwitch' data-topic='/devices/"+deviceId+"/status' data-type='switch' data-value='" + queuedMessages[bareTopic] + "'> </div><div class='name'>" + deviceId +"</div></div> <div class='controlls'> </div></div>").appendTo("#container");
-			device = $("<div class='appliance' id='device-"+ deviceId + "'> <div class='name'>"+ deviceId +"</div></div>").appendTo('#container');
-		} 
 
 
+		if(topic.indexOf("type") != -1) {
+			handleTypeMessage(topic, payload);
+		} else if(topic.indexOf("meta") != -1) { 			
+			handleMetaMessage(topic, payload);
+		}	else {
+			handleControlMessage(topic, payload);
+		}
 
-		// Create controll according to type and append it to device
-		if (type == "range") {
-			console.log("Creating new range control");
-			var control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").prependTo(device);
-			positionRangeBackground(control);			
-		} else if (type == "switch") {
-			console.log("Creating new switch control");
+		console.log("-----------/ RECEIVE-----------");
+	}
 
-			var control = $("<div data-topic='"+ bareTopic +"' data-type='switch' data-value='" + queuedMessages[bareTopic] + "' ></div>").prependTo(device);
-			if (attribute == "power") {
-				control.addClass("power");
-			}
+
+	// split 2 = id
+	// split 4 = metatype {room, name}
+	function handleMetaMessage(topic, payload) {
+		var uniqueDeviceId = topic.split("/")[2];
+
+		if(topic.indexOf("meta/room") != -1) { // /devices/$deviceid/meta/room 
+			ensureRoomExists(payload);
+			moveDeviceToRoom(uniqueDeviceId, payload);
+
+		} else {
+			console.log("Got name for device:" + uniqueId);
 		}
 	}
 
 	function handleTypeMessage(topic, payload) {
-		bareTopic = topic.replace('/type', ''); // strip type 
-		// check if element for topic exists 
-		if (elementsExistForTopic(bareTopic)) {
-			return;
-		} else {
-			createControll(bareTopic, payload);
-		}
+			bareTopic = topic.replace('/type', ''); 
+
+			if (!elementsExistForTopic(bareTopic))
+				createControl(bareTopic, payload);
 	}
 
-	function handleDataMessage(topic, payload) {
+	function handleControlMessage(topic, payload) {
+		console.log("control message")
 		if (elementsExistForTopic(topic)) {
+
 			$('[data-topic=\'' + topic +'\']').each(function(index) {
 				if ($(this).attr("data-type") == "switch") {
-					setToggle(topic, payload, $(this));
+					setSwitch($(this), payload);
 				} else if ($(this).attr("data-type") == "range") {
-					setRange(topic, payload, $(this));
+					setRange($(this), payload);
 				} else {
 				  console.log("handleDataMessage for type ("+ $(this).attr("type") +") is not implemented");
 				}
 			}); 
+
 		} else {
 			console.log("Data message queued");
 			queuedMessages[topic] = payload;
 		}
 	}
 
-	function receive(topic, payload) {
-		console.log("-----------RECEIVE-----------");
-		console.log("Receive "+topic+":"+payload);		
-	
-		// Check if it is type or data message
-		if(topic.indexOf("type") != -1) {
-			console.log ("Got type message");
-			handleTypeMessage(topic, payload);
+
+	/*
+	 *
+	 * ROOM MANAGEMENT
+	 *
+	 */
+
+	function ensureRoomExists(roomName) {
+		var room;
+
+		if (!(room = roomExists(roomName))) {
+			console.log("Creating room");
+			room = $("<div class='rooms' id='room-"+roomName+ "'><h1>"+roomName+"</h1></div>").appendTo("#rooms");
+			var menuItem = $("<li data-room='room-"+roomName+"'>"+roomName+"</li>").appendTo("#rooms-menu");
+
+
+			if (roomName = localStorage.selectedRoom) {
+				showRoom(roomName);			
+			}
+			rooms[roomName.replace("room-","")];
+			console.log("Rooms: " + rooms);
+
+
 		} else {
-			console.log("Got data message");
-			handleDataMessage(topic, payload)
+			console.log("Room does exist");
 		}
-		console.log("-----------/ RECEIVE-----------");
+		return room;
 	}
 
-	function setRange(topic, payload, domElement) {
+	function showRoom(roomName) {
+		console.log("showing room with id " +roomName);
+		$(".rooms").css("display", "none");
+		$("#"+roomName).css("display", "block");
+		localStorage.selectedRoom = roomName;
+	}
+
+	function roomExists(roomName) {
+		var room = $("#room-"+roomName)
+		if (room.size() != 0) {
+			return room;
+		} else {
+			return false;
+		}
+	}
+
+
+	/*
+	 *
+	 * DEVICE MANAGEMENT
+	 *
+	 */
+
+	function ensureDevieExists(topic) {
+		var uniqueDeviceId = topic.split("/")[2];
+		var device;
+		if(!(device = deviceExists(uniqueDeviceId))) {
+			device = $("<div draggable='true' class='device' id='device-"+ uniqueDeviceId + "'>  <div class='header'>Name</div>  <div class='controls'><div class='settings'>Settings</div></div></div>").appendTo('#rooms #unknown');
+
+			device.delegate('.power', 'powerChanged', function(event, data) {
+		   $(event.delegateTarget).attr('data-value', data);
+			});
+
+			device.delegate('.settings', 'click', function(event) {
+				showDeviceSettings($(event.delegateTarget));
+			});
+
+
+		}
+		return device;
+	}
+
+
+	function showDeviceSettings(device) {
+		var uniqueDeviceId = device.attr("id").replace('device-', '');
+		var deviceName = device.children('.header').text();
+		console.log("showing device settings of device " + uniqueDeviceId + " name: " + deviceName);
+
+		var mdl = $("<div id='device-settings-overlay'></div><div id='device-settings'><h2>Device Settings</h2><a id='modalclose' href='#'>close</a><a id='modalsave' href='#'>save</a></div>");
+				$('body').append(mdl);
+
+		$('#modalsave').click(function () {
+			console.log("closing with save");
+
+			$("#device-settings-overlay").remove();
+			$("#device-settings").remove();
+
+		});	
+				$('#modalclose').click(function () {
+						console.log("closing with save");
+						$("#device-settings-overlay").remove();
+						$("#device-settings").remove();
+
+		});
+
+
+
+
+	}
+
+
+
+	function deviceExists(uniqueDeviceId) {
+		var device = $("#device-"+uniqueDeviceId)
+		if (device.size() != 0) {
+			return device;
+		} else {
+			return null;
+		}
+	}
+
+	function nameDevice(uniqueDeviceId, name) {
+		$("#device-"+uniqueDeviceId + " .name").text(name);
+	}
+
+
+
+	function moveDeviceToRoom(uniqueDeviceId, newRoomName) {
+		console.log("Moving device " + uniqueDeviceId + " to room " + newRoomName);
+		var device = $("#device-"+uniqueDeviceId);
+		var room = $("#room-"+newRoomName);
+		device.appendTo(room);
+	}	
+
+
+
+
+
+	/*
+	 *
+	 * CONTROLLS
+	 *
+	 */
+
+	function createControl(bareTopic, type) {
+		var deviceId = bareTopic.split("/")[2]
+		var device = $("#device-" + deviceId + "");
+		var attribute = bareTopic.split("/")[3]
+		var controlAnchor = device.children(".controls")[0]
+		
+		// Create controll according to type and append it to device
+		if (type == "range") {
+			console.log("Creating new range control");
+			var control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").appendTo(controlAnchor);
+			positionRangeBackground(control);			
+		} else if (type == "switch") {
+			console.log("Creating new switch control");
+			var control = $("<div data-topic='"+ bareTopic +"' data-type='switch' data-value='" + queuedMessages[bareTopic] + "' ></div>").prependTo(controlAnchor);
+			if (attribute == "power") {
+				control.addClass("power");
+				control.trigger('powerChanged',[queuedMessages[bareTopic]]);
+			}
+		}
+	}
+
+	function elementsExistForTopic(bareTopic) {
+		var elements = $('[data-topic=\'' + bareTopic +'\']');
+		if (elements.size() != 0) {
+			console.log("Control exists for: " + bareTopic);
+			return true;
+		} else {
+			console.log("Control does not exist for:" + bareTopic)
+			return false;
+		}
+	}
+
+	function setRange(domElement, payload) {
 		domElement.val(payload);
 		positionRangeBackground(domElement);
 	}
 
-	function setToggle(topic, payload, domElement) {
+	function setSwitch(domElement, payload) {
+		console.log("asdf");
 		domElement.attr('data-value', payload)
+
+		if(domElement.is('.power')) {
+			domElement.trigger('powerChanged',[payload]);
+		}
 	}
 
 	function publishToggle(domElement) {
@@ -200,25 +358,19 @@ $(document).ready(function() {
 		mqttSocket.publish(topic, payload, 0, true);
 	}
 
-	function elementsExistForTopic(bareTopic) {
-		var elements = $('[data-topic=\'' + bareTopic +'\']');
-		if (elements.size() != 0) {
-			console.log("Control exists for: " + bareTopic);
-			return true;
-		} else {
-			console.log("Control does not exist for:" + bareTopic)
-			return false;
-		}
-	}
+
 
 	function positionRangeBackground(domElement) {
 		$(domElement).css('background-position-x', (-(400-$(domElement).val()*($(domElement).outerWidth()/100)))+"px");
 	}
-	
+
 	function savePreferences() {
 		console.log("saving preferences");
 		localStorage.server = $('#settings-server').val();
 	}
 
-	bootstrap();
+ $( "#foobar" ).autocomplete({
+            source: Object.keys(rooms)
+        });
+
 }); 

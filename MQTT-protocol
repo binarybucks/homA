@@ -5,10 +5,10 @@ Device meta attributes for building app interfaces dynamically are available at
 														 /room
 
 Device controlls are a available at
-/devices/$uniquedeviceid/controlls/power = controll-value
+/devices/$uniquedeviceid/controls/power = control-value
 	
 For each controll, the type has to be published at 
-/devices/$uniquedeviceid/controlls/power/type = {"switch", "range"}
+/devices/$uniquedeviceid/controls/power/type = {"switch", "range"}
 
 
 Sensors publish to 
