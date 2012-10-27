@@ -44,9 +44,24 @@ $(document).ready(function() {
 			positionRangeBackground($(this));
 		});
 
-		$('#rooms-menu').delegate("li", "click",function() {
+		$('#room-list').delegate("a.forward", "click",function(e) {
+			e.preventDefault();
 			showRoom($(this).attr("data-room"));
+			slideTo($("#"+ $(this).attr("data-room")), "#!/room-"+$(this).attr("data-room"));
 		});
+
+
+		$('#room-details').delegate("a.back", "click",function(e) {
+			e.preventDefault();
+		 	slideTo($("#room-list"), "#!/");
+		});
+
+		$(".device .forward").on("click", function() {
+			console.log(e);
+		});
+
+
+
 
 		mqttSocket.onconnect = function(rc){
   		console.log("Connection established");
@@ -66,7 +81,6 @@ $(document).ready(function() {
 
 
 	}
-
 	function connect() {		 	
 	 	console.log("Connecting to "+ localStorage.server);
 	 	mqttSocket.connect(localStorage.server);
@@ -160,14 +174,15 @@ $(document).ready(function() {
 		var room;
 
 		if (!(room = roomExists(roomName))) {
-			console.log("Creating room");
-			room = $("<div class='rooms' id='room-"+roomName+ "'><h1>"+roomName+"</h1></div>").appendTo("#rooms");
-			var menuItem = $("<li data-room='room-"+roomName+"'>"+roomName+"</li>").appendTo("#rooms-menu");
+			room = $("<div id='room-"+roomName+ "' class='room'><div class='view-header'><h1><a href='' class='back'>Rooms / </a> "+roomName+"</h1></div></div>").appendTo("#room-details");
+			var menuItem = $("<a href='' class='forward' data-room='room-"+roomName+"'>"+roomName+"</a>").appendTo("#room-list");
 
 
-			if (roomName = localStorage.selectedRoom) {
-				showRoom(roomName);			
-			}
+
+
+
+
+
 			rooms[roomName.replace("room-","")];
 			console.log("Rooms: " + rooms);
 
@@ -180,10 +195,13 @@ $(document).ready(function() {
 
 	function showRoom(roomName) {
 		console.log("showing room with id " +roomName);
-		$(".rooms").css("display", "none");
+		$(".room").css("display", "none");
 		$("#"+roomName).css("display", "block");
+
 		localStorage.selectedRoom = roomName;
 	}
+
+
 
 	function roomExists(roomName) {
 		var room = $("#room-"+roomName)
@@ -205,17 +223,7 @@ $(document).ready(function() {
 		var uniqueDeviceId = topic.split("/")[2];
 		var device;
 		if(!(device = deviceExists(uniqueDeviceId))) {
-			device = $("<div draggable='true' class='device' id='device-"+ uniqueDeviceId + "'>  <div class='header'>Name</div>  <div class='controls'><div class='settings'>Settings</div></div></div>").appendTo('#rooms #unknown');
-
-			device.delegate('.power', 'powerChanged', function(event, data) {
-		   $(event.delegateTarget).attr('data-value', data);
-			});
-
-			device.delegate('.settings', 'click', function(event) {
-				showDeviceSettings($(event.delegateTarget));
-			});
-
-
+			device = $("<div class='device' id='device-"+ uniqueDeviceId + "'>  <div class='header forward'>"+uniqueDeviceId+"</div>  <div class='controls'><div class='settings'>Settings</div></div></div>").appendTo('#room-details #unassigned');
 		}
 		return device;
 	}
@@ -342,6 +350,25 @@ $(document).ready(function() {
 	}
 
 
+
+  /*
+   *
+   * UI CANDY
+   *
+   */
+
+
+   function slideTo(domElement, hashtag) {
+		console.log("sliding to: ");
+		console.log(domElement);
+		var offset = $("#slider").offset().left - domElement.offset().left ;
+		console.log("Offset: " + offset);
+
+   	$("#slider").css("transform","translateX("+ offset + "px)");
+   }
+
+
+
 	/* 
 	 * 
 	 * HELPER 
@@ -368,6 +395,12 @@ $(document).ready(function() {
 		console.log("saving preferences");
 		localStorage.server = $('#settings-server').val();
 	}
+
+
+	if (roomName = localStorage.selectedRoom) {
+		showRoom(roomName);			
+	}
+
 
  $( "#foobar" ).autocomplete({
             source: Object.keys(rooms)

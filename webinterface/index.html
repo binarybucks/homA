@@ -7,37 +7,42 @@
 
     
     <script type="text/javascript" src="js/jquery-1.8.2.js"> </script>
+    
+            <script type="text/javascript" src="js/jquery.pathchange.js"> </script>
+
         <script type="text/javascript" src="js/jquery-ui-1.9.0.custom.min.js"> </script>
 
     <script type="text/javascript" src="js/app.js" > </script>
   </head>
   <body>
-    <div id="sidebar">
-      <h1>Homer</h1>
-      <ul id="rooms-menu">
-        <li data-room="unknown">Unknown</li>
-      </ul>
-    </div>
 
-    <div id="rooms">
-      <div id="unknown" class="rooms"><h1>Unkown</h1></div>
+    <div id="wrapper">
+      <div id="slider">
+        <div id="room-list" class="view">
+          <div class="view-header">
+            <h1>Rooms</h1>
+          </div>
+            <a href="" class="forward" data-room="unassigned">Unassigned</a>
+        </div>
+
+
+
+        <div id="room-details" class="view">
+
+
+            <div id="unassigned" class="room"> 
+              <div class="view-header">
+                <h1>
+                  <a href="" class="back"> Rooms / </a>
+                  Unassigned
+                </h1>
+              </div></div>
+        </div>
+        <div id="device-details" class="view">
+          
+        </div>
+      </div>
     </div>
-      
-<div class="ui-widget"
-    <label for="foobar"Tags: </label>
-    <input id="foobar" />
-</div>
 
   </body>
 </html>
-      <!--  Example device
-      <div class="device">
-        <div class="header">
-          Device name
-        </div>
-        <div class="controls">
-          <div data-topic="/devices/1/status" data-value="1" data-type="switch" ></div>
-           <input type="range" value="0" data-topic="/devices/1/status" data-type="range"/> 
-        </div>
-      </div> 
-      -->
