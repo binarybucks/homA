@@ -44,17 +44,17 @@ $(document).ready(function() {
 			positionRangeBackground($(this));
 		});
 
-		$('#room-list').delegate("a.forward", "click",function(e) {
-			e.preventDefault();
-			showRoom($(this).attr("data-room"));
-			slideTo($("#"+ $(this).attr("data-room")), "#!/room-"+$(this).attr("data-room"));
-		});
+		// $('#room-list').delegate("a.forward", "click",function(e) {
+		// 	e.preventDefault();
+		// 	showRoom($(this).attr("data-room"));
+		// 	slideTo($("#"+ $(this).attr("data-room")), "#!/room-"+$(this).attr("data-room"));
+		// });
 
 
-		$('#room-details').delegate("a.back", "click",function(e) {
-			e.preventDefault();
-		 	slideTo($("#room-list"), "#!/");
-		});
+		// $('#room-details').delegate("a.back", "click",function(e) {
+		// 	e.preventDefault();
+		//  	slideTo($("#room-list"), "#!/");
+		// });
 
 		$(".device .forward").on("click", function() {
 			console.log(e);
@@ -77,10 +77,22 @@ $(document).ready(function() {
 		};
 
 
-
+		window.onhashchange = change;
 
 
 	}
+
+	function change(){
+		console.log("hash changed to : " + location.hash);
+
+		   // function slideTo(domElement, hashtag) {
+
+		   var target = $(location.hash);
+		if (target.size()!=0) {
+			slideTo(target, "foo");
+		}
+}
+
 	function connect() {		 	
 	 	console.log("Connecting to "+ localStorage.server);
 	 	mqttSocket.connect(localStorage.server);
@@ -175,7 +187,7 @@ $(document).ready(function() {
 
 		if (!(room = roomExists(roomName))) {
 			room = $("<div id='room-"+roomName+ "' class='room'><div class='view-header'><h1><a href='' class='back'>Rooms / </a> "+roomName+"</h1></div></div>").appendTo("#room-details");
-			var menuItem = $("<a href='' class='forward' data-room='room-"+roomName+"'>"+roomName+"</a>").appendTo("#room-list");
+			var menuItem = $("<a href='#room-"+roomName +"' class='forward' data-room='room-"+roomName+"'>"+roomName+"</a>").appendTo("#room-list");
 
 
 
@@ -224,6 +236,8 @@ $(document).ready(function() {
 		var device;
 		if(!(device = deviceExists(uniqueDeviceId))) {
 			device = $("<div class='device' id='device-"+ uniqueDeviceId + "'>  <div class='header forward'>"+uniqueDeviceId+"</div>  <div class='controls'><div class='settings'>Settings</div></div></div>").appendTo('#room-details #unassigned');
+			
+
 		}
 		return device;
 	}
@@ -293,22 +307,28 @@ $(document).ready(function() {
 	function createControl(bareTopic, type) {
 		var deviceId = bareTopic.split("/")[2]
 		var device = $("#device-" + deviceId + "");
-		var attribute = bareTopic.split("/")[3]
+		var attribute = bareTopic.split("/")[4]
 		var controlAnchor = device.children(".controls")[0]
 		
+
+
+var control;
 		// Create controll according to type and append it to device
 		if (type == "range") {
 			console.log("Creating new range control");
-			var control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").appendTo(controlAnchor);
+			control =  $("<input type='range' value='" + queuedMessages[bareTopic]+ "' data-topic='"+bareTopic+"' data-type='range'/>").appendTo(controlAnchor);
 			positionRangeBackground(control);			
 		} else if (type == "switch") {
 			console.log("Creating new switch control");
-			var control = $("<div data-topic='"+ bareTopic +"' data-type='switch' data-value='" + queuedMessages[bareTopic] + "' ></div>").prependTo(controlAnchor);
+		  control = $("<div data-topic='"+ bareTopic +"' data-type='switch' data-value='" + queuedMessages[bareTopic] + "' ></div>").prependTo(controlAnchor);
 			if (attribute == "power") {
 				control.addClass("power");
 				control.trigger('powerChanged',[queuedMessages[bareTopic]]);
 			}
 		}
+		$("<span class='controlName'>" + attribute + "</span>").appendTo(controlAnchor);
+
+
 	}
 
 	function elementsExistForTopic(bareTopic) {
@@ -405,5 +425,6 @@ $(document).ready(function() {
  $( "#foobar" ).autocomplete({
             source: Object.keys(rooms)
         });
+
 
 }); 
