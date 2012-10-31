@@ -1,0 +1,46 @@
+ <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>backbone</title>
+  </head>
+  <body>
+
+    <div id="container">
+      <ul id="room-navigation"></ul>
+      <div id="rooms"></div>
+    </div>
+
+    <script id="room-navigation-template" type="text/template">
+          <a href="#/<%= id %>">
+            <%= name || id  %>
+          </a>
+    </script>
+
+    <script id="room-template" type="text/template">
+          <h1>
+            <%= id %>
+          </h1>
+          <div class="devices">
+          </div>
+    </script>
+    <script id="device-template" type="text/template">
+          <h2>
+            <%= name || id %>
+          </h2>
+          <div class="controls">
+          </div>
+    </script>
+
+
+    <script src="mosquitto-1.0.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="json2.js"></script>
+    <script src="underscore-min.js"></script>
+    <script src="backbone-min.js"></script>
+    <script src="backbone.getters.setters.js"></script>
+    <script src="app.js" type="text/javascript"></script>
+  
+  </body>
+  </html>   
+            
