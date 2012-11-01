@@ -1,6 +1,6 @@
 Homer MQTT-protocol
 
-Device meta attributes for building app interfaces dynamically are available at
+Device meta attributes for building app interfaces dynamically are available at. These can be set from the webinterface and are not managed by the device itself.
 /devices/$uniquedeviceid/meta/name
 														 /room
 
