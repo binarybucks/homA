@@ -2,25 +2,40 @@
   <html>
   <head>
     <meta charset="utf-8">
+        <link href="app.css" media="screen" rel="stylesheet" type="text/css"/>
+
     <title>backbone</title>
   </head>
   <body>
 
     <div id="container">
-      <ul id="room-navigation"></ul>
-      <div id="rooms"></div>
     </div>
 
-    <script id="room-navigation-template" type="text/template">
+
+
+    <script id="room-list-template" type="text/template">
+          <div class="view-header">
+            <h1>
+              Rooms
+            </h1>
+          </div>
+          <ul id="room-detail-links">
+          </ul>
+    </script>
+
+    <script id="room-detail-link-template" type="text/template">
           <a href="#/<%= id %>">
             <%= name || id  %>
           </a>
     </script>
 
-    <script id="room-template" type="text/template">
-          <h1>
-            <%= id %>
-          </h1>
+
+    <script id="room-detail-template" type="text/template">
+          <div class="view-header">
+            <h1>
+              <%= id %>
+            </h1>
+          </div>
           <div class="devices">
           </div>
     </script>

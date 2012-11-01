@@ -63,10 +63,25 @@ $(function($){
    *
    */
 
-   var RoomMenuView = Backbone.View.extend({
-    className: "room-menuitem", 
+  var RoomListView = Backbone.View.extend({
+    idName: "room-list", 
+    tagName: "div",
+    template: $("#room-list-template").html(),
+
+    initialize: function() {
+    },
+
+    render: function () {
+        var tmpl = _.template(this.template);
+        this.$el.html(tmpl(this.model.toJSON()));
+        return this;
+    },
+  });
+
+   var RoomDetailLinkView = Backbone.View.extend({
+    className: "room-detail-link", 
     tagName: "li",
-    template: $("#room-navigation-template").html(),
+    template: $("#room-detail-link-template").html(),
 
     initialize: function() {
       this.model.menuView = this; 
@@ -77,13 +92,13 @@ $(function($){
         this.$el.html(tmpl(this.model.toJSON()));
         return this;
     },
-
-
    });
 
-  var RoomView = Backbone.View.extend({
-    template: $("#room-template").html(),
-    navigationTemplate: $("#room-navigation-template").html(), 
+
+   var 
+
+  var RoomDetailView = Backbone.View.extend({
+    template: $("#room-detail-template").html(),
     className: "room", 
 
     initialize: function() {
@@ -172,15 +187,25 @@ $(function($){
     initialize: function() {
        Rooms.on('add', this.addRoom, this);
        Rooms.on('remove', this.removeRoom, this);
-
+       this.render();
     },
+
+    render: function() {
+      var roomListView = new RoomListView
+
+      this.$el.append()
+
+      return this;
+    },
+
+
     addRoom: function(room) {
       console.log("new room added: " + room.get('id'))
-      var roomView = new RoomView({model: room});
+      var roomDetailView = new RoomDetailView({model: room});
       var roomMenuView = new RoomMenuView({model: room});
 
-      this.$("#rooms").append(roomView.render().el);
-      $('#room-navigation').append(roomMenuView.render().el);
+      this.$("#rooms").append(roomDetailView.render().el);
+      $('#room-detail-links').append(roomMenuView.render().el);
 
     },
 
@@ -203,35 +228,44 @@ $(function($){
    *
    */
 
-  var Router = Backbone.Router.extend({
+  var ApplicationRouter = Backbone.Router.extend({
   routes: {
     "": "index",
     "/:room": "room"
   },
 
   index: function() {
-    var tutorial = new Example.Views.Tutorial();
+    console.log("index view");
 
-    // Attach the tutorial page to the DOM
-    tutorial.render(function(el) {
-      $("#main").html(el);
-    });
+    // var tutorial = new Example.Views.Tutorial();
+
+    // // Attach the tutorial page to the DOM
+    // tutorial.render(function(el) {
+    //   $("#main").html(el);
+    // });
   },
+  initialize: function() {},
 
   room: function() {
-    var search = new Example.Views.Search();
+    console.log("room view");
+  //   var search = new Example.Views.Search();
 
-    // Attach the search page to the DOM
-    search.render(function(el) {
-      $("#main").html(el);
-    });
-  }
+  //   // Attach the search page to the DOM
+  //   search.render(function(el) {
+  //     $("#main").html(el);
+  //   });
+   },
 });
+
 
 
   var mqttSocket = new Mosquitto();
   var Devices = new DeviceCollection;
   var Rooms = new RoomCollection;
+
+    var router = new ApplicationRouter;
+    Backbone.history.start({pushState : true});
+
 
 
   var App = new AppView;
@@ -295,6 +329,7 @@ $(function($){
             var newRoom = Rooms.get(payload);
             if (newRoom == null) {
               device.set('room', payload);
+              console.log("payload")
               newRoom = new Room({id: payload});  
               console.log("New room created: " + newRoom.get('id'));
               Rooms.add(newRoom);   
