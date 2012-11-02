@@ -3,12 +3,12 @@ $(function(){
 
 
   Backbone.View.prototype.close = function(){
-  this.remove();
-  this.unbind();
-  if (this.onClose){ // Provide custom functionality to remove event bindings in subclasses
-    this.onClose();
+    this.remove();
+    this.unbind();
+    if (this.onClose){ // Provide custom functionality to remove event bindings in subclasses
+      this.onClose();
+    }
   }
-}
 
 
   /*
@@ -62,11 +62,6 @@ $(function(){
     model: Control,
   });
 
-
-
-
-
-
   /*
    *
    *  VIEWS
@@ -85,18 +80,10 @@ $(function(){
 
     },
 
-
-
     addRoom: function(room) {
       console.log("Room added: " + room.get("id"));
       var detailViewLink = new RoomDetailLinkView({model: room});
       this.$('#room-detail-links').append(detailViewLink.render().$el);
-
-    //   console.log("new room added: " + room.get('id'))
-      // var roomDetailView = new RoomDetailView({model: room});
-    //   this.$el.append(roomDetailView.render().el);
-    //   // this.$('#room-detail-links').append(roomDetailView.render().el);
-             
     },
 
     render: function () {
@@ -170,18 +157,19 @@ $(function(){
     },
 
     // render: function() {
-    //   this.$el.html(this.model.get('id')+":"+this.model.get('value'));
-    //   return this;
-    // },
 
     render: function () {
-
         var tmpl = _.template(this.template);
         this.$el.html(tmpl(this.model.toJSON()));
+        for (var i = 0, l = this.model.devices.length; i < l; i++) {
+            this.addDevice(this.model.devices.models[i]);
+        }
+
         return this;
     },
 
     addDevice: function(device) {
+
       var deviceView = new DeviceView({model: device});
       this.$(".devices").append(deviceView.render().el);
     },
@@ -222,6 +210,7 @@ $(function(){
     className: "device", 
 
     initialize: function() {
+      console.log("new DeviceView created for: " + this.model.id);
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
