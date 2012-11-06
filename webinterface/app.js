@@ -344,12 +344,25 @@ $(function(){
     template: $("#device-template").html(),
     className: "device", 
 
-    initialize: function() {
+
+    events: {
+      "dblclick h1":  "edit",
+      "keypress .edit"  : "updateOnEnter",
+      "blur .edit"      : "close"
+
+    },
+
+
+    initialize:
+
+
+     function() {
       console.log("new DeviceView created for: " + this.model.id);
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
-
+      console.log("input");
+      console.log(this.input);
       this.model.view = this;
     },  
 
@@ -359,6 +372,7 @@ $(function(){
         for (var i = 0, l = this.model.controls.length; i < l; i++) {
             this.addControl(this.model.controls.models[i]);
         }
+      this.input = this.$('.edit');
 
       return this;
     },
@@ -367,6 +381,41 @@ $(function(){
       var controlView = new ControlView({model: control});
       this.$(".controls").append(controlView.render().el);
     },
+
+// Switch this view into `"editing"` mode, displaying the input field.
+    edit: function() {
+      this.$el.addClass("editing");
+      this.input.focus();
+    },
+
+    // Close the `"editing"` mode, saving changes to the todo.
+    close: function() {
+      var value = this.input.val();
+      if (!value) {
+        console.log("clearing");
+        mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/name", null, 0, true);
+        // this.clear();
+      } else {
+        console.log("saving");
+        // this.model.save({title: value});
+        mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/name", value, 0, true);
+
+        this.$el.removeClass("editing");
+      }
+    },
+
+    // If you hit `enter`, we're through editing the item.
+    updateOnEnter: function(e) {
+      console.log("updateOnEnter");
+      if (e.keyCode == 13) this.close();
+    },
+
+    // Remove the item, destroy the model.
+    clear: function() {
+      console.log("clearing");
+      // this.model.destroy();
+    }
+
   });
 
 
