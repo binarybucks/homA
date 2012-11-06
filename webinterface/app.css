@@ -43,69 +43,36 @@ body {
     padding-bottom: 30px;
 
 }
-.view-header h1{
-    font-size: 27px;
+
+h1 {
     color: #a5a5a7;
     display: inline;
 }
 
-
-
-#room-navigation a {
-    font-size: 16px;
-    display: block;
-    text-transform: capitalize;
-    margin-bottom: 10px;
-}
-
-.view-header h2 {
-    font-size: 17px;
+h2 {
     color: #cdcdd0;
     display: inline;
 }
 
 
-/*SLIDER*/
-#slider {
-    position: relative;
-    width: 900px;
-    -webkit-transition:all 0.1s ease-in-out;
+
+.view-header h1{
+    font-size: 27px;
 }
 
-.view {
-width: 300px;
+.view-header h2 {
+    font-size: 17px;
 }
 
-#room-list, #room-details{
-/*    position: absolute;
-    top: 0;
-    padding: 35px;
-*/}
-
-#room-list {
-    left: 0;
-}
-
-#room-details {
-    left: 335px;
-}
-
-#device-details {
-    left: 670px;
-}
-
-.forward {
-    cursor: pointer;
+.device .controls {
+    color: #cdcdd0;
 }
 
 
-
-
-
-
-
-
-
+input[type="range"] {
+    display: inline-block;
+    width: auto;
+}
 
 
 a {text-decoration: none; color: inherit;}

@@ -9,6 +9,25 @@
     <div id="container">
     </div>
     <div id="templates">
+    <script id="settings-template" type="text/template">
+      <div class="view-header">
+        <h1>
+          Settings
+        </h1>
+        <ul>
+          <li> 
+            <h2>
+              Connection Status
+            </h2>
+            <div id="connection-status">
+              <%= connectionStatus %>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <ul id="room-detail-links">
+      </ul>
+    </script>
     <script id="room-list-template" type="text/template">
       <div class="view-header">
         <h1>
@@ -54,12 +73,33 @@
       </p>
     </script>
     <script id="device-template" type="text/template">
-          <h2>
+          <h1>
             <%= name || id %>
-          </h2>
+          </h1>
           <div class="controls">
           </div>
     </script>
+    <script id="undefined-control-template" type="text/template">
+      <h2>
+        <%= id %>
+      <h2>
+      <span "missing-type">Loading control</span>
+    </script>
+    <script id="range-control-template" type="text/template">
+      <h2>
+        <%= id %>
+      </h2>
+      <input type="range"/>
+    </script>
+    <script id="switch-control-template" type="text/template">
+      <h2>
+        <%= id %>
+      </h2>
+      <input type="checkbox" <%= checkedAttribute %>/> 
+    </script>
+
+    
+
     <script src="libs/mosquitto.js"></script>
     <script src="libs/jquery.js"></script>
     <script src="libs/json2.js"></script>

@@ -20,7 +20,7 @@
 // Prototypes
 
 void setWifi(char* state, char* group, int switchNumber);
-void setColor(int r, int g, int b);
+void setColor();
 float getTemp();
 void mqttReceive(char* topic, byte* payload, unsigned int length);
 void publishRetained(char* topic, char* payload);
@@ -35,8 +35,10 @@ char* mqttClientId = "homeduino";
 char* wifiSwitchHomeGroup = "11011";
 
 
-  int currentr = 255;
-int currentg = 0;
+int fadecounter = 0;
+int sensorcounter = 0;
+int currentr = 0;
+int currentg = 255;
 int currentb = 0;
 
 
@@ -56,9 +58,6 @@ void setWifi(char* state, char* group, int switchNumber) {
     wifiTransmitter.switchOn(group, switchNumber);
     delay(500);
     wifiTransmitter.switchOn(group, switchNumber);  
-   Serial.println(group); 
-   Serial.println(switchNumber);
-      Serial.println("here");
 
   } else if (strcmp(state, "0") == 0)  {  
     wifiTransmitter.switchOff(group, switchNumber); 
@@ -67,25 +66,25 @@ void setWifi(char* state, char* group, int switchNumber) {
   } 
 }
 
-void setColor(int r, int g, int b) {    
-  analogWrite(AMBILIGHTREDPIN, r);
-  analogWrite(AMBILIGHTGREENPIN, g);
-  analogWrite(AMBILIGHTBLUEEPIN, b);
+void setColor() {    
+  analogWrite(AMBILIGHTREDPIN, currentr);
+  analogWrite(AMBILIGHTGREENPIN, currentg);
+  analogWrite(AMBILIGHTBLUEEPIN, currentb);
 }
 
-void publishColor(int r, int g, int b) {
+void publishColor() {
   char buffer[6];
-  
-  sprintf(buffer, "%.2X%.2X%.2X", r, g, b);
-  Serial.println("hrx is");
+  sprintf(buffer, "%.2X%.2X%.2X", currentr, currentg, currentb);
+  Serial.println("hex is: ");
   Serial.println(buffer);
+  publishRetained("/devices/321995-ambilight/controls/color", buffer);
 }
 
 void fadeStep () {
 
-  Serial.println(currentr);
-  Serial.println(currentg);
-  Serial.println(currentb);
+//  Serial.println(currentr);
+//  Serial.println(currentg);
+//  Serial.println(currentb);
 
   if (currentr == 255 && currentg == 0  && currentb < 255) {
     currentb++;
@@ -100,7 +99,7 @@ void fadeStep () {
   } else if (currentr == 255 && currentb == 0 && currentg > 0){
     currentg--;
   }
-  setColor(currentr, currentg, currentb);
+  setColor();
 }
 
 
@@ -130,15 +129,6 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   char  payload[length+1];
   memcpy(payload, rawPayload, length);
   payload[length] = '\0';
-  
-//  Serial.println("Callback");
-//  Serial.print("Topic:");
-//  Serial.println(topic);
-//  Serial.print("Length:");
-//  Serial.println(length);
-//  Serial.print("Payload:");
-//  Serial.print(payload);
-//  Serial.println();
   
   if(strcmp(topic, "/devices/321995-ambilight/controls/power") == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 1);
@@ -200,11 +190,8 @@ void setup() {
   pinMode(AMBILIGHTGREENPIN, OUTPUT);
   pinMode(AMBILIGHTBLUEEPIN, OUTPUT);
   pinMode(WIFIPIN, OUTPUT);
-      analogWrite(AMBILIGHTREDPIN, 255);
-
-    analogWrite(AMBILIGHTBLUEEPIN , 255);
-
-    analogWrite(AMBILIGHTGREENPIN, 255);
+  
+  setColor();
 
   Ethernet.begin(mac, ip);
   if (client.connect(mqttClientId)) {
@@ -225,21 +212,8 @@ void setupInterrupts() {
    
       // Overflow interrupt with CLK/1024 Prescaler (~4s) for Sensor readings
       TIMSK1 |= (1 << TOIE1); 
-   //   TCCR1B |= (1 << CS10);
-   //   TCCR1B |= (1 << CS12);
-      
-      
-      
-
-  TCNT1  = 0;
-
-  OCR1A = 2000;            
-  TCCR1B |= (1 << WGM12);   // CTC mode
-    TCCR1B |= (1 << CS10); // 64 prescaler for 8hz
-
-  TCCR1B |= (1 << CS11); 
-
-  TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
+      TCCR1B |= (1 << CS10);
+      TCCR1B |= (1 << CS12);
       
       // enable global interrupts:
       sei();
@@ -249,28 +223,24 @@ ISR(TIMER1_OVF_vect)
 {
 
   publishSensorsFlag = true;
-  
 }
-
-ISR(TIMER1_COMPA_vect)          
-{
-  fadeStepFlag = true;
-}
-
 
 
 void loop() {
   client.loop();
 
-  if (publishSensorsFlag) {
+  if (sensorcounter % 65000 == 0) {
     publishSensors();
-    publishSensorsFlag = false;
+    sensorcounter= 0;
   }
     
-  if (fading) {
+  if (fading && ((fadecounter % 2500) == 0)) {
     fadeStep(); 
-    fadeStepFlag = false;
+    fadecounter = 0;
   }
+  
+  fadecounter++;
+  sensorcounter++;
 }
 
 

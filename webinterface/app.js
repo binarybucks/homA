@@ -2,11 +2,22 @@ $(function(){
   var mqttSocket = new Mosquitto();
 
 
-  Backbone.View.prototype.close = function(){
+  // Backbone.View.prototype.close = function(){
+  //   this.remove();
+  //   this.unbind();
+  //   if (this.onClose){ // Provide custom functionality to remove event bindings in subclasses
+  //     this.onClose();
+  //   }
+  // }
+
+  Backbone.View.prototype.close = function() {
     this.remove();
-    this.unbind();
-    if (this.onClose){ // Provide custom functionality to remove event bindings in subclasses
-      this.onClose();
+    this.unbind(); // alias of this.off();
+    if (this.model) {
+      this.model.off(null, null, this);
+    }
+    if (this.collection) {
+      this.collection.off(null, null, this);
     }
   }
 
@@ -17,22 +28,52 @@ $(function(){
    *
    */
 
+  var Status = Backbone.Model.extend({
+    defaults: function () {
+      return {
+        connectionStatus: "disconnected", 
+        broker: "ws://127.0.0.1/mqtt" 
+      };
+    },
+  });
+
+
   var Control = Backbone.Model.extend({
     defaults: function() {
       return {
-        value: null,
-        type: null              
+        value: 0,
+        type: "undefined",
+        topic: null              
       };
     },
-
+  
     initialize: function() {
+      _.bindAll(this, 'toExtendedJSON', 'checkedAttribute', 'valueAttribute');
     },
+
+    // provide custom functionality to format values
+    toExtendedJSON: function(){
+      var json = _.extend( this.toJSON(), { 
+                                            checkedAttribute: this.checkedAttribute(), 
+                                            valueAttribute: this.valueAttribute()
+                                          });
+      return json;
+    },
+
+    checkedAttribute: function() {
+      return this.get("value") == 1 ? "checked=\"true\"" : "";
+    },
+
+    valueAttribute: function(){
+      return "value=\""+ this.get("value")+"\"";
+    },
+
+
   });
 
   var Device = Backbone.Model.extend({
     defaults: function() {
       return {
-        room: "unassigned",
         name: ""
       };
     },
@@ -40,6 +81,54 @@ $(function(){
     initialize: function() {
       this.controls = new ControlCollection;
     },
+
+    removeFromCurrentRoom: function() {
+      if (this.room != undefined && this.room != null) {
+        console.log("device has room, removing from it");
+        this.room.devices.remove(this);
+
+
+        if (this.room.devices.length == 0) {
+
+          console.log("Room is empty, removing it");
+          Rooms.remove(this.room);
+        }
+
+
+      } 
+    },
+
+
+
+
+    moveToRoom: function(roomName) {
+      var cleanedName = roomName || "unassigned";
+      this.removeFromCurrentRoom();
+
+      var room = Rooms.get(cleanedName);
+
+
+      if (room == null) {
+                console.log("room does not exist");
+
+        Rooms.add(new Room({id: cleanedName}));
+                        console.log("recursing");
+
+        this.moveToRoom(cleanedName);
+      } else {
+                        console.log("room exists");
+
+        room.devices.add(this);
+                        console.log("device added to room");
+
+        this.room = room;
+                        console.log("room set as this devices room");
+
+      } 
+    },
+
+
+
   });
 
 
@@ -68,6 +157,25 @@ $(function(){
    *
    */
 
+  var SettingsView = Backbone.View.extend({
+    template: $("#settings-template").html(),
+
+    initialize: function() {
+      this.model.view = this; 
+      this.model.on('change', this.render, this);
+    },
+
+
+    render: function () {
+        var tmpl = _.template(this.template);
+        this.$el.html(tmpl(this.model.toJSON()));
+        return this;
+    },
+   });
+
+
+
+
   var RoomListView = Backbone.View.extend({
     idName: "room-list", 
     tagName: "div",
@@ -75,8 +183,8 @@ $(function(){
 
     initialize: function() {
         this.model.on('add', this.addRoom, this);
-      this.model.on('remove', this.addRoom, this);
-              _.bindAll(this, 'addRoom', 'render');
+        this.model.on('remove', this.removeRoom, this);
+        _.bindAll(this, 'addRoom', 'removeRoom', 'render');
 
     },
 
@@ -91,6 +199,7 @@ $(function(){
         this.$el.html(tmpl());
 
         // According to http://jsperf.com/backbone-js-collection-iteration for iteration with collection.models is pretty fast
+        console.log("number of rooms: " + this.model.length);
         for (var i = 0, l = this.model.length; i < l; i++) {
             this.addRoom(this.model.models[i]);
         }
@@ -98,11 +207,15 @@ $(function(){
         return this;
     },
     removeRoom: function(room) {
+      console.log("room removed, removing detail link view");
        room.detailViewLink.close();
     },
 
 
+
   });
+
+
 
    var RoomDetailLinkView = Backbone.View.extend({
     className: "room-detail-link", 
@@ -111,6 +224,7 @@ $(function(){
 
     initialize: function() {
       this.model.detailViewLink = this; 
+
     },
 
     render: function () {
@@ -118,6 +232,10 @@ $(function(){
         this.$el.html(tmpl(this.model.toJSON()));
         return this;
     },
+
+ 
+
+
    });
 
 
@@ -183,25 +301,42 @@ $(function(){
       if (this.model.devices.length == 0) {
         console.log("Room is empty, removing it");
         Rooms.remove(this.model);
+
       }
     },
-
-
   });
 
 
   var ControlView = Backbone.View.extend({
-    className: "control", 
+    className: "control",
 
-    initialize: function() {
+    events: {
+      "click input[type=checkbox]":  "checkboxChanged",
+      "click input[type=range]":  "rangeChanged"
+    },
+
+     initialize: function() {
+      _.bindAll(this, 'checkboxChanged');
       this.model.on('change', this.render, this);
       this.model.view = this;
     },
 
     render: function() {
-      this.$el.html(this.model.get('id')+":"+this.model.get('value'));
-      return this;
+      var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
+      this.$el.html(tmpl(this.model.toExtendedJSON()));
+      return this;
     },
+
+
+
+
+    rangeChanged: function(event) {
+      console.log(event);
+    },
+
+    checkboxChanged: function(event) {
+      mqttSocket.publish(this.model.get("topic"), event.srcElement.checked == 0 ? "0" : "1", 0, true);
+    }
 
   });
 
@@ -221,6 +356,10 @@ $(function(){
     render: function() {
       var tmpl = _.template(this.template);
       this.$el.html(tmpl(this.model.toJSON()));
+        for (var i = 0, l = this.model.controls.length; i < l; i++) {
+            this.addControl(this.model.controls.models[i]);
+        }
+
       return this;
     },
 
@@ -258,6 +397,7 @@ $(function(){
 
   var ApplicationRouter = Backbone.Router.extend({
   routes: {
+    "settigns" : "settings",
     "rooms/:room": "room",
     "": "index",
     "/": "index",
@@ -271,6 +411,10 @@ $(function(){
     App.showView(roomListView);
   },
 
+  settings: function () {
+    var settingsView = new SettingsView({model: Settings});
+    App.showView(settingsView);
+  },
 
   room: function(id) {
     console.log("showing roomDetailView for room: " + id);
@@ -295,10 +439,12 @@ $(function(){
 
   mqttSocket.onconnect = function(rc){
     console.log("Connection established");
+    // Status.set("connectionStatus", "connected");
     mqttSocket.subscribe('/devices/#', 0);
   };
 
   mqttSocket.ondisconnect = function(rc){ 
+    // Status.set("connectionStatus", "disconnected");
     console.log("Connection terminated");
   };
 
@@ -306,23 +452,15 @@ $(function(){
 
     console.log("-----------RECEIVED-----------");
     console.log("Received: "+topic+":"+payload);    
-
     var splitTopic = topic.split("/");
 
-    // Ensure the device for the exists
+    // Ensure the device for the message exists
     var deviceId = splitTopic[2]
     var device = Devices.get(deviceId);
     if (device == null) {
       device = new Device({id: deviceId});
       Devices.add(device);
-
-
-        var room = Rooms.get(device.get('room'));
-        if (room == null) {
-          room = new Room({id: device.get('room')});     
-          Rooms.add(room);   
-        } 
-        room.devices.add(device);
+      device.moveToRoom(undefined);
     }
 
     // Topic parsing
@@ -335,25 +473,14 @@ $(function(){
       }
 
       if(splitTopic[5] == null) {                                       // Control value
-        console.log("Control value for "+ controlName+ " : " + payload);
         control.set("value", payload);
+        control.set("topic", topic);
       } else {                                                          // Control type 
-        console.log("Control type for "+ controlName+ " : " + payload);
         control.set("type", payload);
       } 
     } else if(splitTopic[3] == "meta" ) { 
       if (splitTopic[4] == "room") {                                    // Device Room
-        var room = Rooms.get(device.get('room'));       
-        if (room.get('id') != payload) {
-          var newRoom = Rooms.get(payload);
-          if (newRoom == null) {
-            device.set('room', payload);
-            newRoom = new Room({id: payload});  
-            Rooms.add(newRoom);   
-          } 
-          room.devices.remove(device);
-          newRoom.devices.add(device);
-        }
+        device.moveToRoom(payload);
       } else if(splitTopic[4] == "name") {                              // Device name
         device.set('name', payload);
       }
@@ -363,6 +490,12 @@ $(function(){
   };
 
 
+
+
+
+
+
+  var Settings = new Status;
   var Devices = new DeviceCollection;
   var Rooms = new RoomCollection;
   var App = new AppView;
