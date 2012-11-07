@@ -312,7 +312,7 @@ $(function(){
 
     events: {
       "click input[type=checkbox]":  "checkboxChanged",
-      "click input[type=range]":  "rangeChanged"
+      "change input[type=range]":  "rangeChanged"
     },
 
      initialize: function() {
@@ -331,7 +331,7 @@ $(function(){
 
 
     rangeChanged: function(event) {
-      console.log(event);
+      mqttSocket.publish(this.model.get("topic"), event.srcElement.value, 0, true);
     },
 
     checkboxChanged: function(event) {
@@ -589,6 +589,6 @@ $(function(){
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
 
-  mqttSocket.connect("ws://192.168.8.2/mqtt");
+  mqttSocket.connect("ws://192.168.8.45/mqtt");
 
 });
