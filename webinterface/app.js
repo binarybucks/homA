@@ -340,6 +340,30 @@ $(function(){
 
   });
 
+
+  var DeviceSettingsView = Backbone.View.extend({
+    template: $("#device-template").html(),
+    className: "device-settings",
+
+    initialize: function() {
+      this.model.on('change', this.render, this);
+      this.model.view = this;
+    },  
+
+    render: function() {
+      var tmpl = _.template(this.template);
+     
+      var json = _.extend( this.toJSON(), { 
+                                            checkedAttribute: this.checkedAttribute(), 
+                                            valueAttribute: this.valueAttribute()
+                                          });
+
+       this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: this.model.get(room).get("id")})));
+      return this;
+    },
+
+  });
+
   var DeviceView = Backbone.View.extend({
     template: $("#device-template").html(),
     className: "device", 
@@ -353,10 +377,7 @@ $(function(){
     },
 
 
-    initialize:
-
-
-     function() {
+    initialize: function() {
       console.log("new DeviceView created for: " + this.model.id);
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
@@ -446,10 +467,13 @@ $(function(){
 
   var ApplicationRouter = Backbone.Router.extend({
   routes: {
-    "settigns" : "settings",
+    "settings" : "settings",
+    "devices/:device/settings": "deviceSettings",
     "rooms/:room": "room",
     "": "index",
     "/": "index",
+
+
   },
   initialize: function() {console.log("Router inizalized");},
 
@@ -463,6 +487,17 @@ $(function(){
   settings: function () {
     var settingsView = new SettingsView({model: Settings});
     App.showView(settingsView);
+  },
+
+  deviceSettings: function(deviceId) {
+    console.log("device settings");
+    var device = Devices.get(deviceId); // Room might not yet exists
+    if (device == null) {
+      console.log("device not yet loaded");
+    } else {
+      var deviceSettingsView = new DeviceSettingsView({model: device});
+      App.showView(deviceSettingsView);
+    }
   },
 
   room: function(id) {
@@ -519,11 +554,13 @@ $(function(){
       if (control == null) {
         control = new Control({id: controlName});
         device.controls.add(control);
+
+        control.set("topic", topic.replace("/type", ""));
+
       }
 
       if(splitTopic[5] == null) {                                       // Control value
         control.set("value", payload);
-        control.set("topic", topic);
       } else {                                                          // Control type 
         control.set("type", payload);
       } 

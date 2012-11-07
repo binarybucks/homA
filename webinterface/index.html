@@ -28,6 +28,9 @@
       <ul id="room-detail-links">
       </ul>
     </script>
+
+
+
     <script id="room-list-template" type="text/template">
       <div class="view-header">
         <h1>
@@ -74,12 +77,26 @@
     </script>
     <script id="device-template" type="text/template">
           <h1>
-            <%= name || id %>
+            <a href="#/devices/<%= id %>/settings">
+              <%= name || id %>
+            </a>
           </h1>
-          <input class="edit" type="text" value="<%= name || id %>" />
+          <!--<input class="edit" type="text" value="<%= name || id %>" />-->
           <div class="controls">
           </div>
     </script>
+
+    <script id="device-settings-template" type="text/template">
+      <h2>
+        <a href="#/rooms/<%= roomname %>">
+          <%= roomname %> / 
+        </a>
+      </h2>
+      <h1>
+        <%= name || id %>
+      </h1>
+    </script>
+
     <script id="undefined-control-template" type="text/template">
       <h2>
         <%= id %>
