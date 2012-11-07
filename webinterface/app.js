@@ -74,7 +74,8 @@ $(function(){
   var Device = Backbone.Model.extend({
     defaults: function() {
       return {
-        name: ""
+        name: "",
+        room: undefined
       };
     },
 
@@ -98,31 +99,32 @@ $(function(){
       } 
     },
 
-
-
-
     moveToRoom: function(roomName) {
       var cleanedName = roomName || "unassigned";
-      this.removeFromCurrentRoom();
 
+      // Prevent infinite recursion if moving device to the room it is already in
+      if (this.room != undefined && this.room.get("id") == roomName) {
+        return; 
+      }
+
+
+      this.removeFromCurrentRoom();
       var room = Rooms.get(cleanedName);
+      
 
 
       if (room == null) {
-                console.log("room does not exist");
+        console.log("room does not exist");
 
         Rooms.add(new Room({id: cleanedName}));
-                        console.log("recursing");
-
         this.moveToRoom(cleanedName);
+
       } else {
-                        console.log("room exists");
-
+        console.log("room exists");
         room.devices.add(this);
-                        console.log("device added to room");
-
+        console.log("device added to room");
         this.room = room;
-                        console.log("room set as this devices room");
+        console.log("room set as this devices room");
 
       } 
     },
@@ -239,6 +241,30 @@ $(function(){
    });
 
 
+
+  var ViewPlaceholder = Backbone.View.extend({
+    template: $("#view-placeholder-template").html(),
+    className: "view", 
+
+    initialize: function() {
+      this.model.on('add', this.addModel, this);
+    },
+
+    render: function () {
+        var tmpl = _.template(this.template);
+       this.$el.html(tmpl(_.extend(this.model.toJSON(), {id: this.id, backText: this.options.backText, backHref: this.options.backHref})));
+        return this;
+    },
+
+    addModel: function(addedObject) {
+      if(addedObject.get("id") == this.id) {
+        console.log("view content now available, re routing to: " + this.options.callbackRoute);
+        Backbone.history.loadUrl( this.options.callbackRoute ) // Router.navigate does not work to reload route, as the hash did not change
+      }
+    },
+  });
+
+
   var RoomDetailViewPlaceholder = Backbone.View.extend({
     template: $("#room-detail-placeholder-template").html(),
     className: "room", 
@@ -342,23 +368,23 @@ $(function(){
 
 
   var DeviceSettingsView = Backbone.View.extend({
-    template: $("#device-template").html(),
+    template: $("#device-settings-template").html(),
     className: "device-settings",
 
     initialize: function() {
       this.model.on('change', this.render, this);
+      // this.model.room.on('add', this.render, this);
+
       this.model.view = this;
     },  
 
     render: function() {
+      console.log("rendering settings");
       var tmpl = _.template(this.template);
-     
-      var json = _.extend( this.toJSON(), { 
-                                            checkedAttribute: this.checkedAttribute(), 
-                                            valueAttribute: this.valueAttribute()
-                                          });
-
-       this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: this.model.get(room).get("id")})));
+      
+      var roomName = this.model.room != undefined ? this.model.room.id : "unassigned"
+  
+      this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName})));
       return this;
     },
 
@@ -382,8 +408,6 @@ $(function(){
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
-      console.log("input");
-      console.log(this.input);
       this.model.view = this;
     },  
 
@@ -489,30 +513,32 @@ $(function(){
     App.showView(settingsView);
   },
 
-  deviceSettings: function(deviceId) {
+  deviceSettings: function(id) {
     console.log("device settings");
-    var device = Devices.get(deviceId); // Room might not yet exists
+    var device = Devices.get(id); // Room might not yet exists
+    var view; 
     if (device == null) {
-      console.log("device not yet loaded");
+      view = new ViewPlaceholder({model: Devices, id: id, backText: "Home", backHref: '#', callbackRoute: Backbone.history.fragment});
     } else {
-      var deviceSettingsView = new DeviceSettingsView({model: device});
-      App.showView(deviceSettingsView);
+      view = new DeviceSettingsView({model: device});
     }
+    App.showView(view);
+
   },
+
 
   room: function(id) {
     console.log("showing roomDetailView for room: " + id);
     var room = Rooms.get(id); // Room might not yet exists
+    var view; 
     if (room == null) {
-      // render "room not yet available. wait or go back to room list" view
-      var roomDetailViewPlaceholder = new RoomDetailViewPlaceholder({model: Rooms, id: id});
-      App.showView(roomDetailViewPlaceholder);
+      view = new ViewPlaceholder({model: Rooms, id: id, backText: 'Rooms', backHref: '#', callbackRoute: Backbone.history.fragment});
     } else {
-      var roomDetailView = new RoomDetailView({model: room});
-      App.showView(roomDetailView);
+      view = new RoomDetailView({model: room});
     }
-   },
+    App.showView(view);
 
+   },
 
 
 

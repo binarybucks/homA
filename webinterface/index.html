@@ -59,6 +59,21 @@
       <div class="devices">
       </div>
     </script>
+    <script id="view-placeholder-template" type="text/template">
+      <div class="view-header">
+        <h2>
+          <a href="<%= backHref %>">
+            <%= backText %> / 
+          </a>
+        </h2>
+        <h1>
+          <%= id %>
+        </h1>
+      </div>
+      <p>
+        View data has not yet been loaded
+      </p>
+    </script>
 
     <script id="room-detail-placeholder-template" type="text/template">
       <div class="view-header">
@@ -87,6 +102,8 @@
     </script>
 
     <script id="device-settings-template" type="text/template">
+      <div class="view-header">
+
       <h2>
         <a href="#/rooms/<%= roomname %>">
           <%= roomname %> / 
@@ -95,6 +112,9 @@
       <h1>
         <%= name || id %>
       </h1>
+      </div>
+      Here be controls
+
     </script>
 
     <script id="undefined-control-template" type="text/template">
