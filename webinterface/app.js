@@ -615,6 +615,6 @@ $(function(){
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
 
-  mqttSocket.connect("ws://192.168.8.45/mqtt");
+  mqttSocket.connect("ws://192.168.8.2/mqtt");
 
 });

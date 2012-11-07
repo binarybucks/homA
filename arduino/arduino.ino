@@ -234,7 +234,7 @@ void loop() {
     sensorcounter= 0;
   }
     
-  if (fading && ((fadecounter % 2500) == 0)) {
+  if (fading && ((fadecounter % 1000) == 0)) {
     fadeStep(); 
     fadecounter = 0;
   }

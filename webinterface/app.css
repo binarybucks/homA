@@ -52,6 +52,7 @@ h1 {
 h2 {
     color: #cdcdd0;
     display: inline;
+    text-transform: capitalize;
 }
 
 
@@ -62,6 +63,10 @@ h2 {
 
 .view-header h2 {
     font-size: 17px;
+}
+
+.device {
+    margin-bottom: 35px;
 }
 
 .device .controls {
