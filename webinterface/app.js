@@ -102,10 +102,10 @@ $(function(){
     moveToRoom: function(roomName) {
       var cleanedName = roomName || "unassigned";
 
-      // Prevent infinite recursion if moving device to the room it is already in
-      if (this.room != undefined && this.room.get("id") == roomName) {
-        return; 
-      }
+      // // Prevent infinite recursion if moving device to the room it is already in
+      // if (this.room != undefined && this.room.get("id") == roomName) {
+      //   return; 
+      // }
 
 
       this.removeFromCurrentRoom();
@@ -115,18 +115,18 @@ $(function(){
 
       if (room == null) {
         console.log("room does not exist");
-
-        Rooms.add(new Room({id: cleanedName}));
-        this.moveToRoom(cleanedName);
-
-      } else {
+        room = new Room({id: cleanedName});
+        Rooms.add(room);
+      } 
+      
+      // else {
         console.log("room exists");
         room.devices.add(this);
         console.log("device added to room");
         this.room = room;
         console.log("room set as this devices room");
 
-      } 
+      // } 
     },
 
 
@@ -338,18 +338,18 @@ $(function(){
 
     events: {
       "click input[type=checkbox]":  "checkboxChanged",
-      "change input[type=range]":  "rangeChanged",
-      "mousedown input[type=range]": "inhibitUpdate",
-      "mouseup input[type=range]": "allowUpdate"
+      "change input[type=range]":    "rangeChanged",
+      "mousedown input[type=range]": "inhibitRangeUpdates",
+      "mouseup input[type=range]":   "allowRangeUpdates"
 
     },
 
-    inhibitUpdate: function() {
-      this.inhibitupdate = false; 
+    inhibitRangeUpdates: function() {
+      this.allowrangeupdates = false; 
     },    
 
-    allowUpdate: function() {
-      this.inhibitupdate = true; 
+    allowRangeUpdates: function() {
+      this.allowrangeupdates = true; 
     },
 
 
@@ -357,7 +357,7 @@ $(function(){
       _.bindAll(this, 'checkboxChanged');
       this.model.on('change:type', this.render, this);
       this.model.on('change:value', this.updateValue, this);
-      this.allowUpdate(); 
+      this.allowRangeUpdates(); 
       this.model.view = this;
     },
 
@@ -368,10 +368,9 @@ $(function(){
     },
 
     updateValue: function(model) {
-      console.log("updating value");
       if(model.get("type") == "switch" ) {
         this.$("input").attr('checked', model.get("value") == 1);
-      } else if( model.get("type") == "range" && this.allowupdate) {
+      } else if( model.get("type") == "range" && this.allowrangeupdates) {
 
         this.$("input").val(this.model.get("value"));     
       }
