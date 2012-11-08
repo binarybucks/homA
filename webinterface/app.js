@@ -11,15 +11,27 @@ $(function(){
   // }
 
   Backbone.View.prototype.close = function() {
+    console.log("closing view");
+
+    this.off();
     this.remove();
-    this.unbind(); // alias of this.off();
+
+    // For custom handlers to clean up events bound to anything else than this.model and this.collection
+    if (this.onClose){ 
+      this.onClose();
+    }
+
     if (this.model) {
+      console.log("removing all event handlers this view has on its model");
       this.model.off(null, null, this);
     }
+
     if (this.collection) {
+      console.log("removing all event handlers this view has on its collection");
       this.collection.off(null, null, this);
     }
   }
+
 
 
   /*
@@ -46,29 +58,6 @@ $(function(){
         topic: null              
       };
     },
-  
-    initialize: function() {
-      _.bindAll(this, 'toExtendedJSON', 'checkedAttribute', 'valueAttribute');
-    },
-
-    // provide custom functionality to format values
-    toExtendedJSON: function(){
-      var json = _.extend( this.toJSON(), { 
-                                            checkedAttribute: this.checkedAttribute(), 
-                                            valueAttribute: this.valueAttribute()
-                                          });
-      return json;
-    },
-
-    checkedAttribute: function() {
-      return this.get("value") == 1 ? "checked=\"true\"" : "";
-    },
-
-    valueAttribute: function(){
-      return "value=\""+ this.get("value")+"\"";
-    },
-
-
   });
 
   var Device = Backbone.Model.extend({
@@ -85,13 +74,13 @@ $(function(){
 
     removeFromCurrentRoom: function() {
       if (this.room != undefined && this.room != null) {
-        console.log("device has room, removing from it");
+        console.log("removing device from room: " + this.room.id);
         this.room.devices.remove(this);
 
 
         if (this.room.devices.length == 0) {
 
-          console.log("Room is empty, removing it");
+          console.log("Room " + this.room.id+" is empty, removing it");
           Rooms.remove(this.room);
         }
 
@@ -101,36 +90,20 @@ $(function(){
 
     moveToRoom: function(roomName) {
       var cleanedName = roomName || "unassigned";
-
-      // // Prevent infinite recursion if moving device to the room it is already in
-      // if (this.room != undefined && this.room.get("id") == roomName) {
-      //   return; 
-      // }
-
-
-      this.removeFromCurrentRoom();
       var room = Rooms.get(cleanedName);
-      
-
-
+    
       if (room == null) {
-        console.log("room does not exist");
+        console.log("room " + cleanedName +" does not exist");
         room = new Room({id: cleanedName});
         Rooms.add(room);
       } 
+
+      this.removeFromCurrentRoom();
       
-      // else {
-        console.log("room exists");
-        room.devices.add(this);
-        console.log("device added to room");
-        this.room = room;
-        console.log("room set as this devices room");
-
-      // } 
+      room.devices.add(this);
+      this.room = room;
+      console.log("device added to room: " + cleanedName);
     },
-
-
-
   });
 
 
@@ -159,7 +132,13 @@ $(function(){
    *
    */
 
-  var SettingsView = Backbone.View.extend({
+  var ToplevelView = Backbone.View.extend({
+    rerenderToplevelView: function() {
+      App.renderToplevelView(this);
+    },
+  })
+
+  var SettingsView = ToplevelView.extend({
     template: $("#settings-template").html(),
 
     initialize: function() {
@@ -178,7 +157,7 @@ $(function(){
 
 
 
-  var RoomListView = Backbone.View.extend({
+  var RoomListView = ToplevelView.extend({
     idName: "room-list", 
     tagName: "div",
     template: $("#room-list-template").html(),
@@ -288,19 +267,20 @@ $(function(){
 
 
 
-  var RoomDetailView = Backbone.View.extend({
+  var RoomDetailView = ToplevelView.extend({
     template: $("#room-detail-template").html(),
     className: "room", 
 
     initialize: function() {
       this.model.devices.on('add', this.addDevice, this);
       this.model.devices.on('remove', this.removeDevice, this);
-
       this.model.bind('remove', this.remove, this);
       this.model.view = this;
     },
 
-    // render: function() {
+    onClose: function() {
+      this.model.devices.off();
+    },
 
     render: function () {
         var tmpl = _.template(this.template);
@@ -318,11 +298,13 @@ $(function(){
       this.$(".devices").append(deviceView.render().el);
     },
 
+
     removeDevice: function(device) {
       console.log("removing device from room: "+ device.get('id') + " " + this.model.get('id'))
       console.log()
-      $(device.view.el).unbind();
-      $(device.view.el).remove();
+      device.view.close();
+      // $(device.view.el).unbind();
+      // $(device.view.el).remove();
 
       if (this.model.devices.length == 0) {
         console.log("Room is empty, removing it");
@@ -356,7 +338,7 @@ $(function(){
      initialize: function() {
       _.bindAll(this, 'checkboxChanged');
       this.model.on('change:type', this.render, this);
-      this.model.on('change:value', this.updateValue, this);
+      this.model.on('change:value', this.updateControl, this);
       this.allowRangeUpdates(); 
       this.model.view = this;
     },
@@ -367,18 +349,25 @@ $(function(){
       return this;
     },
 
-    updateValue: function(model) {
-      if(model.get("type") == "switch" ) {
-        this.$("input").attr('checked', model.get("value") == 1);
-      } else if( model.get("type") == "range" && this.allowrangeupdates) {
+    updateControl: function(model) {
 
-        this.$("input").val(this.model.get("value"));     
+      if(model.get("type") == "switch" ) {
+        // this.$("input").attr('checked', model.get("value") == 1);
+        this.render();
+      } else if( model.get("type") == "range" && this.allowrangeupdates) {
+        console.log("model value changed, updating range slider with value: " + this.model.get("value"));
+                this.render();
+
+        // this.$("input").val(this.model.get("value"));     
       }
     },
 
 
     rangeChanged: function(event) {
+              console.log("range slider value changed to " + event.srcElement.value +", publishing it");
+
       mqttSocket.publish(this.model.get("topic"), event.srcElement.value, 0, true);
+
     },
 
     checkboxChanged: function(event) {
@@ -388,7 +377,7 @@ $(function(){
   });
 
 
-  var DeviceSettingsView = Backbone.View.extend({
+  var DeviceSettingsView = ToplevelView.extend({
     template: $("#device-settings-template").html(),
     className: "device-settings",
 
@@ -396,29 +385,24 @@ $(function(){
     events: {
       "keypress #nameInput"  : "publishNameInputOnEnter",
       "keypress #roomInput"  : "publishRoomInputOnEnter",
-      "blur #nameInput"  : "publishNameInput",
-      "blur #roomInput"  : "publishRoomInput"
     },
 
     initialize: function() {
-      this.model.on('change', this.render, this);
+      this.model.on('change', this.rerenderToplevelView, this);
       this.model.view = this;
     },  
 
+
     render: function() {
-      console.log("rendering settings");
+      console.log("reredering room");
       var tmpl = _.template(this.template);
-      var roomName = this.model.room != undefined ? this.model.room.id : "unassigned"
-      console.log("roomname: " + roomName);
+      var roomName = this.model.get("room") != undefined ? this.model.room.get("id") : "unassigned"
       this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName, rooms: Rooms})));
+      this.delegateEvents();
       return this;
     },
 
-
-    // Close the `"editing"` mode, saving changes to the todo.
     publishValue: function(e, type) {
-      console.log("event:");
-      console.log(event);
       var value = e.srcElement.value;
       mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/"+type, value ? value : "", 0, true);
     },
@@ -482,10 +466,15 @@ $(function(){
       }
 
       this.currentView = view;
-      this.currentView.render();
+      this.renderToplevelView(this.currentView);
+    },
 
-      this.$el.html(this.currentView.$el);
-    }
+    renderToplevelView: function(view) {
+      console.log("renderToplevelView");
+      this.$el.html(view.render().$el);
+                          view.delegateEvents();
+
+    },
 
   });
 

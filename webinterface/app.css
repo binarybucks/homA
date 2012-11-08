@@ -91,10 +91,10 @@ h2 {
 
 
 input[type="range"] {
-    display: block;
-/*    display: inline-block;
-    width: auto;*/
+    -webkit-appearance: slider-horizontal;
+
 }
+
 
 
 a {text-decoration: none; color: inherit;}
