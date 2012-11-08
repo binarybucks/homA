@@ -96,7 +96,6 @@
               <%= name || id %>
             </a>
           </h1>
-          <!--<input class="edit" type="text" value="<%= name || id %>" />-->
           <div class="controls">
           </div>
     </script>
@@ -113,8 +112,21 @@
         <%= name || id %>
       </h1>
       </div>
-      Here be controls
+      <div class="settings">
+        <div class="setting">
+          <h1>
+            Room
+          </h1>
+          <input id="roomInput" type="text" value="<%= roomname %>" placeholder="unassigned" />
 
+        </div>
+        <div class="setting">
+          <h1>
+            Name
+          </h1>
+          <input id="nameInput" type="text" value="<%= name %>" placeholder="<%= id %>" />
+        </div>
+      </div>
     </script>
 
     <script id="undefined-control-template" type="text/template">

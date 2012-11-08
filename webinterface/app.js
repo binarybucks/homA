@@ -338,21 +338,47 @@ $(function(){
 
     events: {
       "click input[type=checkbox]":  "checkboxChanged",
-      "change input[type=range]":  "rangeChanged"
+      "change input[type=range]":  "rangeChanged",
+      "mousedown input[type=range]": "inhibitUpdate",
+      "mouseup input[type=range]": "allowUpdate"
+
     },
+
+    inhibitUpdate: function(e) {
+      this.update = false; 
+
+    },    
+
+    allowUpdate: function(e) {
+      this.update = true; 
+    },
+
 
      initialize: function() {
       _.bindAll(this, 'checkboxChanged');
-      this.model.on('change', this.render, this);
+      this.model.on('change:type', this.render, this);
+      this.model.on('change:value', this.updateValue, this);
+
       this.model.view = this;
     },
 
     render: function() {
+           console.log("rendering control");
       var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
       this.$el.html(tmpl(this.model.toExtendedJSON()));
       return this;
     },
 
+
+    updateValue: function(model) {
+      console.log("updating value");
+      if(model.get("type") == "switch" && this.update) {
+        this.$("input").attr('checked', model.get("value") == 1);
+      } else if( model.get("type") == "range" && this.update) {
+
+        this.$("input").val(this.model.get("value"));     
+      }
+    },
 
 
 
@@ -371,37 +397,56 @@ $(function(){
     template: $("#device-settings-template").html(),
     className: "device-settings",
 
+
+    events: {
+      "keypress #nameInput"  : "publishNameInputOnEnter",
+      "keypress #roomInput"  : "publishRoomInputOnEnter",
+      "blur #nameInput"  : "publishNameInput",
+      "blur #roomInput"  : "publishRoomInput"
+    },
+
     initialize: function() {
       this.model.on('change', this.render, this);
-      // this.model.room.on('add', this.render, this);
-
       this.model.view = this;
     },  
 
     render: function() {
       console.log("rendering settings");
       var tmpl = _.template(this.template);
-      
       var roomName = this.model.room != undefined ? this.model.room.id : "unassigned"
-  
-      this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName})));
+      console.log("roomname: " + roomName);
+      this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName, rooms: Rooms})));
       return this;
     },
 
+
+    // Close the `"editing"` mode, saving changes to the todo.
+    publishValue: function(e, type) {
+      console.log("event:");
+      console.log(event);
+      var value = e.srcElement.value;
+      mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/"+type, value ? value : "", 0, true);
+    },
+
+    publishNameInput: function(e) {
+      this.publishValue(e, "name");
+    },
+
+    publishRoomInput: function(e) {
+      this.publishValue(e, "room");
+    },
+
+    publishNameInputOnEnter: function(e) { // enter in nameInput
+      if (e.keyCode == 13) this.publishNameInput(e);
+    },
+    publishRoomInputOnEnter: function(e) { // enter in nameInput
+      if (e.keyCode == 13) this.publishRoomInput(e);
+    },
   });
 
   var DeviceView = Backbone.View.extend({
     template: $("#device-template").html(),
     className: "device", 
-
-
-    events: {
-      "dblclick h1":  "edit",
-      "keypress .edit"  : "updateOnEnter",
-      "blur .edit"      : "close"
-
-    },
-
 
     initialize: function() {
       console.log("new DeviceView created for: " + this.model.id);
@@ -417,7 +462,6 @@ $(function(){
         for (var i = 0, l = this.model.controls.length; i < l; i++) {
             this.addControl(this.model.controls.models[i]);
         }
-      this.input = this.$('.edit');
 
       return this;
     },
@@ -427,39 +471,7 @@ $(function(){
       this.$(".controls").append(controlView.render().el);
     },
 
-// Switch this view into `"editing"` mode, displaying the input field.
-    edit: function() {
-      this.$el.addClass("editing");
-      this.input.focus();
-    },
 
-    // Close the `"editing"` mode, saving changes to the todo.
-    close: function() {
-      var value = this.input.val();
-      if (!value) {
-        console.log("clearing");
-        mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/name", null, 0, true);
-        // this.clear();
-      } else {
-        console.log("saving");
-        // this.model.save({title: value});
-        mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/name", value, 0, true);
-
-        this.$el.removeClass("editing");
-      }
-    },
-
-    // If you hit `enter`, we're through editing the item.
-    updateOnEnter: function(e) {
-      console.log("updateOnEnter");
-      if (e.keyCode == 13) this.close();
-    },
-
-    // Remove the item, destroy the model.
-    clear: function() {
-      console.log("clearing");
-      // this.model.destroy();
-    }
 
   });
 
@@ -615,6 +627,6 @@ $(function(){
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
 
-  mqttSocket.connect("ws://192.168.8.2/mqtt");
+  mqttSocket.connect("ws://192.168.8.45/mqtt");
 
 });
