@@ -344,13 +344,12 @@ $(function(){
 
     },
 
-    inhibitUpdate: function(e) {
-      this.update = false; 
-
+    inhibitUpdate: function() {
+      this.inhibitupdate = false; 
     },    
 
-    allowUpdate: function(e) {
-      this.update = true; 
+    allowUpdate: function() {
+      this.inhibitupdate = true; 
     },
 
 
@@ -358,28 +357,25 @@ $(function(){
       _.bindAll(this, 'checkboxChanged');
       this.model.on('change:type', this.render, this);
       this.model.on('change:value', this.updateValue, this);
-
+      this.allowUpdate(); 
       this.model.view = this;
     },
 
     render: function() {
-           console.log("rendering control");
       var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
-      this.$el.html(tmpl(this.model.toExtendedJSON()));
+      this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
       return this;
     },
 
-
     updateValue: function(model) {
       console.log("updating value");
-      if(model.get("type") == "switch" && this.update) {
+      if(model.get("type") == "switch" ) {
         this.$("input").attr('checked', model.get("value") == 1);
-      } else if( model.get("type") == "range" && this.update) {
+      } else if( model.get("type") == "range" && this.allowupdate) {
 
         this.$("input").val(this.model.get("value"));     
       }
     },
-
 
 
     rangeChanged: function(event) {
