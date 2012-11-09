@@ -69,33 +69,116 @@ h2 {
     margin-bottom: 35px;
 }
 
-.device .controls {
+.device .controls 
+{
     color: #cdcdd0;
 }
 
 
+
 .device h1 {
     cursor: pointer;
-}
-
-.device .edit {
-    display: none;
-}
-.device.editing h1 {
-    display: none;
-}
-
-.device.editing .edit {
     display: block;
+    margin-bottom: 5px;
 }
+
+
+.device .control {
+        line-height: 24px;
+    margin-bottom: 10px;
+
+}
+.device .control h2 {
+    display: inline-block;
+    width: 100px;
+}
+
+input {
+    margin: 0;
+}
+
+input[type="checkbox"] {
+
+    background: url('../images/sliderBg.png') no-repeat -200px 0;
+    border-radius: 2px;
+    border-left: 1px solid #7badcd;
+    border-right: 1px solid #d9d9d9;
+
+    cursor: pointer;
+    height: 18px;
+    width: 50px;
+    -webkit-appearance: none;
+}
+
+
+
+input[type="checkbox"]:after { 
+
+    margin-top: -3px;
+    background-color: #fbfbfb;
+    background: url('../images/handle.png') no-repeat 7px 7px, -webkit-linear-gradient(top, #fbfbfb 0%,#f4f4f4 100%); 
+
+    border: 1px solid #c0c8ca;
+    box-shadow: 0 1px 2px #dbdbdb;
+    border-radius: 2px;
+    content: '';
+    display: block;
+    height: 22px;
+    left: -4px;
+    position: relative;
+    top: 0;
+    width: 22px;
+}
+
+input[type="checkbox"]:checked {
+    background-position: 0 0, 0px 0;
+    padding-left: 30px;
+    padding-right: 0;
+}
+
 
 
 input[type="range"] {
-    -webkit-appearance: slider-horizontal;
+
+    background: url('../images/sliderBg.png') no-repeat -100px 0;
+    border-radius: 2px;
+    border-left: 1px solid #7badcd;
+    border-right: 1px solid #d9d9d9;
+    cursor: pointer;
+    height: 18px;
+    -webkit-appearance: none;
+        width: 185px;
 
 }
+
+
+
+input[type="range"]::-webkit-slider-thumb { 
+    -webkit-appearance: none;
+
+    margin-top: -1px;
+    background-color: #fbfbfb;
+    background: url('../images/handle.png') no-repeat 7px 7px, -webkit-linear-gradient(top, #fbfbfb 0%,#f4f4f4 100%); 
+    border: 1px solid #c0c8ca;
+    box-shadow: 0 1px 2px #dbdbdb;
+    border-radius: 2px;
+    content: '';
+    display: block;
+    height: 24px;
+ position: relative;
+    width: 24px;
+
+    margin-left: -4px;
+       margin-right: -4px;
+    }
+
+
+
+
 
 
 
 a {text-decoration: none; color: inherit;}
+
+
 

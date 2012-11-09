@@ -339,33 +339,46 @@ $(function(){
       _.bindAll(this, 'checkboxChanged');
       this.model.on('change:type', this.render, this);
       this.model.on('change:value', this.updateControl, this);
+
       this.allowRangeUpdates(); 
       this.model.view = this;
+
+      this.updateControl(this.model);
     },
 
     render: function() {
       var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
       this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
+      
+      this.positionRangeBackgroundImage(this.model.get("value"));
+
       return this;
     },
+
+
+    positionRangeBackgroundImage: function(value) {
+                var input = this.$('input[type="range"]');
+                var position = -200+(input.width()/255*value*0.95)
+                input.css({"background-position":   position+"px"});
+
+    },
+
+
 
     updateControl: function(model) {
 
       if(model.get("type") == "switch" ) {
-        // this.$("input").attr('checked', model.get("value") == 1);
         this.render();
       } else if( model.get("type") == "range" && this.allowrangeupdates) {
-        console.log("model value changed, updating range slider with value: " + this.model.get("value"));
-                this.render();
-
-        // this.$("input").val(this.model.get("value"));     
+        this.render();        
       }
-    },
 
+
+    },
 
     rangeChanged: function(event) {
               console.log("range slider value changed to " + event.srcElement.value +", publishing it");
-
+      this.positionRangeBackgroundImage(event.srcElement.value);
       mqttSocket.publish(this.model.get("topic"), event.srcElement.value, 0, true);
 
     },

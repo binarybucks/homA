@@ -53,7 +53,8 @@ PubSubClient client(mqttServer, 1883, mqttReceive, ethClient);
 
 
 
-void setWifi(char* state, char* group, int switchNumber) {  
+void setWifi(char* state, char* group, int switchNumber) {
+Serial.println("setting wifi switch");  
   if (strcmp(state, "1") == 0) {
     wifiTransmitter.switchOn(group, switchNumber);
     delay(500);
