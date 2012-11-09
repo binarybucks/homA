@@ -140,7 +140,7 @@ input[type="checkbox"]:checked {
 
 input[type="range"] {
 
-    background: url('../images/sliderBg.png') no-repeat -100px 0;
+    background: url('images/sliderBg.png') no-repeat -100px 0;
     border-radius: 2px;
     border-left: 1px solid #7badcd;
     border-right: 1px solid #d9d9d9;
@@ -158,7 +158,7 @@ input[type="range"]::-webkit-slider-thumb {
 
     margin-top: -1px;
     background-color: #fbfbfb;
-    background: url('../images/handle.png') no-repeat 7px 7px, -webkit-linear-gradient(top, #fbfbfb 0%,#f4f4f4 100%); 
+    background: url('images/handle.png') no-repeat 7px 7px, -webkit-linear-gradient(top, #fbfbfb 0%,#f4f4f4 100%); 
     border: 1px solid #c0c8ca;
     box-shadow: 0 1px 2px #dbdbdb;
     border-radius: 2px;
