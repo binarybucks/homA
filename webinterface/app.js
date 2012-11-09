@@ -2,14 +2,6 @@ $(function(){
   var mqttSocket = new Mosquitto();
 
 
-  // Backbone.View.prototype.close = function(){
-  //   this.remove();
-  //   this.unbind();
-  //   if (this.onClose){ // Provide custom functionality to remove event bindings in subclasses
-  //     this.onClose();
-  //   }
-  // }
-
   Backbone.View.prototype.close = function() {
     console.log("closing view");
 
@@ -44,7 +36,7 @@ $(function(){
     defaults: function () {
       return {
         connectionStatus: "disconnected", 
-        broker: "ws://127.0.0.1/mqtt" 
+        server: "ws://127.0.0.1/mqtt" 
       };
     },
   });
@@ -343,23 +335,23 @@ $(function(){
       this.allowRangeUpdates(); 
       this.model.view = this;
 
-      this.updateControl(this.model);
+      // this.updateControl(this.model);
     },
 
     render: function() {
+      console.log("rendering control");
       var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
       this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
-      
-      this.positionRangeBackgroundImage(this.model.get("value"));
+      this.input = this.$('input');
 
       return this;
     },
 
 
     positionRangeBackgroundImage: function(value) {
-                var input = this.$('input[type="range"]');
-                var position = -200+(input.width()/255*value*0.95)
-                input.css({"background-position":   position+"px"});
+
+                var position = -200+(this.input.width()/255*value*0.95)
+                this.input.css({"background-position":   position+"px"});
 
     },
 
@@ -370,14 +362,17 @@ $(function(){
       if(model.get("type") == "switch" ) {
         this.render();
       } else if( model.get("type") == "range" && this.allowrangeupdates) {
-        this.render();        
+      // console.log("updating control");
+        // this.render();
+        this.input.val(this.model.get("value"));
       }
+      this.positionRangeBackgroundImage(this.model.get("value"));
 
 
     },
 
     rangeChanged: function(event) {
-              console.log("range slider value changed to " + event.srcElement.value +", publishing it");
+              // console.log("range slider value changed to " + event.srcElement.value +", publishing it");
       this.positionRangeBackgroundImage(event.srcElement.value);
       mqttSocket.publish(this.model.get("topic"), event.srcElement.value, 0, true);
 
@@ -569,8 +564,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-    console.log("-----------RECEIVED-----------");
-    console.log("Received: "+topic+":"+payload);    
+    // console.log("-----------RECEIVED-----------");
+    // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -607,7 +602,7 @@ $(function(){
       }
       device.set(splitTopic[4], payload);
     }
-    console.log("-----------/ RECEIVED-----------");
+    // console.log("-----------/ RECEIVED-----------");
   };
 
 

@@ -61,11 +61,19 @@ h2 {
     font-size: 27px;
 }
 
+
+.view-header ~ * h1 {
+    display: block;
+    margin-bottom: 5px;
+
+}
+
+
 .view-header h2 {
     font-size: 17px;
 }
 
-.device {
+.device, .setting {
     margin-bottom: 35px;
 }
 
@@ -78,8 +86,6 @@ h2 {
 
 .device h1 {
     cursor: pointer;
-    display: block;
-    margin-bottom: 5px;
 }
 
 
@@ -152,7 +158,6 @@ input[type="range"] {
 }
 
 
-
 input[type="range"]::-webkit-slider-thumb { 
     -webkit-appearance: none;
 
@@ -172,8 +177,24 @@ input[type="range"]::-webkit-slider-thumb {
        margin-right: -4px;
     }
 
+input[type="text"] {
+    height: 22pxs;
+    border: 1px solid #d9d9d9;
+        border-radius: 2px;
+        padding-left: 10px;
+        padding-right: 10px;
+        vertical-align: center;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        color: #a2a3a3;
+}
+input[type="text"]:focus {
+    outline: none;
+    font-size: 18px;
+    border-color: #7bbacd;
+        -webkit-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1),inset 0 -1px 0 rgba(0,0,0,0.07);
 
-
+}
 
 
 

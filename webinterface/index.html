@@ -11,19 +11,30 @@
     <div id="templates">
     <script id="settings-template" type="text/template">
       <div class="view-header">
+        <h2>
+          <a href="#">
+            Rooms / 
+          </a>
+        </h2>
         <h1>
           Settings
-
         </h1>
       </div>
         <ul>
-          <li> 
-            <h2>
+          <li class="setting"> 
+            <h1>
               Connection Status
-            </h2>
-            <div id="connection-status">
+            </h1>
+            <h2 id="connection-status">
               <%= connectionStatus %>
-            </div>
+            </h2>
+          </li>
+          <li> 
+            <h1>
+              Server
+            </h1>
+            <input type="text" value="<%= server %>" />
+
           </li>
         </ul>
       </div>
@@ -43,9 +54,11 @@
       </ul>
     </script>
     <script id="room-detail-link-template" type="text/template">
+      <h1>
       <a href="#/rooms/<%= id %>">
         <%= name || id  %>
       </a>
+      </h1>
     </script>
     <script id="room-detail-template" type="text/template">
       <div class="view-header">
