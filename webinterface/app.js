@@ -313,33 +313,30 @@ $(function(){
     events: {
       "click input[type=checkbox]":  "checkboxChanged",
       "change input[type=range]":    "rangeChanged",
-      "mousedown input[type=range]": "inhibitRangeUpdates",
-      "mouseup input[type=range]":   "allowRangeUpdates"
+      "mousedown input[type=range]": "inhibitInputUpdates",
+      "mouseup input[type=range]":   "allowInputUpdates"
 
     },
 
-    inhibitRangeUpdates: function() {
-      this.allowrangeupdates = false; 
+    inhibitInputUpdates: function() {
+      this.allowUpdates = false; 
     },    
 
-    allowRangeUpdates: function() {
-      this.allowrangeupdates = true; 
+    allowInputUpdates: function() {
+      this.allowUpdates = true; 
     },
-
 
      initialize: function() {
       _.bindAll(this, 'checkboxChanged');
       this.model.on('change:type', this.render, this);
       this.model.on('change:value', this.updateControl, this);
-
-      this.allowRangeUpdates(); 
+      this.allowInputUpdates(); 
       this.model.view = this;
-
-      // this.updateControl(this.model);
+      this.updateControl(this.model);
     },
 
     render: function() {
-      console.log("rendering control");
+      // console.log("rendering control");
       var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
       this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
       this.input = this.$('input');
@@ -347,41 +344,26 @@ $(function(){
       return this;
     },
 
-
     positionRangeBackgroundImage: function(value) {
-
-                var position = -200+(this.input.width()/255*value*0.95)
-                this.input.css({"background-position":   position+"px"});
-
+      var position = -200+(this.input.width()/255*value*0.95)
+      this.input.css({"background-position": position+"px"});
     },
 
-
-
     updateControl: function(model) {
-
-      if(model.get("type") == "switch" ) {
+      if (this.allowUpdates) {
         this.render();
-      } else if( model.get("type") == "range" && this.allowrangeupdates) {
-      // console.log("updating control");
-        // this.render();
-        this.input.val(this.model.get("value"));
       }
       this.positionRangeBackgroundImage(this.model.get("value"));
-
-
     },
 
     rangeChanged: function(event) {
-              // console.log("range slider value changed to " + event.srcElement.value +", publishing it");
       this.positionRangeBackgroundImage(event.srcElement.value);
       mqttSocket.publish(this.model.get("topic"), event.srcElement.value, 0, true);
-
     },
 
     checkboxChanged: function(event) {
       mqttSocket.publish(this.model.get("topic"), event.srcElement.checked == 0 ? "0" : "1", 0, true);
     }
-
   });
 
 
