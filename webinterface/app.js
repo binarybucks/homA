@@ -26,19 +26,35 @@ $(function(){
 
 
 
+
   /*
    *
    *  MODELS
    *
    */
 
-  var Status = Backbone.Model.extend({
+  var AppSettings = Backbone.Model.extend({
+
     defaults: function () {
       return {
         connectionStatus: "disconnected", 
-        server: "ws://127.0.0.1/mqtt" 
       };
     },
+
+   initialize: function() {
+      if (!this.get("title")) {
+        this.set({"server": localStorage.getItem("homer_server") || "127.0.0.1"});
+        this.set({"devMode": localStorage.getItem("homer_devMode") == 1 });
+      }
+    },
+
+    sync: function() {// Overwritten to kill default sync behaviour
+    },
+
+    save: function() {
+      if( this.get("server")) localStorage.setItem("homer_server", this.get("server"))
+    },
+
   });
 
 
@@ -132,6 +148,20 @@ $(function(){
 
   var SettingsView = ToplevelView.extend({
     template: $("#settings-template").html(),
+
+
+    events: {
+      "keypress #serverInput":  "saveServerOnEnter",
+    },
+
+
+    saveServerOnEnter: function(e) { 
+      console.log("saving");
+      if (e.keyCode == 13) {
+        this.model.set("server", e.srcElement.value);
+        this.model.save();
+      }
+    },
 
     initialize: function() {
       this.model.view = this; 
@@ -266,8 +296,11 @@ $(function(){
     initialize: function() {
       this.model.devices.on('add', this.addDevice, this);
       this.model.devices.on('remove', this.removeDevice, this);
-      this.model.bind('remove', this.remove, this);
+       // this.model.bind('remove', this.remove, this);
+     this.model.bind('remove', this.removeSelf, this);
+
       this.model.view = this;
+
     },
 
     onClose: function() {
@@ -290,7 +323,6 @@ $(function(){
       this.$(".devices").append(deviceView.render().el);
     },
 
-
     removeDevice: function(device) {
       console.log("removing device from room: "+ device.get('id') + " " + this.model.get('id'))
       console.log()
@@ -304,67 +336,167 @@ $(function(){
 
       }
     },
+
+    removeSelf: function(room) {
+      // debugger
+      Backbone.history.loadUrl( "rooms/"+room.get("id") ) // Router.navigate does not work to reload route, as the hash did not change
+
+    }
   });
+
 
 
   var ControlView = Backbone.View.extend({
     className: "control",
 
     events: {
-      "click input[type=checkbox]":  "checkboxChanged",
-      "change input[type=range]":    "rangeChanged",
-      "mousedown input[type=range]": "inhibitInputUpdates",
-      "mouseup input[type=range]":   "allowInputUpdates"
-
+      "click input[type=checkbox]" : "inputValueChanged",
+      "change input[type=range]" : "inputValueChanged",
+      "mousedown input[type=range]" : "inhibitInputUpdates",
+      "mouseup input[type=range]" : "allowInputUpdates"
     },
 
-    inhibitInputUpdates: function() {
-      this.allowUpdates = false; 
-    },    
-
-    allowInputUpdates: function() {
-      this.allowUpdates = true; 
-    },
-
-     initialize: function() {
-      _.bindAll(this, 'checkboxChanged');
-      this.model.on('change:type', this.render, this);
-      this.model.on('change:value', this.updateControl, this);
-      this.allowInputUpdates(); 
+    initialize: function() {
+      this.model.on('change:type', this.modelTypeChanged, this);  
+      this.model.on('change:value', this.modelValueChanged, this);  
+      this.specialize();
       this.model.view = this;
-      this.updateControl(this.model);
     },
 
-    render: function() {
-      // console.log("rendering control");
-      var tmpl = _.template($("#" + this.model.get("type") +"-control-template").html());
-      this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
-      this.input = this.$('input');
 
+
+
+    specialize: function() {
+      this.dynamicInputValueChanged = this.methodNotImplemented;
+      this.dynamicRender = this.methodNotImplemented;
+      this.dynamicInhibitInputUpdates = this.methodNotImplemented;
+      this.dynamicAllowInputUpdates = this.methodNotImplemented;
+      this.dynamicModelValueChanged = this.methodNotImplemented;
+
+      if (this.model.get("type") == "switch") {
+        this.dynamicRender = this.switchRender;
+        this.dynamicInputValueChanged = this.switchInputValueChanged;
+        this.dynamicModelValueChanged = this.switchModelValueChanged;
+      } else if (this.model.get("type") == "range") {
+        this.dynamicRender = this.rangeRender;
+        this.dynamicInputValueChanged = this.rangeInputValueChanged;
+        this.dynamicModelValueChanged = this.rangeModelValueChanged;
+        this.dynamicInhibitInputUpdates = this.rangeInhibitInputUpdates;
+        this.dynamicAllowInputUpdates = this.rangeAllowInputUpdates;
+      } else {
+        this.dynamicRender = this.undefinedRender;
+      }
+    },
+
+
+    // Wrapper methods
+    render: function() {
+      return this.dynamicRender();
+    },
+
+    inputValueChanged: function(event) {
+      this.dynamicInputValueChanged(event);
+    },
+    
+    modelValueChanged: function(model) {
+      this.dynamicModelValueChanged(model);
+    },
+
+    modelTypeChanged: function() {
+      this.specialize();
+      this.render();
+    },
+
+    inhibitInputUpdates: function(event) {
+      this.dynamicInhibitInputUpdates(event);
+    },
+
+    allowInputUpdates: function(event) {
+      this.dynamicAllowInputUpdates(event);
+    },
+
+
+
+
+    // Specialized methods for type range
+    rangeRender: function() {
+      var tmpl = this.templateByType("range");
+      this.$el.html(tmpl(_.extend(this.model.toJSON(),{backgroundPosition: this.rangeBackgroundPosition(this.model.get("value"))})));
+      this.input = this.$('input');
       return this;
     },
 
-    positionRangeBackgroundImage: function(value) {
-      var position = -200+(this.input.width()/255*value*0.95)
-      this.input.css({"background-position": position+"px"});
+    rangeInhibitInputUpdates: function() {
+      this.allowUpdates = false; 
+    },    
+
+    rangeAllowInputUpdates: function() {
+      this.allowUpdates = true; 
     },
 
-    updateControl: function(model) {
-      if (this.allowUpdates) {
-        this.render();
+    rangeBackgroundPosition: function (value) {
+      if (this.input) {
+        return -200+(this.input.width()/255*value*0.95)
+
+      } else {
+        return -200+(185/255*value*0.95)
       }
-      this.positionRangeBackgroundImage(this.model.get("value"));
+
+
     },
 
-    rangeChanged: function(event) {
-      this.positionRangeBackgroundImage(event.srcElement.value);
-      mqttSocket.publish(this.model.get("topic"), event.srcElement.value, 0, true);
+    rangePositionRangeBackgroundImage: function(value) {
+      this.input.css({"background-position": this.rangeBackgroundPosition(value) +"px"});
     },
 
-    checkboxChanged: function(event) {
-      mqttSocket.publish(this.model.get("topic"), event.srcElement.checked == 0 ? "0" : "1", 0, true);
-    }
-  });
+    rangeInputValueChanged: function(event) {
+      this.rangePositionRangeBackgroundImage(event.srcElement.value);
+      App.publishMqtt(this.model.get("topic"), event.srcElement.value);
+    },
+
+
+    rangeModelValueChanged: function(model) {
+      if (this.allowUpdates) {
+        this.rangeRender();
+      }
+    },
+
+    // Specialized methods for type switch
+    switchRender: function() {
+      var tmpl = this.templateByType("switch");
+      this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
+      this.input = this.$('input');
+      return this;
+    },
+
+
+    switchInputValueChanged: function(event) {
+      App.publishMqtt(this.model.get("topic"), event.srcElement.checked == 0 ? "0" : "1");
+    },
+
+    switchModelValueChanged: function(model) {
+      this.switchRender();
+    },
+
+    // Specialized methods for type undefined
+    undefinedRender: function() {
+      var tmpl = this.templateByType("undefined");
+      this.$el.html(tmpl(this.model.toJSON()));
+      return this;
+    },
+
+
+    // Helper methods
+    methodNotImplemented: function() {
+      debugger
+      console.log("method is not implemented");
+    },
+
+    templateByType: function(type) {
+      return _.template($("#" + type +"-control-template").html());
+    },
+
+ });
 
 
   var DeviceSettingsView = ToplevelView.extend({
@@ -438,6 +570,7 @@ $(function(){
     addControl: function(control) {
       var controlView = new ControlView({model: control});
       this.$(".controls").append(controlView.render().el);
+      // controlView.positionRangeBackgroundImage(control.get("value"));
     },
 
 
@@ -449,6 +582,12 @@ $(function(){
   // Manages view transition 
   var AppView = Backbone.View.extend({
     el: $("#container"),
+
+    initialize: function() {
+      if(Settings.get("devMode")) {
+        console.log("Starting in developer mode");
+      }
+    },
 
     showView: function(view) {
       if (this.currentView){
@@ -462,9 +601,18 @@ $(function(){
     renderToplevelView: function(view) {
       console.log("renderToplevelView");
       this.$el.html(view.render().$el);
-                          view.delegateEvents();
+      view.delegateEvents();
 
     },
+
+    publishMqtt: function(topic, value) {
+      if(Settings.get("devMode")) {
+        console.log("DEV: Simulating publishing of " + topic + ":" + value);
+      } else {
+        mqttSocket.publish(topic, value, 0, true);
+      }
+
+    }
 
   });
 
@@ -535,12 +683,12 @@ $(function(){
 
   mqttSocket.onconnect = function(rc){
     console.log("Connection established");
-    // Status.set("connectionStatus", "connected");
+    Settings.set("connectionStatus", "connected");
     mqttSocket.subscribe('/devices/#', 0);
   };
 
   mqttSocket.ondisconnect = function(rc){ 
-    // Status.set("connectionStatus", "disconnected");
+    Settings.set("connectionStatus", "disconnected");
     console.log("Connection terminated");
   };
 
@@ -591,9 +739,8 @@ $(function(){
 
 
 
-
-
-  var Settings = new Status;
+  var Settings = new AppSettings;
+  Settings.fetch();
   var Devices = new DeviceCollection;
   var Rooms = new RoomCollection;
   var App = new AppView;
@@ -601,6 +748,6 @@ $(function(){
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
 
-  mqttSocket.connect("ws://192.168.8.45/mqtt");
+  mqttSocket.connect("ws://" + Settings.get("server") + "/mqtt");
 
 });
