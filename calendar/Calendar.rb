@@ -3,7 +3,7 @@ require 'json'
 require 'yaml'
 
 # Load Config
-CONFIG = YAML.load_file("config/config.yml") unless defined? CONFIG
+CONFIG = YAML.load_file("config.yml") unless defined? CONFIG
 
 
 class Calendar

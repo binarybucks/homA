@@ -18,4 +18,4 @@ _yardoc
 doc/
 
 # Config
-config/config.yml
+config.yml

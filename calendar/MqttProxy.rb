@@ -5,7 +5,7 @@ require 'yaml'
 #require 'tree' 
 
 # Load Config
-CONFIG = YAML.load_file("config/config.yml") unless defined? CONFIG
+CONFIG = YAML.load_file("config.yml") unless defined? CONFIG
 
 class MqttProxy
 	include Singleton 
