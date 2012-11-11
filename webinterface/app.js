@@ -383,6 +383,8 @@ $(function(){
         this.dynamicModelValueChanged = this.rangeModelValueChanged;
         this.dynamicInhibitInputUpdates = this.rangeInhibitInputUpdates;
         this.dynamicAllowInputUpdates = this.rangeAllowInputUpdates;
+                this.dynamicAllowInputUpdates();
+
       } else {
         this.dynamicRender = this.undefinedRender;
       }
@@ -435,18 +437,17 @@ $(function(){
     },
 
     rangeBackgroundPosition: function (value) {
-      if (this.input) {
-        return -200+(this.input.width()/255*value*0.95)
+      // if (this.input) {
+      //   return -200+(this.input.width()/255*value*0.95)
 
-      } else {
-        return -200+(185/255*value*0.95)
-      }
-
-
+      // } else {
+      //   return -200+(185/255*value*0.95)
+      // }
+      // $(this.input).attr('data-value',value);
     },
 
     rangePositionRangeBackgroundImage: function(value) {
-      this.input.css({"background-position": this.rangeBackgroundPosition(value) +"px"});
+      // this.input.css({"background-position": this.rangeBackgroundPosition(value) +"px"});
     },
 
     rangeInputValueChanged: function(event) {
@@ -488,7 +489,6 @@ $(function(){
 
     // Helper methods
     methodNotImplemented: function() {
-      debugger
       console.log("method is not implemented");
     },
 
@@ -694,8 +694,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-    // console.log("-----------RECEIVED-----------");
-    // console.log("Received: "+topic+":"+payload);    
+     // console.log("-----------RECEIVED-----------");
+     // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
