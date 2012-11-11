@@ -1,16 +1,15 @@
 require 'oauth2'
 require 'json'
 require 'yaml'
-
+require 'singleton'
+require 'eventmachine'
+require 'time'
+require_relative 'MqttProxy.rb'
 # Load Config
 CONFIG = YAML.load_file("config.yml") unless defined? CONFIG
 
-
 class Calendar
 	include Singleton
-	# Events take openHAB format "/AttributePath AttributeValue" e.g "/devices/1/status 1"
-
-
 	def initialize()
 		puts "(ThreadID #{Thread.current.object_id}) Initializing calendar proxy"
 
@@ -31,7 +30,8 @@ class Calendar
 		calendarPollPeriodically()
 	end
 
-	def calendarPollPeriodically(interval = 10)
+	def calendarPollPeriodically(interval = 2)
+		puts "Polling periodically every #{interval} seconds"
 		@pollIntervall = interval
 		 timer = EventMachine::PeriodicTimer.new(interval) do
 			getNextEvent()
@@ -44,29 +44,59 @@ class Calendar
 
 		# Formats minimal start date of events according to te wishes of the Google Calendar API (2012-10-12T11:50:00+02:00) and URL escapes ':' and '+' characters
 		startTime = "#{Time.now.strftime('%Y-%m-%dT%H%%3A%M%%3A%S%:z').sub( "+", "%2B" ).sub(":", "%3A")}"
-		puts "querying starttime #{startTime}"
-		query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(description%2Cstart%2Csummary)&orderBy=startTime&timeMin=#{startTime}"
-		puts query 
+		query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(description%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin=#{startTime}"
 		result = getQuery(query)	
+		items = JSON.parse(result.body)['items'];
 		
-		JSON.parse(result.body)['items'].each do |event|
-			parsed = event['summary'].split(" ")
+		return if items.nil?
 
-			topic = parsed[0]
-			payload = parsed[1]
- 			timediff = time - Time.parse(event['start']['dateTime'])
+		items.each do |event|
 
- 			$mqttProxy.publish(topic, payload) if (timediff < @pollIntervall && timediff > 0)
+			startTimeStr = event["start"]["dateTime"];
+			endTimeStr = event["end"]["dateTime"];
+			device = event['summary']
+			description = event['description'];
 
- 			puts "Got topic #{topic} with payload #{payload} in #{timediff} seconds"
+			next if description.nil?
+
+			descriptionJSON=JSON.parse(description);
+
+ 			startTimediff = Time.parse(startTimeStr) - Time.now()
+ 			endTimediff = Time.parse(endTimeStr) - Time.now()
+
+
+
+ 			if (startTimediff > 0) then
+ 				puts "Start events in #{startTimediff.to_i}s/#{(startTimediff/60).to_i}m :"
+ 				descriptionJSON["start"].each do |event| 
+ 					puts "#{event.keys[0]}:#{event.values[0]}"
+ 				end
+ 			end
+
+			if (endTimediff > 0) then
+ 				puts "End events in #{endTimediff.to_i}s/#{(endTimediff/60).to_i}m :"
+ 				descriptionJSON["end"].each do |event| 
+ 					puts "#{event.keys[0]}:#{event.values[0]}"
+ 				end
+ 			end
+
+			if (startTimediff.abs() < @pollIntervall) then
+ 				descriptionJSON["start"].each do |event| 
+ 					puts "Publishing #{event.keys[0]}:#{event.values[0]}"
+ 					MqttProxy.instance().publish(event.keys[0], event.values[0])	#Publish twice just in case
+ 					MqttProxy.instance().publish(event.keys[0], event.values[0])
+ 				end
+			end
+
+			if (endTimediff.abs() < @pollIntervall) then
+ 				descriptionJSON["end"].each do |event| 
+ 					puts "Publishing #{event.keys[0]}:#{event.values[0]}"
+ 					MqttProxy.instance().publish(event.keys[0], event.values[0])
+ 					MqttProxy.instance().publish(event.keys[0], event.values[0])
+
+ 				end
+			end
 		end
-
-
-
-
-
-# Check if event is scheduled  scheduler.find_by_tag(t)
-
 	end
 
 	def getQuery(query)
@@ -138,5 +168,6 @@ end
 # Start the whole thing
 EventMachine.run {
 	Calendar.instance().run()
+	MqttProxy.instance().run()
 	Signal.trap("INT") {  EventMachine.stop }
 }
