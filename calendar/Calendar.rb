@@ -4,6 +4,8 @@ require 'yaml'
 require 'singleton'
 require 'eventmachine'
 require 'time'
+require 'rufus/scheduler'
+
 require_relative 'MqttProxy.rb'
 # Load Config
 CONFIG = YAML.load_file("config.yml") unless defined? CONFIG
@@ -20,6 +22,9 @@ class Calendar
 		@accessToken = nil
 		@calendarID = CONFIG['googlecalendar']['calendarID']
 
+		@events = {}
+  	@scheduler = Rufus::Scheduler.start_new
+
 
 		raise "Missing googlecalendar:apiKey config parameter" if @client_id.to_s.empty?
 		raise "Missing googlecalendar:apiSecret config parameter" if @client_secret.to_s.empty?
@@ -27,76 +32,85 @@ class Calendar
 	end
 
 	def run()
+		getNextEvents()
 		calendarPollPeriodically()
 	end
 
-	def calendarPollPeriodically(interval = 2)
+	def calendarPollPeriodically(interval = 15)
 		puts "Polling periodically every #{interval} seconds"
 		@pollIntervall = interval
 		 timer = EventMachine::PeriodicTimer.new(interval) do
-			getNextEvent()
+			getNextEvents()
 		 end
 	end
 
-	def getNextEvent() 
+	def getNextEvents() 
 		# Test to get list of calendars
 		# getQuery("/calendar/v3/users/me/calendarList")
 
 		# Formats minimal start date of events according to te wishes of the Google Calendar API (2012-10-12T11:50:00+02:00) and URL escapes ':' and '+' characters
 		startTime = "#{Time.now.strftime('%Y-%m-%dT%H%%3A%M%%3A%S%:z').sub( "+", "%2B" ).sub(":", "%3A")}"
-		query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(description%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin=#{startTime}"
+		query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin=#{startTime}"
+				#query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&orderBy=startTime&timeMin=#{startTime}"
+
 		result = getQuery(query)	
 		items = JSON.parse(result.body)['items'];
+		puts items
+
+		@events = {}
 		
 		return if items.nil?
 
 		items.each do |event|
-
 			startTimeStr = event["start"]["dateTime"];
 			endTimeStr = event["end"]["dateTime"];
 			device = event['summary']
 			description = event['description'];
+			id = event['id']
 
 			next if description.nil?
-
+			
 			descriptionJSON=JSON.parse(description);
-
  			startTimediff = Time.parse(startTimeStr) - Time.now()
  			endTimediff = Time.parse(endTimeStr) - Time.now()
 
-
-
+ 			# Start events
  			if (startTimediff > 0) then
- 				puts "Start events in #{startTimediff.to_i}s/#{(startTimediff/60).to_i}m :"
  				descriptionJSON["start"].each do |event| 
- 					puts "#{event.keys[0]}:#{event.values[0]}"
+ 					@events[startTimeStr] ||= []
+  				@events[startTimeStr].push({event.keys[0] => event.values[0]})
  				end
  			end
 
+ 			# End events
 			if (endTimediff > 0) then
- 				puts "End events in #{endTimediff.to_i}s/#{(endTimediff/60).to_i}m :"
  				descriptionJSON["end"].each do |event| 
- 					puts "#{event.keys[0]}:#{event.values[0]}"
+ 					@events[endTimeStr] ||= []
+ 					@events[endTimeStr].push({event.keys[0] => event.values[0]})
  				end
  			end
 
-			if (startTimediff.abs() < @pollIntervall) then
- 				descriptionJSON["start"].each do |event| 
- 					puts "Publishing #{event.keys[0]}:#{event.values[0]}"
- 					MqttProxy.instance().publish(event.keys[0], event.values[0])	#Publish twice just in case
- 					MqttProxy.instance().publish(event.keys[0], event.values[0])
- 				end
-			end
 
-			if (endTimediff.abs() < @pollIntervall) then
- 				descriptionJSON["end"].each do |event| 
- 					puts "Publishing #{event.keys[0]}:#{event.values[0]}"
- 					MqttProxy.instance().publish(event.keys[0], event.values[0])
- 					MqttProxy.instance().publish(event.keys[0], event.values[0])
+		end
+		puts "Run done: Events are: "
+		puts @events
 
- 				end
+		#Unschedule all events
+		jobs = @scheduler.running_jobs.each{|j| j.unschedule}
+
+		# Reschedule all events
+		@events.each do |timestring, events| 
+			events.each do |event| 
+
+				startTimediff = (Time.parse(timestring) - Time.now()).to_i
+				puts "In #{startTimediff} putting #{event.keys[0]}:#{event.values[0]}"
+				@scheduler.in "#{startTimediff}s" do
+					puts "Publising #{event.keys[0]}:#{event.values[0]}"
+					MqttProxy.instance().publish(event.keys[0], event.values[0])
+				end
 			end
 		end
+
 	end
 
 	def getQuery(query)

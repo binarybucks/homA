@@ -139,10 +139,15 @@
       <div class="settings">
         <div class="setting">
           <h1>
+            Id
+          </h1>
+          <h2><%= id %></h2>
+        </div>
+        <div class="setting">
+          <h1>
             Room
           </h1>
           <input id="roomInput" type="text" value="<%= roomname %>" placeholder="unassigned" />
-
         </div>
         <div class="setting">
           <h1>
@@ -173,7 +178,12 @@
       </h2>
       <input type="checkbox" <%= checkedAttribute %>/> 
     </script>
-
+    <script id="text-control-template" type="text/template">
+      <h2>
+        <%= id %>
+      </h2>
+      <span><%= value %></span> 
+    </script>
     
 
     <script src="libs/mosquitto.js"></script>

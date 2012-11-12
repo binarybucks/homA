@@ -383,8 +383,11 @@ $(function(){
         this.dynamicModelValueChanged = this.rangeModelValueChanged;
         this.dynamicInhibitInputUpdates = this.rangeInhibitInputUpdates;
         this.dynamicAllowInputUpdates = this.rangeAllowInputUpdates;
-                this.dynamicAllowInputUpdates();
+        this.dynamicAllowInputUpdates();
 
+      } else if (this.model.get("type") == "text") {
+        this.dynamicRender = this.textRender;
+        this.dynamicModelValueChanged = this.textModelValueChanged;
       } else {
         this.dynamicRender = this.undefinedRender;
       }
@@ -476,6 +479,17 @@ $(function(){
     },
 
     switchModelValueChanged: function(model) {
+      this.switchRender();
+    },
+
+    // Specialized methods for type (readonly)
+    textRender: function() {
+      var tmpl = this.templateByType("text");
+      this.$el.html(tmpl(this.model.toJSON()));
+      return this;
+    },
+
+    textModelValueChanged: function(model) {
       this.switchRender();
     },
 

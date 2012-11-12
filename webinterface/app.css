@@ -105,7 +105,7 @@ h2 {
     top: 2px;
 }
 
-.device .control input[type="checkbox"],  .device .control .rangeWrapper {
+.device .control input[type="checkbox"],  .device .control .rangeWrapper, .device .control span {
         position: absolute;
     left: 100px;
     top: 1px;
