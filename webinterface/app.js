@@ -595,7 +595,8 @@ $(function(){
       if(Settings.get("devMode")) {
         console.log("DEV: Simulating publishing of " + topic + ":" + value);
       } else {
-        mqttSocket.publish(topic, value, 0, true);
+       
+        mqttSocket.publish(topic+"/on", value, 0, true);
       }
 
     }

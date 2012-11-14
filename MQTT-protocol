@@ -8,7 +8,7 @@ Device controlls are a available at
 /devices/$uniquedeviceid/controls
 
 To prevent devices from receiving their own echos, devices must NOT subscribe to the same topics they publish to.
-Instead, devices publish values to /devices/$uniquedeviceid/controls/controlname and subscribe to value updates by external interface at /devices/$uniquedeviceid/controls/controlname/on
+Instead, devices publish values to /devices/$uniquedeviceid/controls/controlname and subscribe to value updates by external interface at /devices/$uniquedeviceid/controls/controlname/on (e.g. by subscribing to /devices/$uniquedeviceid/controls/+/on)
 	
 For each control, the type has to be published at 
 /devices/$uniquedeviceid/controls/power/type = {"switch", "range", "text"}

@@ -15,24 +15,36 @@
 #define BCOEFFICIENT 4791       // The beta coefficient of the thermistor (usually 3000-4000)
 #define SERIESRESISTOR 2200     // the value of the 'other' resistor
 
-#define DEVICE_1_SUBSCRIBE"/devices/321995-ambilight/controls/#"
-#define DEVICE_1_POWER "/devices/321995-ambilight/controls/power"
+#define DEVICE_1_ON_RAMP_WILDCARD "/devices/321995-ambilight/controls/+/on"    // Incomming values and commands for device
+
+#define DEVICE_1_OFF_RAMP_POWER "/devices/321995-ambilight/controls/power"
+#define DEVICE_1_ON_RAMP_POWER "/devices/321995-ambilight/controls/power/on"
 #define DEVICE_1_POWER_TYPE "/devices/321995-ambilight/controls/power/type"
-#define DEVICE_1_FADING "/devices/321995-ambilight/controls/fading"
+
+#define DEVICE_1_OFF_RAMP_FADING "/devices/321995-ambilight/controls/fading"
+#define DEVICE_1_ON_RAMP_FADING "/devices/321995-ambilight/controls/fading/on"
 #define DEVICE_1_FADING_TYPE "/devices/321995-ambilight/controls/fading/type"
-#define DEVICE_1_VALUE "/devices/321995-ambilight/controls/intensity"
+
+#define DEVICE_1_OFF_RAMP_VALUE "/devices/321995-ambilight/controls/intensity"
+#define DEVICE_1_ON_RAMP_VALUE "/devices/321995-ambilight/controls/intensity/on"
 #define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/intensity/type"
 
-#define DEVICE_1_HUE "/devices/321995-ambilight/controls/color/type"
+#define DEVICE_1_OFF_RAMP_HUE "/devices/321995-ambilight/controls/color/type"
+#define DEVICE_1_ON_RAMP_HUE "/devices/321995-ambilight/controls/color/type/on"
 #define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/color"
 
-#define DEVICE_2_SUBSCRIBE "/devices/862671-wirelessSwitch/controls/#"
-#define DEVICE_2_POWER "/devices/862671-wirelessSwitch/controls/power"
+#define DEVICE_2_ON_RAMP_WILDCARD "/devices/862671-wirelessSwitch/controls/+/on"
+
+#define DEVICE_2_OFF_RAMP_POWER "/devices/862671-wirelessSwitch/controls/power"
+#define DEVICE_2_ON_RAMP_POWER "/devices/862671-wirelessSwitch/controls/power/on"
 #define DEVICE_2_POWER_TYPE "/devices/862671-wirelessSwitch/controls/power/type"
-#define DEVICE_3_SUBSCRIBE "/devices/558426-wirelessSwitch/controls/#"
-#define DEVICE_3_POWER "/devices/558426-wirelessSwitch/controls/power"
+
+#define DEVICE_3_OFF_RAMP_POWER "/devices/558426-wirelessSwitch/controls/power"
+#define DEVICE_3_ON_RAMP_WILDCARD "/devices/558426-wirelessSwitch/controls/+/on"
 #define DEVICE_3_POWER_TYPE "/devices/558426-wirelessSwitch/controls/power/type"
-#define SENSORS_1_TEMPERATURE "/devices/482031-sensors/controls/temp"
+
+// No on ramp, sensors are read only
+#define SENSORS_1_OFF_RAMP_TEMPERATURE "/devices/482031-sensors/controls/temp"
 #define SENSORS_1_TEMPERATURE_TYPE "/devices/482031-sensors/controls/temp/type"
 
 
@@ -81,9 +93,7 @@ int ambilightG = 255;
 int ambilightB = 0;
 
 double ambilightValue = 1.0;
-double ambilightValueExpectedEcho;
 int ambilightHue = 360;
-int ambilightHueExpectedEcho;
 
 void setWifi(char* state, char* group, int switchNumber) {
   if (strcmp(state, "1") == 0) {
@@ -131,23 +141,14 @@ float getTemp() {
 //
 
 void setAmbilightValue(double value) {
- if (value == ambilightValueExpectedEcho)
-   return
-   
-   
   ambilightValue = value;
   setLedColorHSV(ambilightHue,1,ambilightValue); //Staturation constant at 1
-
 }     
 
 
 void setAmbilightHue(int hue) {
-  if (value == ambilightHueExpectedEcho)
-   return
-  
   ambilightHue = hue;
   setLedColorHSV(ambilightHue,1,ambilightValue); //Staturation constant at 1
-
 }
 
 
@@ -155,26 +156,26 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   char  payload[length+1];
   memcpy(payload, rawPayload, length);
   payload[length] = '\0';
-  Serial.println("there");
-    
+  Serial.print("Received MQTT message:");
+  Serial.println(payload);
+   
 
-
-  if (strcmp(topic, DEVICE_1_VALUE) == 0) {
+  if (strcmp(topic, DEVICE_1_ON_RAMP_VALUE) == 0) {
     double value;
     sscanf(payload, "%f", &value);
     setAmbilightValue(value);     
-  } else if (strcmp(topic, DEVICE_1_HUE) == 0) {
+  } else if (strcmp(topic, DEVICE_1_ON_RAMP_HUE) == 0) {
     int hue;
     sscanf(payload, "%f", &hue);
     setAmbilightHue(hue); 
-  } else if(strcmp(topic, DEVICE_1_POWER) == 0) {
+  } else if(strcmp(topic, DEVICE_1_ON_RAMP_POWER) == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 1);
-  } else if(strcmp(topic, DEVICE_1_FADING)  == 0 ) {
+  } else if(strcmp(topic, DEVICE_1_ON_RAMP_FADING)  == 0 ) {
     fadeStepFlag  = !(*payload == '0');
     fadeStepToTargetColorFlag = false;
-  } else if(strcmp(topic, DEVICE_2_POWER)  == 0) {
+  } else if(strcmp(topic, DEVICE_2_ON_RAMP_POWER)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 2);
-  }else if(strcmp(topic,DEVICE_3_POWER)  == 0) {
+  }else if(strcmp(topic,DEVICE_3_ON_RAMP_POWER)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 3);
   } else if (strcmp(topic, "/devices/321995-ambilight/actions/wakeup") == 0) {
     Serial.println("wakeup");
@@ -287,10 +288,7 @@ void wakeupLoop() {
      
      char buffer[4];
      sprintf(buffer, "%s", ambilightValue);
-     publishRetained(DEVICE_1_VALUE,  buffer);
-     
-     ambilightHueExpectedEcho = ambilightValue;
-     setLedColorHSV(ambilightHue,1,ambilightValue);   
+     publishRetained(DEVICE_1_OFF_RAMP_VALUE,  buffer);     
   }
 }
 
@@ -300,18 +298,13 @@ void fadeLoop() {
    
   char buffer[3];
   sprintf(buffer, "%s", ambilightHue);
-  publishRetained(DEVICE_1_HUE,  buffer);
-  
-  ambilightValueExpectedEcho = ambilightHue;
-  setLedColorHSV(ambilightHue,1,ambilightValue);
-  
-  
+  publishRetained(DEVICE_1_OFF_RAMP_HUE,  buffer);
 }
 
 void sensorLoop(){
   char tempStr[5];
   dtostrf(getTemp(),2,2,tempStr);
-  publishRetained(SENSORS_1_TEMPERATURE, tempStr);
+  publishRetained(SENSORS_OFF_RAMP_TEMPERATURE, tempStr);
 }
 
 
@@ -347,12 +340,9 @@ void publishDeviceMetaInformation() {
 }
 
 void subscribe() {
- client.subscribe("/devices/321995-ambilight/actions/#");
- client.subscribe(DEVICE_1_SUBSCRIBE);
- client.subscribe(DEVICE_2_SUBSCRIBE);
- client.subscribe(DEVICE_3_SUBSCRIBE);  
- 
- 
+ client.subscribe(DEVICE_1_ON_RAMP_WILDCARD);
+ client.subscribe(DEVICE_2_ON_RAMP_WILDCARD);
+ client.subscribe(DEVICE_3_ON_RAMP_WILDCARD);   
 }
 
 void publishSensors () {
