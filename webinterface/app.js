@@ -671,7 +671,9 @@ $(function(){
   mqttSocket.onconnect = function(rc){
     console.log("Connection established");
     Settings.set("connectionStatus", "connected");
-    mqttSocket.subscribe('/devices/#', 0);
+    mqttSocket.subscribe('/devices/+/controls/+', 0);
+    mqttSocket.subscribe('/devices/+/meta/#', 0);
+
   };
 
   mqttSocket.ondisconnect = function(rc){ 
@@ -681,8 +683,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-     // console.log("-----------RECEIVED-----------");
-     // console.log("Received: "+topic+":"+payload);    
+      console.log("-----------RECEIVED-----------");
+      console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -717,7 +719,7 @@ $(function(){
       }
       device.set(splitTopic[4], payload);
     }
-    // console.log("-----------/ RECEIVED-----------");
+     console.log("-----------/ RECEIVED-----------");
   };
 
 

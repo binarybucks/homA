@@ -28,6 +28,8 @@
 #define DEVICE_1_OFF_RAMP_VALUE "/devices/321995-ambilight/controls/intensity"
 #define DEVICE_1_ON_RAMP_VALUE "/devices/321995-ambilight/controls/intensity/on"
 #define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/intensity/type"
+
+#define DEVICE_1_OFF_RAMP_HUE "/devices/321995-ambilight/controls/color"
 #define DEVICE_1_ON_RAMP_HUE "/devices/321995-ambilight/controls/color/on"
 #define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/color/type"
 
@@ -157,8 +159,8 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   char  payload[length+1];
   memcpy(payload, rawPayload, length);
   payload[length] = '\0';
-  Serial.print("Received MQTT message:");
-  Serial.println(payload);
+  //Serial.print("Received MQTT message:");
+  //Serial.println(payload);
    
 
   if (strcmp(topic, DEVICE_1_ON_RAMP_VALUE) == 0) {
