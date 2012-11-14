@@ -28,10 +28,8 @@
 #define DEVICE_1_OFF_RAMP_VALUE "/devices/321995-ambilight/controls/intensity"
 #define DEVICE_1_ON_RAMP_VALUE "/devices/321995-ambilight/controls/intensity/on"
 #define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/intensity/type"
-
-#define DEVICE_1_OFF_RAMP_HUE "/devices/321995-ambilight/controls/color/type"
-#define DEVICE_1_ON_RAMP_HUE "/devices/321995-ambilight/controls/color/type/on"
-#define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/color"
+#define DEVICE_1_ON_RAMP_HUE "/devices/321995-ambilight/controls/color/on"
+#define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/color/type"
 
 #define DEVICE_2_ON_RAMP_WILDCARD "/devices/862671-wirelessSwitch/controls/+/on"
 
@@ -42,6 +40,9 @@
 #define DEVICE_3_OFF_RAMP_POWER "/devices/558426-wirelessSwitch/controls/power"
 #define DEVICE_3_ON_RAMP_WILDCARD "/devices/558426-wirelessSwitch/controls/+/on"
 #define DEVICE_3_POWER_TYPE "/devices/558426-wirelessSwitch/controls/power/type"
+#define DEVICE_3_ON_RAMP_POWER "/devices/558426-wirelessSwitch/controls/power"
+
+
 
 // No on ramp, sensors are read only
 #define SENSORS_1_OFF_RAMP_TEMPERATURE "/devices/482031-sensors/controls/temp"
@@ -304,7 +305,7 @@ void fadeLoop() {
 void sensorLoop(){
   char tempStr[5];
   dtostrf(getTemp(),2,2,tempStr);
-  publishRetained(SENSORS_OFF_RAMP_TEMPERATURE, tempStr);
+  publishRetained(SENSORS_1_OFF_RAMP_TEMPERATURE, tempStr);
 }
 
 
