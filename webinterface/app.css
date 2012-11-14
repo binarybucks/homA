@@ -98,18 +98,22 @@ h2 {
     position: relative;
     height: 24px;
 
+
 }
 .device .control h2 {
     position: absolute;
     left: 0;
-    top: 2px;
-}
+    top: 1px; }
 
 .device .control input[type="checkbox"],  .device .control .rangeWrapper, .device .control span {
         position: absolute;
-    left: 100px;
-    top: 1px;
+    left: 120px;
+    top: 3px;
 
+}
+
+.device .control span {
+    top: 2px;
 }
 
 input {

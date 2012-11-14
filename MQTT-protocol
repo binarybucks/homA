@@ -5,16 +5,17 @@ Device meta attributes for building app interfaces dynamically are available at.
 														 /room
 
 Device controlls are a available at
-/devices/$uniquedeviceid/controls/power = control-value
+/devices/$uniquedeviceid/controls
+
+To prevent devices from receiving their own echos, devices must NOT subscribe to the same topics they publish to.
+Instead, devices publish values to /devices/$uniquedeviceid/controls/controlname and subscribe to value updates by external interface at /devices/$uniquedeviceid/controls/controlname/on
 	
-For each controll, the type has to be published at 
-/devices/$uniquedeviceid/controls/power/type = {"switch", "range"}
+For each control, the type has to be published at 
+/devices/$uniquedeviceid/controls/power/type = {"switch", "range", "text"}
 
 
-Sensors publish to 
-/sensors/sensorname
+Sensor values can be published to 
+/devices/$uniquedeviceid/controls/$sensorname 
 
-Addionally, each sensor has to publish the type for each sensor to 
-/sensors/sensorname/type
-
-Currently possible values for type are: "temperature", "brightness", "count"
+with a type published as "text"
+/devices/$uniquedeviceid/controls/$sensorname/type = text

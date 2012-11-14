@@ -6,7 +6,6 @@
 #include <math.h>
 
 #define WIFIPIN 9
-
 #define AMBILIGHTBLUEEPIN 6
 #define AMBILIGHTREDPIN 5
 #define AMBILIGHTGREENPIN 3
@@ -16,47 +15,39 @@
 #define BCOEFFICIENT 4791       // The beta coefficient of the thermistor (usually 3000-4000)
 #define SERIESRESISTOR 2200     // the value of the 'other' resistor
 
-
 #define DEVICE_1_SUBSCRIBE"/devices/321995-ambilight/controls/#"
 #define DEVICE_1_POWER "/devices/321995-ambilight/controls/power"
 #define DEVICE_1_POWER_TYPE "/devices/321995-ambilight/controls/power/type"
 #define DEVICE_1_FADING "/devices/321995-ambilight/controls/fading"
 #define DEVICE_1_FADING_TYPE "/devices/321995-ambilight/controls/fading/type"
-#define DEVICE_1_COLOR "/devices/321995-ambilight/controls/color"
-#define DEVICE_1_COLOR_TYPE "/devices/321995-ambilight/controls/color/type"
+#define DEVICE_1_VALUE "/devices/321995-ambilight/controls/intensity"
+#define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/intensity/type"
+
+#define DEVICE_1_HUE "/devices/321995-ambilight/controls/color/type"
+#define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/color"
 
 #define DEVICE_2_SUBSCRIBE "/devices/862671-wirelessSwitch/controls/#"
 #define DEVICE_2_POWER "/devices/862671-wirelessSwitch/controls/power"
 #define DEVICE_2_POWER_TYPE "/devices/862671-wirelessSwitch/controls/power/type"
-
 #define DEVICE_3_SUBSCRIBE "/devices/558426-wirelessSwitch/controls/#"
 #define DEVICE_3_POWER "/devices/558426-wirelessSwitch/controls/power"
 #define DEVICE_3_POWER_TYPE "/devices/558426-wirelessSwitch/controls/power/type"
-
 #define SENSORS_1_TEMPERATURE "/devices/482031-sensors/controls/temp"
 #define SENSORS_1_TEMPERATURE_TYPE "/devices/482031-sensors/controls/temp/type"
 
-void subscribe();
-void publishDeviceMetaInformation();
-
-union u_color { 
-	// first representation (member of union) 
-	struct s_color { 
-		uint8_t r, g, b;
-	} rgb;
- 
-	// second representation (member of union) 
-	uint32_t hex; 
-};
 
 
 // Prototypes
-
 void setWifi(char* state, char* group, int switchNumber);
-void setColor();
+void setLedColor();
 float getTemp();
 void mqttReceive(char* topic, byte* payload, unsigned int length);
 void publishRetained(char* topic, char* payload);
+void subscribe();
+void publishDeviceMetaInformation();
+void fadeStepToTargetColor();
+
+void wakeup();
 
 
 
@@ -68,31 +59,37 @@ char* mqttClientId = "homeduino";
 char* wifiSwitchHomeGroup = "11011";
 
 
-int fadecounter = 0;
-int sensorcounter = 0;
-int currentr = 0;
-int currentg = 255;
-int currentb = 0;
-
 
 // Global variables
 RCSwitch wifiTransmitter = RCSwitch();
-boolean publishSensorsFlag = false;
-boolean fadeStepFlag = false;
-boolean fading = false;
 EthernetClient ethClient;
 PubSubClient client(mqttServer, 1883, mqttReceive, ethClient);
 
 
 
+// Global status variabels
+boolean fadeStepFlag = false;
+boolean publishSensorsFlag = false;
+boolean fadeStepToTargetColorFlag = false;
+
+int fadecounter = 0;
+int fadetToTargetCounter = 0;
+int sensorcounter = 0;
+
+int ambilightR = 0;
+int ambilightG = 255;
+int ambilightB = 0;
+
+double ambilightValue = 1.0;
+double ambilightValueExpectedEcho;
+int ambilightHue = 360;
+int ambilightHueExpectedEcho;
 
 void setWifi(char* state, char* group, int switchNumber) {
-Serial.println("setting wifi switch");  
   if (strcmp(state, "1") == 0) {
     wifiTransmitter.switchOn(group, switchNumber);
     delay(500);
     wifiTransmitter.switchOn(group, switchNumber);  
-
   } else if (strcmp(state, "0") == 0)  {  
     wifiTransmitter.switchOff(group, switchNumber); 
     delay(500);
@@ -100,40 +97,12 @@ Serial.println("setting wifi switch");
   } 
 }
 
-void setColor() {    
-  analogWrite(AMBILIGHTREDPIN, currentr);
-  analogWrite(AMBILIGHTGREENPIN, currentg);
-  analogWrite(AMBILIGHTBLUEEPIN, currentb);
-
+void setLedColor(int red, int green, int blue) {    
+  analogWrite(AMBILIGHTREDPIN, red);
+  analogWrite(AMBILIGHTGREENPIN, green);
+  analogWrite(AMBILIGHTBLUEEPIN, blue);
 }
 
-void publishColor() {
-  char buffer[6];
-  sprintf(buffer, "%.2X%.2X%.2X", currentr, currentg, currentb);
-  Serial.println("hex is: ");
-  Serial.println(buffer);
-  publishRetained("/devices/321995-ambilight/controls/color", buffer);
-}
-
-void fadeStep () {
-
-
-  if (currentr == 255 && currentg == 0  && currentb < 255) {
-    currentb++;
-  } else if (currentb == 255 && currentg == 0 && currentr > 0) {
-    currentr--;
-  } else if (currentr ==0 && currentb == 255  && currentg < 255){
-    currentg++;
-  } else if (currentr == 0 && currentg == 255 && currentb > 0){
-    currentb--;
-  } else if (currentg == 255 && currentb == 0 && currentr < 255){
-    currentr++;
-  } else if (currentr == 255 && currentb == 0 && currentg > 0){
-    currentg--;
-  }
-  publishColor();
-  setColor();
-}
 
 
 float getTemp() {
@@ -152,40 +121,67 @@ float getTemp() {
 
 
 
+
+
+
 //
 //
 // MQTT 
 //
 //
 
+void setAmbilightValue(double value) {
+ if (value == ambilightValueExpectedEcho)
+   return
+   
+   
+  ambilightValue = value;
+  setLedColorHSV(ambilightHue,1,ambilightValue); //Staturation constant at 1
+
+}     
+
+
+void setAmbilightHue(int hue) {
+  if (value == ambilightHueExpectedEcho)
+   return
+  
+  ambilightHue = hue;
+  setLedColorHSV(ambilightHue,1,ambilightValue); //Staturation constant at 1
+
+}
+
+
 void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {  
   char  payload[length+1];
   memcpy(payload, rawPayload, length);
   payload[length] = '\0';
-  
-  if(strcmp(topic, DEVICE_1_COLOR) == 0) {
-    sscanf(payload, "%2x", &currentr);
-    sscanf(&payload[2], "%2x", &currentg);
-    sscanf(&payload[4], "%2x", &currentb);
-    setColor();
+  Serial.println("there");
+    
+
+
+  if (strcmp(topic, DEVICE_1_VALUE) == 0) {
+    double value;
+    sscanf(payload, "%f", &value);
+    setAmbilightValue(value);     
+  } else if (strcmp(topic, DEVICE_1_HUE) == 0) {
+    int hue;
+    sscanf(payload, "%f", &hue);
+    setAmbilightHue(hue); 
   } else if(strcmp(topic, DEVICE_1_POWER) == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 1);
   } else if(strcmp(topic, DEVICE_1_FADING)  == 0 ) {
-    fading  = !(*payload == '0');
+    fadeStepFlag  = !(*payload == '0');
+    fadeStepToTargetColorFlag = false;
   } else if(strcmp(topic, DEVICE_2_POWER)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 2);
   }else if(strcmp(topic,DEVICE_3_POWER)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 3);
+  } else if (strcmp(topic, "/devices/321995-ambilight/actions/wakeup") == 0) {
+    Serial.println("wakeup");
   }
 }
 
 void publishRetained(char* topic, char* payload) {
-//  Serial.print("tx t: ");
-//  Serial.print(topic);
-//  Serial.print(", tx p: ");
-//  Serial.println((char*)payload);
-//  Serial.println("");
-
   client.publish(topic, (uint8_t*)payload, strlen((const char*)payload), true);
 }
 
@@ -201,58 +197,135 @@ void publishRetained(char* topic, char* payload) {
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("starting");
+  Serial.println("Starting");
 
   pinMode(AMBILIGHTREDPIN, OUTPUT);
   pinMode(AMBILIGHTGREENPIN, OUTPUT);
   pinMode(AMBILIGHTBLUEEPIN, OUTPUT);
   pinMode(WIFIPIN, OUTPUT);
   
-//  setColor();
+  wifiTransmitter.enableTransmit(WIFIPIN);
 
   Ethernet.begin(mac, ip);
   if (client.connect(mqttClientId)) {
     subscribe();
     publishDeviceMetaInformation();
   }
-
-  wifiTransmitter.enableTransmit(WIFIPIN);
-  setupInterrupts();
 }
 
 
-void setupInterrupts() {
-      // initialize Timer1
-      cli();             // disable global interrupts
-      TCCR1A = 0;        // set entire TCCR1A register to 0
-      TCCR1B = 0;
+void setLedColorHSV(int h, double s, double v) {
+  //this is the algorithm to convert from RGB to HSV
+  double r=0; 
+  double g=0; 
+  double b=0;
+
+  double hf=h/60.0;
+
+  int i=(int)floor(h/60.0);
+  double f = h/60.0 - i;
+  double pv = v * (1 - s);
+  double qv = v * (1 - s*f);
+  double tv = v * (1 - s * (1 - f));
+
+  switch (i)
+  {
+  case 0: //rojo dominante
+    r = v;
+    g = tv;
+    b = pv;
+    break;
+  case 1: //verde
+    r = qv;
+    g = v;
+    b = pv;
+    break;
+  case 2: 
+    r = pv;
+    g = v;
+    b = tv;
+    break;
+  case 3: //azul
+    r = pv;
+    g = qv;
+    b = v;
+    break;
+  case 4:
+    r = tv;
+    g = pv;
+    b = v;
+    break;
+  case 5: //rojo
+    r = v;
+    g = pv;
+    b = qv;
+    break;
+  }
+
+  //set each component to a integer value between 0 and 255
+  int red=constrain((int)255*r,0,255);
+  int green=constrain((int)255*g,0,255);
+  int blue=constrain((int)255*b,0,255);
+
+  setLedColor(red,green,blue);
+}
+
+
+void publishAmbilightValue(double value) {
+  
+}
+
+void publishAmbilightHue(int hue) {
+
+  
+}
+
+// Fades brightness of single HSV value to maximum
+void wakeupLoop() {
+  if (ambilightValue < 1.0) {
+     ambilightValue += 0.01;
+     
+     char buffer[4];
+     sprintf(buffer, "%s", ambilightValue);
+     publishRetained(DEVICE_1_VALUE,  buffer);
+     
+     ambilightHueExpectedEcho = ambilightValue;
+     setLedColorHSV(ambilightHue,1,ambilightValue);   
+  }
+}
+
+// Continuously Fades values on HSV spectrum
+void fadeLoop() {
+  ambilightHue = ambilightHue < 360 ? ambilightHue+1 : 0;
    
-      // Overflow interrupt with CLK/1024 Prescaler (~4s) for Sensor readings
-      TIMSK1 |= (1 << TOIE1); 
-      TCCR1B |= (1 << CS10);
-      TCCR1B |= (1 << CS12);
-      
-      // enable global interrupts:
-      sei();
+  char buffer[3];
+  sprintf(buffer, "%s", ambilightHue);
+  publishRetained(DEVICE_1_HUE,  buffer);
+  
+  ambilightValueExpectedEcho = ambilightHue;
+  setLedColorHSV(ambilightHue,1,ambilightValue);
+  
+  
 }
 
-ISR(TIMER1_OVF_vect)
-{
-
-  publishSensorsFlag = true;
+void sensorLoop(){
+  char tempStr[5];
+  dtostrf(getTemp(),2,2,tempStr);
+  publishRetained(SENSORS_1_TEMPERATURE, tempStr);
 }
 
 
 void loop() {
+  // Mqtt loop
   client.loop();
 
   if (sensorcounter % 65000 == 0) {
-    publishSensors();
+    sensorLoop();
     sensorcounter= 0;
   }
     
-  if (fading && ((fadecounter % 1000) == 0)) {
-    fadeStep(); 
+  if (fadeStepFlag && ((fadecounter % 2000) == 0)) {
+    fadeLoop();
     fadecounter = 0;
   }
   
@@ -262,24 +335,26 @@ void loop() {
 
 
 
+
 void publishDeviceMetaInformation() {
  publishRetained(DEVICE_1_POWER_TYPE, "switch");
  publishRetained(DEVICE_1_FADING_TYPE, "switch");
- publishRetained(DEVICE_1_COLOR_TYPE, "range");
+ publishRetained(DEVICE_1_HUE_TYPE, "range");
+ publishRetained(DEVICE_1_VALUE_TYPE, "range"); 
  publishRetained(DEVICE_2_POWER_TYPE, "switch");
  publishRetained(DEVICE_3_POWER_TYPE, "switch");
  publishRetained(SENSORS_1_TEMPERATURE_TYPE, "text");
 }
 
 void subscribe() {
+ client.subscribe("/devices/321995-ambilight/actions/#");
  client.subscribe(DEVICE_1_SUBSCRIBE);
  client.subscribe(DEVICE_2_SUBSCRIBE);
  client.subscribe(DEVICE_3_SUBSCRIBE);  
+ 
+ 
 }
 
 void publishSensors () {
-    char tempStr[5];
-    dtostrf(getTemp(),2,2,tempStr);
-    publishRetained(SENSORS_1_TEMPERATURE, tempStr);
 }
 

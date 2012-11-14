@@ -265,30 +265,6 @@ $(function(){
     },
   });
 
-
-  var RoomDetailViewPlaceholder = Backbone.View.extend({
-    template: $("#room-detail-placeholder-template").html(),
-    className: "room", 
-
-    initialize: function() {
-      this.model.on('add', this.addRoom, this);
-    },
-
-    render: function () {
-        var tmpl = _.template(this.template);
-          this.$el.html(tmpl({id: this.id}));
-        return this;
-    },
-
-    addRoom: function(room) {
-      if(room.get("id") == this.id) {
-        Router.room(this.id);
-      }
-    },
-  });
-
-
-
   var RoomDetailView = ToplevelView.extend({
     template: $("#room-detail-template").html(),
     className: "room", 
@@ -361,6 +337,7 @@ $(function(){
       this.model.on('change:value', this.modelValueChanged, this);  
       this.specialize();
       this.model.view = this;
+      this.allowInputUpdates();
     },
 
 
@@ -425,43 +402,38 @@ $(function(){
 
     // Specialized methods for type range
     rangeRender: function() {
+            console.log("range reder");
+
       var tmpl = this.templateByType("range");
-      this.$el.html(tmpl(_.extend(this.model.toJSON(),{backgroundPosition: this.rangeBackgroundPosition(this.model.get("value"))})));
+      this.$el.html(tmpl(this.model.toJSON()));
       this.input = this.$('input');
       return this;
     },
 
-    rangeInhibitInputUpdates: function() {
+    rangeInhibitInputUpdates: function(event) {
+      console.log("preventing input updates");
       this.allowUpdates = false; 
     },    
 
-    rangeAllowInputUpdates: function() {
+    rangeAllowInputUpdates: function(event) {
+      console.log("allowing input updates");
+
       this.allowUpdates = true; 
     },
 
-    rangeBackgroundPosition: function (value) {
-      // if (this.input) {
-      //   return -200+(this.input.width()/255*value*0.95)
 
-      // } else {
-      //   return -200+(185/255*value*0.95)
-      // }
-      // $(this.input).attr('data-value',value);
-    },
 
-    rangePositionRangeBackgroundImage: function(value) {
-      // this.input.css({"background-position": this.rangeBackgroundPosition(value) +"px"});
-    },
 
     rangeInputValueChanged: function(event) {
-      this.rangePositionRangeBackgroundImage(event.srcElement.value);
       App.publishMqtt(this.model.get("topic"), event.srcElement.value);
     },
 
 
     rangeModelValueChanged: function(model) {
+            console.log("model value changed to: " + this.model.get("value"));
+
       if (this.allowUpdates) {
-        this.rangeRender();
+        this.render();
       }
     },
 
@@ -479,7 +451,7 @@ $(function(){
     },
 
     switchModelValueChanged: function(model) {
-      this.switchRender();
+      this.render();
     },
 
     // Specialized methods for type (readonly)
@@ -490,7 +462,7 @@ $(function(){
     },
 
     textModelValueChanged: function(model) {
-      this.switchRender();
+      this.render();
     },
 
     // Specialized methods for type undefined
@@ -728,9 +700,7 @@ $(function(){
       if (control == null) {
         control = new Control({id: controlName});
         device.controls.add(control);
-
         control.set("topic", topic.replace("/type", ""));
-
       }
 
       if(splitTopic[5] == null) {                                       // Control value
