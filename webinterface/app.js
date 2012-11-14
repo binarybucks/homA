@@ -672,8 +672,8 @@ $(function(){
     console.log("Connection established");
     Settings.set("connectionStatus", "connected");
     mqttSocket.subscribe('/devices/+/controls/+', 0);
+    mqttSocket.subscribe('/devices/+/controls/+/type', 0);
     mqttSocket.subscribe('/devices/+/meta/#', 0);
-
   };
 
   mqttSocket.ondisconnect = function(rc){ 
