@@ -85,7 +85,6 @@ PubSubClient client(mqttServer, 1883, mqttReceive, ethClient);
 // Global status variabels
 boolean fadeStepFlag = false;
 boolean publishSensorsFlag = false;
-boolean fadeStepToTargetColorFlag = false;
 
 int fadecounter = 0;
 int fadetToTargetCounter = 0;
@@ -143,14 +142,25 @@ float getTemp() {
 //
 //
 
-void setAmbilightValue(double value) {
-  ambilightValue = value;
+void setAmbilightValue(int value) {
+      Serial.println(value);
+
+//  Serial.print("new value is: ");
+ // Serial.println(value);
+  ambilightValue = round(1.0*value*(360.0/255));
+  Serial.print("new value is: ");
+  Serial.println(ambilightValue);
+
   setLedColorHSV(ambilightHue,1,ambilightValue); //Staturation constant at 1
 }     
 
 
 void setAmbilightHue(int hue) {
-  ambilightHue = hue;
+
+    ambilightHue =hue;
+    Serial.print("new hue is: ");
+  Serial.println(ambilightHue);
+
   setLedColorHSV(ambilightHue,1,ambilightValue); //Staturation constant at 1
 }
 
@@ -162,24 +172,43 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   //Serial.print("Received MQTT message:");
   //Serial.println(payload);
    
-
+// TODO: PUBLISH VALUES TO OTHER SIDE OF RAMP
   if (strcmp(topic, DEVICE_1_ON_RAMP_VALUE) == 0) {
-    double value;
-    sscanf(payload, "%f", &value);
+    int value; // 0-255 => convert to float
+    Serial.println(payload);
+    sscanf(payload, "%d", &value);
     setAmbilightValue(value);     
+    
+    publishRetained(DEVICE_1_OFF_RAMP_VALUE,  payload);     
+
+
   } else if (strcmp(topic, DEVICE_1_ON_RAMP_HUE) == 0) {
     int hue;
-    sscanf(payload, "%f", &hue);
-    setAmbilightHue(hue); 
+    Serial.println("receive");
+    Serial.println(payload);
+
+    sscanf(payload, "%d", &hue);
+    
+     
+     
+    setAmbilightHue(hue*(360/255)); 
+        //publishRetained(DEVICE_1_OFF_RAMP_HUE,  payload);     
+
+    
   } else if(strcmp(topic, DEVICE_1_ON_RAMP_POWER) == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 1);
+
+    
+
   } else if(strcmp(topic, DEVICE_1_ON_RAMP_FADING)  == 0 ) {
     fadeStepFlag  = !(*payload == '0');
-    fadeStepToTargetColorFlag = false;
+
   } else if(strcmp(topic, DEVICE_2_ON_RAMP_POWER)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 2);
+
   }else if(strcmp(topic,DEVICE_3_ON_RAMP_POWER)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 3);
+
   } else if (strcmp(topic, "/devices/321995-ambilight/actions/wakeup") == 0) {
     Serial.println("wakeup");
   }
@@ -291,7 +320,7 @@ void wakeupLoop() {
      
      char buffer[4];
      sprintf(buffer, "%s", ambilightValue);
-     publishRetained(DEVICE_1_OFF_RAMP_VALUE,  buffer);     
+     publishRetained(DEVICE_1_ON_RAMP_VALUE,  buffer);     
   }
 }
 
@@ -299,9 +328,10 @@ void wakeupLoop() {
 void fadeLoop() {
   ambilightHue = ambilightHue < 360 ? ambilightHue+1 : 0;
    
-  char buffer[3];
-  sprintf(buffer, "%s", ambilightHue);
-  publishRetained(DEVICE_1_OFF_RAMP_HUE,  buffer);
+//   Serial.println(ambilightHue);
+  char buffer[6];
+  sprintf(buffer, "%f", 1.0*ambilightHue*(255.0/360));
+  //spublishRetained(DEVICE_1_ON_RAMP_HUE,  buffer);
 }
 
 void sensorLoop(){
@@ -316,7 +346,7 @@ void loop() {
   client.loop();
 
   if (sensorcounter % 65000 == 0) {
-    sensorLoop();
+  //  sensorLoop();
     sensorcounter= 0;
   }
     
