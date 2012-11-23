@@ -735,6 +735,6 @@ $(function(){
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
 
-  mqttSocket.connect("ws://" + Settings.get("server") + "/mqtt");
+  mqttSocket.connect("ws://" + Settings.get("server") + ":1337");
 
 });

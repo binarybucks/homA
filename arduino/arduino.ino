@@ -162,11 +162,15 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
     sscanf(payload, "%d", &value);
     ambilightValue = (1.0*value)/255.0;
     setLedColorHSV(ambilightHue, ambilightValue);
+    publishRetained(DEVICE_1_VALUE_INTERFACE, payload);
+
   } else if (strcmp(topic, DEVICE_1_HUE_COMMAND) == 0) {
     int hue;
     sscanf(payload, "%d", &hue);
     ambilightHue = round(1.0*hue*(359.0/255.0)) ;
     setLedColorHSV(ambilightHue, ambilightValue);
+    publishRetained(DEVICE_1_HUE_INTERFACE, payload);
+
   } else if(strcmp(topic, DEVICE_1_POWER_COMMAND) == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 1);
     publishRetained(DEVICE_1_POWER_INTERFACE, payload);
