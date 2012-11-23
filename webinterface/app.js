@@ -81,15 +81,15 @@ $(function(){
     },
 
     removeFromCurrentRoom: function() {
-      if (this.room != undefined && this.room != null) {
-        console.log("removing device from room: " + this.room.id);
-        this.room.devices.remove(this);
+      if (this.get("room") != undefined && this.get("room") != null) {
+        console.log("removing device from room: " + this.get("room").id);
+        this.get("room").devices.remove(this);
 
 
-        if (this.room.devices.length == 0) {
+        if (this.get("room").devices.length == 0) {
 
-          console.log("Room " + this.room.id+" is empty, removing it");
-          Rooms.remove(this.room);
+          console.log("Room " + this.get("room").id+" is empty, removing it");
+          Rooms.remove(this.get("room"));
         }
 
 
@@ -98,19 +98,19 @@ $(function(){
 
     moveToRoom: function(roomName) {
       var cleanedName = roomName || "unassigned";
-      var room = Rooms.get(cleanedName);
+      var targetRoom = Rooms.get(cleanedName);
     
-      if (room == null) {
+      if (targetRoom == null) {
         console.log("room " + cleanedName +" does not exist");
-        room = new Room({id: cleanedName});
-        Rooms.add(room);
+        targetRoom = new Room({id: cleanedName});
+        Rooms.add(targetRoom);
       } 
 
       this.removeFromCurrentRoom();
       
-      room.devices.add(this);
-      this.room = room;
-      console.log("device added to room: " + cleanedName);
+      targetRoom.devices.add(this);
+      this.set("room", targetRoom);
+   //   this.room = targetRoom;
     },
   });
 
@@ -502,9 +502,8 @@ $(function(){
 
 
     render: function() {
-      console.log("reredering room");
       var tmpl = _.template(this.template);
-      var roomName = this.model.get("room") != undefined ? this.model.room.get("id") : "unassigned"
+      var roomName = this.model.get("room") != undefined ? this.model.get("room").get("id") : "unassigned"
       this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName, rooms: Rooms})));
       this.delegateEvents();
       return this;
@@ -718,7 +717,7 @@ $(function(){
       } else if(splitTopic[4] == "name") {                              // Device name
         device.set('name', payload);
       }
-      device.set(splitTopic[4], payload);
+//      device.set(splitTopic[4], payload);
     }
      // console.log("-----------/ RECEIVED-----------");
   };
