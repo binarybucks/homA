@@ -1,6 +1,3 @@
 [submodule "webinterface/lighttpd/mod_websocket"]
 	path = webinterface/lighttpd/mod_websocket
 	url = git://github.com/nori0428/mod_websocket.git
-[submodule "android/paho"]
-	path = android/paho
-	url = http://git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.java.git

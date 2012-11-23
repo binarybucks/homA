@@ -43,8 +43,8 @@ $(function(){
 
    initialize: function() {
       if (!this.get("title")) {
-        this.set({"server": localStorage.getItem("homer_server") || "127.0.0.1"});
-        this.set({"devMode": localStorage.getItem("homer_devMode") == 1 });
+        this.set({"server": localStorage.getItem("homA_server") || "127.0.0.1"});
+        this.set({"devMode": localStorage.getItem("homA_devMode") == 1 });
       }
     },
 
@@ -52,7 +52,7 @@ $(function(){
     },
 
     save: function() {
-      if( this.get("server")) localStorage.setItem("homer_server", this.get("server"))
+      if( this.get("server")) localStorage.setItem("homA_server", this.get("server"))
     },
 
   });
