@@ -54,7 +54,15 @@ class Calendar
 				#query = "calendar/v3/calendars/alr.st_t4do0ippogfurs00brmpgfhre0%40group.calendar.google.com/events?singleEvents=true&orderBy=startTime&timeMin=#{startTime}"
 
 		result = getQuery(query)	
-		items = JSON.parse(result.body)['items'];
+
+
+		begin
+			items = JSON.parse(result.body)['items'];
+		rescue Exception=>e
+			puts "Unable to get calendar data from the calendar server"
+			items = nil
+		end
+
 		puts items
 
 		@events = {}
@@ -106,7 +114,7 @@ class Calendar
 				puts "In #{startTimediff} putting #{event.keys[0]}:#{event.values[0]}"
 				@scheduler.in "#{startTimediff}s" do
 					puts "Publising #{event.keys[0]}:#{event.values[0]}"
-					MqttProxy.instance().publish(event.keys[0], event.values[0])
+						MqttProxy.instance().publish(event.keys[0], event.values[0])
 				end
 			end
 		end
@@ -114,10 +122,14 @@ class Calendar
 	end
 
 	def getQuery(query)
-		authorizeOAuth2IfRequired()
-		api_client_obj = OAuth2::Client.new(@client_id, @client_secret, {:site => 'https://www.googleapis.com'})
-		api_access_token_obj = OAuth2::AccessToken.new(api_client_obj, @accessToken.token)
-		result = api_access_token_obj.get(query)
+		begin
+			authorizeOAuth2IfRequired()
+			api_client_obj = OAuth2::Client.new(@client_id, @client_secret, {:site => 'https://www.googleapis.com'})
+			api_access_token_obj = OAuth2::AccessToken.new(api_client_obj, @accessToken.token)
+			return api_access_token_obj.get(query)
+		rescue Exception=>e
+			return nil
+		end
 	end
 
 
