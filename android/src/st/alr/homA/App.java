@@ -2,6 +2,8 @@ package st.alr.homA;
 import st.alr.homA.R;
 
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -55,9 +57,13 @@ public class App extends Application implements MqttCallback{
 	 
 	private void connectMqtt() {
       try {
-    	Log.v(this.toString(), "Starting Mqtt threat. Brace for impact");
-		mqttClient = new MqttClient("tcp://192.168.8.2:1883", MqttClient.generateClientId(), null);
-		mqttClient.setCallback(this);
+    	Log.v(this.toString(), "Connecting to broker");
+   
+    	if (mqttClient == null) {
+    		mqttClient = new MqttClient("tcp://192.168.8.2:1883", MqttClient.generateClientId(), null);
+			mqttClient.setCallback(this);
+    	}
+		
 		mqttClient.connect();
 		
 		mqttClient.subscribe("/devices/+/controls/+/type", 0);
@@ -79,6 +85,14 @@ public class App extends Application implements MqttCallback{
 	@Override
 	public void connectionLost(Throwable cause) {
     	Log.v(this.toString(), "Mqtt connectin lost. Cause: " + cause);
+
+    	while (!mqttClient.isConnected()) {
+    		try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+			}
+    		connectMqtt();	
+    	}    	
 	}
 
 
