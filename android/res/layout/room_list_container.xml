@@ -7,8 +7,7 @@
     android:layout_marginRight="16dp"
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
-    android:showDividers="middle"
-    tools:context=".RoomListActivity" >
+    android:showDividers="middle" >
 
     <ListView
         android:id="@android:id/list"

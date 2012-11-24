@@ -1,21 +1,22 @@
-Homer MQTT-protocol
+Donut protocol
 
-Device meta attributes for building app interfaces dynamically are available at. These can be set from the webinterface and are not managed by the device itself.
-/devices/$uniquedeviceid/meta/name
-														 /room
+Values of device controls are a available at
+/devices/$uniquedeviceid/controls/$deviceUniqueControlName
 
-Device controlls are a available at
-/devices/$uniquedeviceid/controls
+To prevent clients such as interfaces or devices from receiving their own published values as echos, clients must NOT subscribe to the same topics they publish to.
+Therefore, devices publish values with an MQTT retained flag to /devices/$uniquedeviceid/controls/deviceUniqueControlName and subscribe to value updates by external interface at /devices/$uniquedeviceid/controls/deviceUniqueControlName/on. Note, external interfaces also have to publish the values to the /on topic with an MQTT retained flag.
 
-To prevent devices from receiving their own echos, devices must NOT subscribe to the same topics they publish to.
-Instead, devices publish values to /devices/$uniquedeviceid/controls/controlname and subscribe to value updates by external interface at /devices/$uniquedeviceid/controls/controlname/on (e.g. by subscribing to /devices/$uniquedeviceid/controls/+/on)
+When a device receives a new value for one of its controls at /devices/$uniquedeviceid/controls/deviceUniqueControlName/on it has to republish the value with an MQTT retainef flat to /devices/$uniquedeviceid/controls/deviceUniqueControlName after it has processed the value in order to notify external interfaces of its changed state
 	
-For each control, the type has to be published at 
-/devices/$uniquedeviceid/controls/power/type = {"switch", "range", "text"}
 
+Additinally, devices have to publish the type of each control so that external interfaces can display the correct control GUI element
+/devices/$uniquedeviceid/controls/power/type = {switch | range |text}
 
-Sensor values can be published to 
-/devices/$uniquedeviceid/controls/$sensorname 
+Device meta attributes for building app interfaces dynamically are available at /devices/$uniquedeviceid/meta/{name | room}
+These can be set from the webinterface and are not managed by the device itself, but just retained by the MQTT broker.
 
-with a type published as "text"
-/devices/$uniquedeviceid/controls/$sensorname/type = text
+As a rule of thumb, interfaces subscribe to the following topics
+/devices/+/controls/+/type
+	/devices/+/controls/+
+/devices/+/meta/#'
+
