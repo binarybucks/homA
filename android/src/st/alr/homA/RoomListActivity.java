@@ -1,5 +1,6 @@
-package st.alr.homer;
+package st.alr.homA;
 
+import st.alr.homA.R;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;

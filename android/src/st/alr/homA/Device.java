@@ -1,11 +1,11 @@
-package st.alr.homer;
+package st.alr.homA;
 
 import java.util.HashMap;
 
 import com.commonsware.cwac.merge.MergeAdapter;
 
-import st.alr.homer.R;
-import st.alr.homer.R.string;
+import st.alr.homA.R;
+import st.alr.homA.R.string;
 
 import android.content.Context;
 import android.content.res.Resources;

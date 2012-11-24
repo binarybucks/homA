@@ -1,6 +1,8 @@
-package st.alr.homer;
+package st.alr.homA;
 
 import java.util.HashMap;
+
+import st.alr.homA.R;
 
 
 import android.content.Context;
@@ -30,7 +32,7 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 
 	@Override
 	public Object getItem(int arg0) {
-		return map.values().toArray()[arg0];
+		return map.values().toArray()[arg0	];
 	}
 
 	@Override

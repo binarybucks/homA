@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package st.alr.homer;
+package st.alr.homA;
 
 public final class R {
     public static final class array {

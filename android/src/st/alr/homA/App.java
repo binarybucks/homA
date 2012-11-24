@@ -1,4 +1,5 @@
-package st.alr.homer;
+package st.alr.homA;
+import st.alr.homA.R;
 
 import java.util.HashMap;
 
@@ -7,7 +8,9 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
+
 
 
 import android.app.AlertDialog;
@@ -197,5 +200,27 @@ public class App extends Application implements MqttCallback{
 		return uiThreadHandler;
 	}
 
+	public void publishMqtt(String topicStr, String value) {
+    	MqttTopic t = mqttClient.getTopic(topicStr+"/on");
+
+   		MqttMessage message = new MqttMessage(value.getBytes());
+    	message.setQos(0);
+
+    	// Publish the message
+    	//String time = new Timestamp(System.currentTimeMillis()).toString();
+    	//log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
+    	try {
+			MqttDeliveryToken token = t.publish(message);
+		} catch (MqttPersistenceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MqttException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+       // mqttSocket.publish(topic+"/on", value, 0, true);
+
+	}
 	
 }

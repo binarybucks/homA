@@ -1,6 +1,9 @@
-package st.alr.homer;
+package st.alr.homA;
 
-import st.alr.homer.Control;
+import java.util.ArrayList;
+
+import st.alr.homA.Control;
+import st.alr.homA.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,10 +12,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -24,12 +29,31 @@ import android.widget.TextView;
  * This activity is mostly just a 'shell' activity containing nothing more than
  * a {@link RoomDetailFragment}.
  */
+
+
 public class RoomDetailActivity extends Activity {
 	LayoutInflater inflater;
-
+	Room room; 
+	private ArrayList <ValueChangedObserver> openObservers = new ArrayList<ValueChangedObserver>();
+	
+	
+	@Override
+	public void onDestroy(){
+		super.onDestroy();
+		if (room != null) {
+			for (Device device : room.getDevices().values()) {
+				for (Control control : device.getControls().values()) {
+					control.removeValueChangedObserver();
+				}
+			}
+		}
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		
 		inflater = getLayoutInflater();
 		
 		ScrollView sw = new ScrollView(this);
@@ -40,7 +64,8 @@ public class RoomDetailActivity extends Activity {
 				LayoutParams.WRAP_CONTENT));
 
 		if (getIntent().getStringExtra("id") != null) {
-			Room room = ((App) getApplicationContext()).getRooms().get(getIntent().getStringExtra("id"));
+			room = ((App) getApplicationContext()).getRooms().get(getIntent().getStringExtra("id"));
+			
 			setTitle(room.getId());
 
 			for (Device device : room.getDevices().values()) {
@@ -91,7 +116,7 @@ public class RoomDetailActivity extends Activity {
 		
 		name.setText(control.getId());
 		
-	    control.addValueChangedObserver(new ValueChangedObserver() {
+	    ValueChangedObserver o = new ValueChangedObserver() {
 			public void onValueChange(String valueStr) {
 		            runOnUiThread(new Runnable() {
 		                public void run() {
@@ -99,7 +124,32 @@ public class RoomDetailActivity extends Activity {
 		                }
 		            });
 		        }				
-			});
+			};
+			control.setValueChangedObserver(o);
+			openObservers.add(o);
+	    
+			value.setOnSeekBarChangeListener( new OnSeekBarChangeListener() {
+
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				if (fromUser) {
+					String payload = Integer.toString(progress);
+					((App)getApplicationContext()).publishMqtt(control.getTopic(), payload);				
+				}				
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}		
+		});
+
 	    
 		value.setMax(255);
 		value.setProgress( Math.round(Float.parseFloat(control.getValue())));
@@ -116,7 +166,7 @@ public class RoomDetailActivity extends Activity {
 		value.setChecked(control.getValue().equals("1"));
 		
 		
-	    control.addValueChangedObserver(new ValueChangedObserver() {
+	    control.setValueChangedObserver(new ValueChangedObserver() {
 			public void onValueChange(String valueStr) {
 		            runOnUiThread(new Runnable() {
 		                public void run() {
@@ -125,7 +175,15 @@ public class RoomDetailActivity extends Activity {
 		            });
 		        }				
 			});
-	    	        
+	    
+	    value.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String payload = control.getValue().equals("1") ? "0" : "1";
+				((App)getApplicationContext()).publishMqtt(control.getTopic(), payload);
+			}		
+		});
+	    
 		return view;
 	}
 
@@ -135,7 +193,7 @@ public class RoomDetailActivity extends Activity {
 		final TextView value = (TextView) view.findViewById(R.id.controlValue);
 		
 		
-	    control.addValueChangedObserver(new ValueChangedObserver() {
+	    control.setValueChangedObserver(new ValueChangedObserver() {
 			public void onValueChange(String valueStr) {
 		            runOnUiThread(new Runnable() {
 		                public void run() {
@@ -157,7 +215,7 @@ public class RoomDetailActivity extends Activity {
 		View view = inflater.inflate(R.layout.room_detail_child_item_unknown, null);
 		final TextView name = (TextView) view.findViewById(R.id.controlName);
 		
-	    control.addValueChangedObserver(new ValueChangedObserver() {
+	    control.setValueChangedObserver(new ValueChangedObserver() {
 			public void onValueChange(String valueStr) {
 		            runOnUiThread(new Runnable() {
 		                public void run() {

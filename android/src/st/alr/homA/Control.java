@@ -1,4 +1,4 @@
-package st.alr.homer;
+package st.alr.homA;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,7 @@ interface ValueChangedObserver
 
 
 public class Control {
-    ArrayList<ValueChangedObserver> observers = new ArrayList<ValueChangedObserver> ();
+    ValueChangedObserver observer;
 
     String value = "0";
     String type = "undefined";
@@ -55,17 +55,17 @@ public class Control {
     	return id;
     }
     
-    public void addValueChangedObserver(ValueChangedObserver observer){
-    	this.observers.add(observer);
+    public void setValueChangedObserver(ValueChangedObserver observer){
+    	this.observer = observer;
     }    
-    public void removeValueChangedObserver(ValueChangedObserver observer){
-    	this.observers.remove(observer);
+    public void removeValueChangedObserver(){
+    	this.observer = null;
     }
     
     private void valueChanged(){
-    	for (ValueChangedObserver o : observers) {
-			o.onValueChange(value);
-		}
+    	if (this.observer != null) {
+			this.observer.onValueChange(value);
+    	}
     }
     
     
