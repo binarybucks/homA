@@ -4,7 +4,7 @@
     android:minHeight="58dip" >
 
     <TextView
-        android:id="@+id/controlName"
+        android:id="@+id/controlName_switch"
         android:layout_width="100dip"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -16,21 +16,21 @@
         android:textSize="18sp" />
 
     <Switch
-        android:id="@+id/controlValue"
+        android:id="@+id/controlValue_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="false"
         android:layout_alignParentTop="false"
         android:layout_centerVertical="true"
         android:layout_marginRight="10dip"
-        android:layout_toRightOf="@+id/controlName" />
+        android:layout_toRightOf="@+id/controlName_switch" />
 
     <View
-        android:id="@+id/list_divider"
+        android:id="@+id/list_divider_switch"
         android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/controlValue"
+        android:layout_below="@+id/controlValue_switch"
         android:background="@android:drawable/divider_horizontal_dark" />
 
 </RelativeLayout>

@@ -85,7 +85,7 @@ public class RoomDetailActivity extends Activity {
 					
 					// Hide divider of last control
 					if (i++ == size) {
-						controlView.findViewById(R.id.list_divider).setVisibility(4);
+//						controlView.findViewById(R.id.list_divider).setVisibility(4);
 					}
 					
 					ll.addView(controlView);		
@@ -112,8 +112,8 @@ public class RoomDetailActivity extends Activity {
 	
 	public View rangeView(final Control control){
 		View view = inflater.inflate(R.layout.room_detail_child_item_range, null);
-		TextView name = (TextView) view.findViewById(R.id.controlName);
-		final SeekBar value = (SeekBar) view.findViewById(R.id.controlValue);
+		TextView name = (TextView) view.findViewById(R.id.controlName_range);
+		final SeekBar value = (SeekBar) view.findViewById(R.id.controlValue_range);
 		
 		name.setText(control.getId());
 		
@@ -160,8 +160,8 @@ public class RoomDetailActivity extends Activity {
 	
 	public View switchView(final Control control){
 		View view = inflater.inflate(R.layout.room_detail_child_item_switch, null);
-		TextView name = (TextView) view.findViewById(R.id.controlName);
-		final Switch value = (Switch) view.findViewById(R.id.controlValue);
+		TextView name = (TextView) view.findViewById(R.id.controlName_switch);
+		final Switch value = (Switch) view.findViewById(R.id.controlValue_switch);
 		
 		name.setText(control.getId());
 		value.setChecked(control.getValue().equals("1"));
@@ -190,8 +190,8 @@ public class RoomDetailActivity extends Activity {
 
 	public View textView(final Control control){
 		View view = inflater.inflate(R.layout.room_detail_child_item_text, null);
-		final TextView name = (TextView) view.findViewById(R.id.controlName);
-		final TextView value = (TextView) view.findViewById(R.id.controlValue);
+		final TextView name = (TextView) view.findViewById(R.id.controlName_text);
+		final TextView value = (TextView) view.findViewById(R.id.controlValue_text);
 		
 		
 	    control.setValueChangedObserver(new ValueChangedObserver() {
@@ -214,7 +214,7 @@ public class RoomDetailActivity extends Activity {
 	}
 	public View unknownView(final Control control){
 		View view = inflater.inflate(R.layout.room_detail_child_item_unknown, null);
-		final TextView name = (TextView) view.findViewById(R.id.controlName);
+		final TextView name = (TextView) view.findViewById(R.id.controlName_unknown);
 		
 	    control.setValueChangedObserver(new ValueChangedObserver() {
 			public void onValueChange(String valueStr) {
