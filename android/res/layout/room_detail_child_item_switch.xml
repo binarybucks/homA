@@ -1,40 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:minHeight="58dip" >
 
-        <Switch
-            android:id="@+id/controlValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:checked="false" 
-                        android:paddingBottom="12dip"
-            android:paddingRight="10dip"
-            android:paddingTop="14dip"
-                        android:layout_toRightOf="@+id/controlName"
-            
-            />
+    <TextView
+        android:id="@+id/controlName"
+        android:layout_width="100dip"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="8dip"
+        android:gravity="left|center_vertical"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp" />
 
-<TextView
-            android:id="@+id/controlName"
-            android:layout_width="167dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:paddingBottom="12dip"
-            android:paddingLeft="10dip"
-            android:paddingTop="12dip"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="18sp" />
-        
-    <View android:id="@+id/list_divider"
+    <Switch
+        android:id="@+id/controlValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dip"
+        android:layout_toRightOf="@+id/controlName" />
+
+    <View
+        android:id="@+id/list_divider"
         android:layout_width="match_parent"
         android:layout_height="1dip"
-        android:background="@android:drawable/divider_horizontal_dark" 
-        android:layout_alignParentBottom="true"/>
-    
-    </RelativeLayout>  
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/controlValue"
+        android:background="@android:drawable/divider_horizontal_dark" />
 
-       
+</RelativeLayout>

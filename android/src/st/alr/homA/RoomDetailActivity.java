@@ -6,6 +6,7 @@ import st.alr.homA.Control;
 import st.alr.homA.R;
 import android.app.Activity;
 import android.content.Intent;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -84,7 +85,7 @@ public class RoomDetailActivity extends Activity {
 					
 					// Hide divider of last control
 					if (i++ == size) {
-						((View)controlView.findViewById(R.id.list_divider)).setVisibility(4);
+						controlView.findViewById(R.id.list_divider).setVisibility(4);
 					}
 					
 					ll.addView(controlView);		
