@@ -6,6 +6,12 @@
     android:orientation="vertical"
     android:padding="5dip" >
 
+    <TextView
+        android:id="@+id/serverAddressLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server address" />
+
     <EditText
         android:id="@+id/serverAddress"
         android:layout_width="match_parent"
@@ -17,6 +23,12 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
  />
+
+    <TextView
+        android:id="@+id/serverPortLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server port" />
 
     <EditText
                 android:id="@+id/serverPort"
