@@ -32,6 +32,7 @@ public class SettingsActivity extends PreferenceActivity {
 	private static ConnectingState state = ConnectingState.DISCONNECTED; 
 	private static SharedPreferences sharedPreferences; 
 	private BroadcastReceiver mqttConnectivityChangedReceiver;
+	private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -49,6 +50,8 @@ public class SettingsActivity extends PreferenceActivity {
 	 @Override
 	 protected void onDestroy() {
 	unregisterReceiver(mqttConnectivityChangedReceiver);
+	sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferencesChangedListener);
+
 	  super.onDestroy();
 	 }
 
@@ -69,23 +72,24 @@ public class SettingsActivity extends PreferenceActivity {
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
 		
 		
-		sharedPreferences.registerOnSharedPreferenceChangeListener(
-	    		new SharedPreferences.OnSharedPreferenceChangeListener() {
-	    			@Override
-	    			public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
-	    				String stringValue = sharedPreference.getString(key, "");
+		preferencesChangedListener = 	    		new SharedPreferences.OnSharedPreferenceChangeListener() {
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
+				String stringValue = sharedPreference.getString(key, "");
 
-	    				if ( key.equals("serverAddress")) {
-	    					Log.e(this.toString(), "onPreferenceChangeListener with stringValue " + stringValue);
+				if ( key.equals("serverAddress")) {
+					Log.e(this.toString(), "onPreferenceChangeListener with stringValue " + stringValue);
 
-	    					setServerPreferenceSummary(stringValue);
-	    				} else {
-	    					Log.v(this.toString(),"OnPreferenceChangeListener not implemented for key "+ key);
-	    				}
+					setServerPreferenceSummary(stringValue);
+				} else {
+					Log.v(this.toString(),"OnPreferenceChangeListener not implemented for key "+ key);
+				}
 
-	    			}
-	    		}
-	    	);
+			}
+		};
+
+		
+		sharedPreferences.registerOnSharedPreferenceChangeListener(preferencesChangedListener);
 		
 		 mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
