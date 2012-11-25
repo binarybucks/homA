@@ -1,7 +1,9 @@
 package st.alr.homA;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -21,8 +23,9 @@ import java.util.List;
 
 import st.alr.homA.R;
 
-
 public class SettingsActivity extends PreferenceActivity {
+	private static Preference serverPreference;
+
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -36,49 +39,48 @@ public class SettingsActivity extends PreferenceActivity {
 
 	}
 
-	
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-         getFragmentManager().beginTransaction().replace(android.R.id.content,
-         new UserPreferencesFragment()).commit();
-    }
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-    public static class UserPreferencesFragment extends PreferenceFragment {
-        private final static String TAG = "UserPreferencesFragment";
+		getFragmentManager().beginTransaction()
+				.replace(android.R.id.content, new UserPreferencesFragment())
+				.commit();
+	}
 
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.preferences);
-        }
-    }
-    
-    @Override
-    public boolean onPrepareOptionsMenu (Menu menu) {
-    	super.onPrepareOptionsMenu(menu);
-    	Log.v(this.toString(), "here");
+	public class UserPreferencesFragment extends PreferenceFragment {
 
-    	return true;
-    
-    }
+		public void onCreate(Bundle savedInstanceState) {
 
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.preferences);
+			serverPreference = findPreference("serverPreference");
+			
+			
+			bindPreferenceSummaryToValue(serverPreference);
+			setServerPreferenceSummaryManually();
 
+			BroadcastReceiver mqttConnectivityChangedReceiver = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					if (intent.getAction().equals("st.alr.homA.mqttConnectivityChanged")) {
+						setServerPreferenceSummaryManually();
+					}
+				}
+			};
+		}
+	}
 
-	/** {@inheritDoc} */
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		return true;
+	}
+
 	@Override
 	public boolean onIsMultiPane() {
 		return false;
 	}
 
-	/**
-	 * Helper method to determine if the device has an extra-large screen. For
-	 * example, 10" tablets are extra-large.
-	 */
-	private static boolean isXLargeTablet(Context context) {
-		return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-	}
-
-
-	/** {@inheritDoc} */
 	@Override
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public void onBuildHeaders(List<Header> target) {
@@ -89,75 +91,38 @@ public class SettingsActivity extends PreferenceActivity {
 	 * A preference value change listener that updates the preference's summary
 	 * to reflect its new value.
 	 */
-	private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+	private Preference.OnPreferenceChangeListener onPreferenceChangeListener = new Preference.OnPreferenceChangeListener() {
 		@Override
 		public boolean onPreferenceChange(Preference preference, Object value) {
 			String stringValue = value.toString();
 
-			if (preference instanceof ListPreference) {
-				// For list preferences, look up the correct display value in
-				// the preference's 'entries' list.
-				ListPreference listPreference = (ListPreference) preference;
-				int index = listPreference.findIndexOfValue(stringValue);
-
-				// Set the summary to reflect the new value.
-				preference
-						.setSummary(index >= 0 ? listPreference.getEntries()[index]
-								: null);
-
-			} else if (preference instanceof RingtonePreference) {
-				// For ringtone preferences, look up the correct display value
-				// using RingtoneManager.
-				if (TextUtils.isEmpty(stringValue)) {
-					// Empty values correspond to 'silent' (no ringtone).
-					preference.setSummary(R.string.pref_ringtone_silent);
-
-				} else {
-					Ringtone ringtone = RingtoneManager.getRingtone(
-							preference.getContext(), Uri.parse(stringValue));
-
-					if (ringtone == null) {
-						// Clear the summary if there was a lookup error.
-						preference.setSummary(null);
-					} else {
-						// Set the summary to reflect the new ringtone display
-						// name.
-						String name = ringtone
-								.getTitle(preference.getContext());
-						preference.setSummary(name);
-					}
-				}
-
+			if (preference.getKey().equals("serverAddress")) {
+				setServerPreferenceSummary(stringValue);
 			} else {
-				// For all other preferences, set the summary to the value's
-				// simple string representation.
-				preference.setSummary(stringValue);
+				Log.v(this.toString(),"OnPreferenceChangeListener not implemented for key "+ preference.getKey());
 			}
+
 			return true;
 		}
 	};
 
-	/**
-	 * Binds a preference's summary to its value. More specifically, when the
-	 * preference's value is changed, its summary (line of text below the
-	 * preference title) is updated to reflect the value. The summary is also
-	 * immediately updated upon calling this method. The exact display format is
-	 * dependent on the type of preference.
-	 * 
-	 * @see #sBindPreferenceSummaryToValueListener
-	 */
-	private static void bindPreferenceSummaryToValue(Preference preference) {
-		// Set the listener to watch for value changes.
-		preference
-				.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-		// Trigger the listener immediately with the preference's
-		// current value.
-		sBindPreferenceSummaryToValueListener.onPreferenceChange(
-				preference,
-				PreferenceManager.getDefaultSharedPreferences(
-						preference.getContext()).getString(preference.getKey(),
-						""));
+	private void bindPreferenceSummaryToValue(Preference preference) {
+		preference.setOnPreferenceChangeListener(onPreferenceChangeListener);
+		onPreferenceChangeListener.onPreferenceChange(preference,PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(),""));
 	}
 
+	private void setServerPreferenceSummaryManually() {
+		setServerPreferenceSummary(PreferenceManager.getDefaultSharedPreferences(serverPreference.getContext()).getString("serverAdress", ""));
+	}
+
+	private void setServerPreferenceSummary(String stringValue) {
+
+		Log.v(this.toString(), "setServerPreferenceSummary");
+
+		if (((App) getApplicationContext()).isConnected()) {
+			serverPreference.setSummary("Connected to " + stringValue);
+		} else {
+			serverPreference.setSummary("Not connected to " + stringValue);
+		}
+	}
 }

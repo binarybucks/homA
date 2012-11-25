@@ -30,6 +30,8 @@ public class App extends Application implements MqttCallback{
 	private HashMap<String, Device> devices;
 	private Handler uiThreadHandler;
 
+	
+	
 //	ControlsHashMapAdapter devicesAdapter;
 	RoomsHashMapAdapter roomsAdapter;
 
@@ -53,47 +55,76 @@ public class App extends Application implements MqttCallback{
 		}).start();
     }
 
-
+    public void connectMqttOnMqttThread(final boolean reconnectIfConnected){
+    	
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				connectMqtt(reconnectIfConnected);
+			}
+		}).start();
+    }
+    
+    
+    
+    public void connectMqtt(boolean reconnectIfConnected) {
+    	if (mqttClient != null && mqttClient.isConnected() && reconnectIfConnected) {
+    		try {
+				mqttClient.disconnect(5);
+			} catch (MqttException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    	
+    	connectMqtt();
+    }
+    
 	 
-	private void connectMqtt() {
-      try {
+	public void connectMqtt() {
+      try {  
     	Log.v(this.toString(), "Connecting to broker");
-   
+
+    	
+    	
     	if (mqttClient == null) {
     		mqttClient = new MqttClient("tcp://192.168.8.2:1883", MqttClient.generateClientId(), null);
 			mqttClient.setCallback(this);
     	}
-		
+
+    	if (mqttClient.isConnected()) {
+    		Log.e(this.toString(), "Trying to connect while already connected to broker. Disconnect first");
+    		return;
+    	}
+    	
 		mqttClient.connect();
+		broadcastConnectionStateChanged();
 		
 		mqttClient.subscribe("/devices/+/controls/+/type", 0);
 		mqttClient.subscribe("/devices/+/controls/+", 0);
 		mqttClient.subscribe("/devices/+/meta/#", 0);
-
 	    
       } catch (MqttException e) {
-    	//Log.v(this.toString(), "Exception: " + e);
-    	Log.v(this.toString(), "Reason is: " + e.getMessage());
-    	final String message = e.getMessage();
-    	Log.e(this.toString(), message);
+    	Log.e(this.toString(), "MqttException: " + e.getMessage());		// This does not retry if initial connection failed
+    	broadcastConnectionStateChanged();
      	
       } catch (Exception e) {
     	  e.printStackTrace();
       }
 	}
 	
+	
+	// When the connection is lost after a connection has been established successfully, this will retry to reconnect
 	@Override
-	public void connectionLost(Throwable cause) {
-    	Log.v(this.toString(), "Mqtt connectin lost. Cause: " + cause);
-
+	public void connectionLost(Throwable cause) {							
+    	Log.e(this.toString(), "Mqtt connection lost. Cause: " + cause);
+    	broadcastConnectionStateChanged();
+    	
     	while (!mqttClient.isConnected()) {
-    		try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-			}
+    		try {Thread.sleep(5000);} catch (InterruptedException e) {}
     		connectMqtt();	
     	}    	
-	}
+	}	
 
 
 	@Override
@@ -236,5 +267,13 @@ public class App extends Application implements MqttCallback{
        // mqttSocket.publish(topic+"/on", value, 0, true);
 
 	}
+	private void broadcastConnectionStateChanged() {
+		Intent i = new Intent("st.alr.homA.mqttConnectivityChanged").putExtra("isConnected", isConnected());
+	    this.sendBroadcast(i);
+
+	}
 	
+	public boolean isConnected() {
+		return mqttClient != null && mqttClient.isConnected();
+	}
 }

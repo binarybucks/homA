@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:orientation="vertical"
+    android:padding="5dip" >
+
+    <EditText
+        android:id="@+id/serverAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:digits="0123456789."
+        android:inputType="numberDecimal"
+        android:key="serverAddress"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+ />
+
+    <EditText
+                android:id="@+id/serverPort"
+        
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:digits="0123456789"        
+        android:inputType="numberDecimal"
+        android:key="serverPort"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+
+/>
+
+</LinearLayout>

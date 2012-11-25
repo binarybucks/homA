@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    
 
-
-    	<PreferenceCategory android:title="System">
-
+    <PreferenceCategory android:title="System" >
+  
+        <st.alr.homA.ServerDialogPreference
+            android:key="serverPreference"
+            android:negativeButtonText="Cancel"
+            android:positiveButtonText="Connect"
+            android:summary="@string/preferences_server_summary"
+            android:title="Server"  >
+            
+            
+            
+           
+        </st.alr.homA.ServerDialogPreference>
         
-        
-        <EditTextPreference
-        android:capitalize="words"
-        android:defaultValue="@string/preferences_server_default"
-        android:inputType="numberDecimal"
-        android:digits="0123456789."
-        android:key="server_address"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/preferences_server_title" 
-        android:summary="@string/preferences_server_summary"/>
-    
     </PreferenceCategory>
-        
 
 </PreferenceScreen>

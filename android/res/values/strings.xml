@@ -7,7 +7,7 @@
     <string name="defaultRoomName">"unassigned"</string>
     <string name="preferences_server_default">"192.168.8.2"</string>
     <string name="preferences_server_title">"Server"</string>
-    <string name="preferences_server_summary">"The address of the systems MQTT server"</string>
+    <string name="preferences_server_summary">"Connect to 192.168.8.2"</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_room">RoomActivity</string>
     <string name="title_room_detail">Room Detail</string>
