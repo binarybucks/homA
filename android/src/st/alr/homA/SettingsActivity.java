@@ -29,7 +29,9 @@ import st.alr.homA.R;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
-
+	private static ConnectingState state = ConnectingState.DISCONNECTED; 
+	private static SharedPreferences sharedPreferences; 
+	private BroadcastReceiver mqttConnectivityChangedReceiver;
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -43,37 +45,75 @@ public class SettingsActivity extends PreferenceActivity {
 
 	}
 
+
+	 @Override
+	 protected void onDestroy() {
+	unregisterReceiver(mqttConnectivityChangedReceiver);
+	  super.onDestroy();
+	 }
+
+	 @Override
+	 public void onConfigurationChanged(Configuration newConfig) {
+	  super.onConfigurationChanged(newConfig);
+	 }
+	    
+	    	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		state = ((App)getApplicationContext()).getState();
 
-		getFragmentManager().beginTransaction()
-				.replace(android.R.id.content, new UserPreferencesFragment())
-				.commit();
+
+
+            	
+		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
+		
+		
+		sharedPreferences.registerOnSharedPreferenceChangeListener(
+	    		new SharedPreferences.OnSharedPreferenceChangeListener() {
+	    			@Override
+	    			public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
+	    				String stringValue = sharedPreference.getString(key, "");
+
+	    				if ( key.equals("serverAddress")) {
+	    					Log.e(this.toString(), "onPreferenceChangeListener with stringValue " + stringValue);
+
+	    					setServerPreferenceSummary(stringValue);
+	    				} else {
+	    					Log.v(this.toString(),"OnPreferenceChangeListener not implemented for key "+ key);
+	    				}
+
+	    			}
+	    		}
+	    	);
+		
+		 mqttConnectivityChangedReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				Log.e(this.toString(), "action is: " +intent.getAction() );
+				state = ((App)getApplicationContext()).getState();
+				setServerPreferenceSummaryManually();
+			}
+		};
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("st.alr.homA.mqttConnectivityChanged ");
+		registerReceiver(mqttConnectivityChangedReceiver, filter);
+
+
 	}
+	
+	
 
-	public class UserPreferencesFragment extends PreferenceFragment {
+	public static class UserPreferencesFragment extends PreferenceFragment {
 
 		public void onCreate(Bundle savedInstanceState) {
 
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
 			serverPreference = findPreference("serverPreference");
-			
-			
-			bindPreferenceSummaryToValue(serverPreference);
 			setServerPreferenceSummaryManually();
 
-			BroadcastReceiver mqttConnectivityChangedReceiver = new BroadcastReceiver() {
-				@Override
-				public void onReceive(Context context, Intent intent) {
-					Log.e(this.toString(), "action is: " +intent.getAction() );
-						setServerPreferenceSummaryManually();
-				}
-			};
-	        IntentFilter filter = new IntentFilter();
-	        filter.addAction("st.alr.homA.mqttConnectivityChanged");
 
-			registerReceiver(mqttConnectivityChangedReceiver, filter);
 		}
 	}
 
@@ -94,63 +134,34 @@ public class SettingsActivity extends PreferenceActivity {
 		loadHeadersFromResource(R.xml.preferences_headers, target);
 	}
 
-	/**
-	 * A preference value change listener that updates the preference's summary
-	 * to reflect its new value.
-	 */
-	private Preference.OnPreferenceChangeListener onPreferenceChangeListener = new Preference.OnPreferenceChangeListener() {
-		@Override
-		public boolean onPreferenceChange(Preference preference, Object value) {
-			String stringValue = value.toString();
 
-			if (preference.getKey().equals("serverAddress")) {
-				Log.e(this.toString(), "onPreferenceChangeListener");
 
-				setServerPreferenceSummary(stringValue);
-			} else {
-				Log.v(this.toString(),"OnPreferenceChangeListener not implemented for key "+ preference.getKey());
-			}
 
-			return true;
-		}
-	};
 
-	private void bindPreferenceSummaryToValue(Preference preference) {
-		preference.setOnPreferenceChangeListener(onPreferenceChangeListener);
-		onPreferenceChangeListener.onPreferenceChange(preference,PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(),""));
+	private static void setServerPreferenceSummaryManually() {
+		setServerPreferenceSummary(sharedPreferences.getString("serverAddress", ""));
 	}
+	
 
-	private void setServerPreferenceSummaryManually() {
-		Log.e(this.toString(), "setServerPreferenceSummaryManually");
-		setServerPreferenceSummary(PreferenceManager.getDefaultSharedPreferences(serverPreference.getContext()).getString("serverAdress", ""));
-	}
-
-	private void setServerPreferenceSummary(String stringValue) {
-
-
-		// stringValue does not contain the right value apparently, thus we re-read the preferences again here
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		String address = prefs.getString("serverAddress", "");
-
-		switch (((App) getApplicationContext()).getState()) {
+	private static void setServerPreferenceSummary(String stringValue) {
+			Log.v("setServerPreferenceSummary", "string value is: "  + stringValue);
+		
+		switch (state) {
 		case CONNECTING:
-			serverPreference.setSummary("Connecting to " + address);
+			serverPreference.setSummary("Connecting to " + stringValue);
 			break;
 		case CONNECTED:
-			serverPreference.setSummary("Connected to " + address);
+			serverPreference.setSummary("Connected to " + stringValue);
 			break;
 		case DISCONNECTING:
-			serverPreference.setSummary("Disconnecting from " + address);
+			serverPreference.setSummary("Disconnecting from " + stringValue);
 			break;
 		case DISCONNECTED:
-			serverPreference.setSummary("Disconnected from " + address);
+			serverPreference.setSummary("Disconnected from " + stringValue);
 			break;
 
 		default:
 			break;
 		}
-		
-		
-
 	}
 }
