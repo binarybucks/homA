@@ -19,10 +19,12 @@ import android.widget.TextView;
 public class ServerDialogPreference extends DialogPreference {
 	private Context context;
 	private EditText address;
+	private EditText port;
 	
     public ServerDialogPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	    this.context = context;
+	    
 		setDialogLayoutResource(R.layout.server_dialog_preferences);
 	    
     }
@@ -39,6 +41,8 @@ public class ServerDialogPreference extends DialogPreference {
     Log.v(this.toString(), "onCreateDialogView");
       View root = super.onCreateDialogView();
       address = (EditText) root.findViewById(R.id.serverAddress);
+      port = (EditText) root.findViewById(R.id.serverPort);
+
       return root;
     }
     
@@ -47,8 +51,9 @@ public class ServerDialogPreference extends DialogPreference {
         Log.v(this.toString(), "onBindDialogView");
 
       	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-      	address.setText(prefs.getString("serverAddress", ""));
-      	
+      	address.setText(prefs.getString("serverAddress", "127.0.0.1"));
+      	port.setText(prefs.getString("serverPort", "1883"));
+
       	
     }
     
@@ -61,10 +66,13 @@ public class ServerDialogPreference extends DialogPreference {
 
         	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         	SharedPreferences.Editor editor = prefs.edit();
+        	
         	editor.putString("serverAddress", address.getText().toString());
+        	editor.putString("serverPort", port.getText().toString());
+
         	editor.apply();
         	
-        	((App)context.getApplicationContext()).connectMqttOnMqttThread(true);
+        	((App)context.getApplicationContext()).bootstrapAndConnectMqtt();
 
         break;
       }

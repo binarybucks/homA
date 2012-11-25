@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -20,6 +22,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import java.util.List;
+
+import org.eclipse.paho.client.mqttv3.MqttClient;
 
 import st.alr.homA.R;
 
@@ -62,11 +66,14 @@ public class SettingsActivity extends PreferenceActivity {
 			BroadcastReceiver mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 				@Override
 				public void onReceive(Context context, Intent intent) {
-					if (intent.getAction().equals("st.alr.homA.mqttConnectivityChanged")) {
+					Log.e(this.toString(), "action is: " +intent.getAction() );
 						setServerPreferenceSummaryManually();
-					}
 				}
 			};
+	        IntentFilter filter = new IntentFilter();
+	        filter.addAction("st.alr.homA.mqttConnectivityChanged");
+
+			registerReceiver(mqttConnectivityChangedReceiver, filter);
 		}
 	}
 
@@ -97,6 +104,8 @@ public class SettingsActivity extends PreferenceActivity {
 			String stringValue = value.toString();
 
 			if (preference.getKey().equals("serverAddress")) {
+				Log.e(this.toString(), "onPreferenceChangeListener");
+
 				setServerPreferenceSummary(stringValue);
 			} else {
 				Log.v(this.toString(),"OnPreferenceChangeListener not implemented for key "+ preference.getKey());
@@ -112,17 +121,36 @@ public class SettingsActivity extends PreferenceActivity {
 	}
 
 	private void setServerPreferenceSummaryManually() {
+		Log.e(this.toString(), "setServerPreferenceSummaryManually");
 		setServerPreferenceSummary(PreferenceManager.getDefaultSharedPreferences(serverPreference.getContext()).getString("serverAdress", ""));
 	}
 
 	private void setServerPreferenceSummary(String stringValue) {
 
-		Log.v(this.toString(), "setServerPreferenceSummary");
 
-		if (((App) getApplicationContext()).isConnected()) {
-			serverPreference.setSummary("Connected to " + stringValue);
-		} else {
-			serverPreference.setSummary("Not connected to " + stringValue);
+		// stringValue does not contain the right value apparently, thus we re-read the preferences again here
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		String address = prefs.getString("serverAddress", "");
+
+		switch (((App) getApplicationContext()).getState()) {
+		case CONNECTING:
+			serverPreference.setSummary("Connecting to " + address);
+			break;
+		case CONNECTED:
+			serverPreference.setSummary("Connected to " + address);
+			break;
+		case DISCONNECTING:
+			serverPreference.setSummary("Disconnecting from " + address);
+			break;
+		case DISCONNECTED:
+			serverPreference.setSummary("Disconnected from " + address);
+			break;
+
+		default:
+			break;
 		}
+		
+		
+
 	}
 }
