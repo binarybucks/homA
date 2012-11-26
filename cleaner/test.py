@@ -54,12 +54,13 @@ class HomaDB:
     except:
       identifier = 9999
 
-    query = "INSERT INTO %s VALUES (\"%s\", \"%s\", %s)" % (TABLE_NAME, topic, value, identifier)
-    print query
-    try:
-      self._db_cursor.execute(query)
-    except sqlite3.Error as e:
-      print "An error occurred:", e
+    if not str(value):
+      query = "INSERT INTO %s VALUES (\"%s\", \"%s\", %s)" % (TABLE_NAME, topic, value, identifier)
+      print query
+      try:
+        self._db_cursor.execute(query)
+      except sqlite3.Error as e:
+        print "An error occurred:", e
 
     self._db_connection.commit()
     return;
@@ -70,7 +71,6 @@ class Remover(threading.Thread):
     super(Remover, self).__init__()
 
   def run(self):
-    time.sleep(3)
     try:
       db_connection = sqlite3.connect(DB_NAME)
       db_cursor = db_connection.cursor()
