@@ -203,7 +203,7 @@ public class App extends Application implements MqttCallback {
 //			public void run() {
 //
 		synchronized (mLock) {
-
+		Log.v(this.toString(), "removing "+ room.toString() +"  room in app");
 		roomsAdapter.remove(room);
 		}
 //			}});

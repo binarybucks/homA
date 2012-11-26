@@ -50,7 +50,8 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 
 				synchronized (mLock) {
 
-					map.remove(room);
+					map.remove(room.getId());
+					Log.v(this.toString(), "roomRemoved. New content is: " + map);
 				}
 				notifyDataSetChangedOnMainThread();
 	}
