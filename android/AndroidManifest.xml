@@ -13,27 +13,28 @@
     <application
         android:name="st.alr.homA.App"
         android:allowBackup="true"
-        android:icon="@drawable/icon"
+        android:icon="@drawable/homa"
 	        android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
         <activity
             android:name="st.alr.homA.SettingsActivity"
-            android:label="@string/title_activity_settings" 
+            android:label="Settings" 
             android:configChanges="orientation">            
         </activity>
         <activity
             android:name="st.alr.homA.RoomListActivity"
-            android:label="@string/title_room_list" >
-            <intent-filter>
+               android:label="HomA" 
+            >
+            
+            <intent-filter android:label="@string/app_name" >
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name="st.alr.homA.RoomDetailActivity"
-            android:label="@string/title_room_detail"
+            android:label="Room detaile"
             android:parentActivityName=".RoomListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

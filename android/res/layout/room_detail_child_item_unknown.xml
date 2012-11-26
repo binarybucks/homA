@@ -16,7 +16,7 @@
         android:textSize="18sp" />
 
     <View
-        android:id="@+id/list_divider_unknown"
+        android:id="@+id/list_divider"
         android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_alignParentBottom="true"

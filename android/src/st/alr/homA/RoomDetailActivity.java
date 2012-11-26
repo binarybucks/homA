@@ -1,11 +1,15 @@
 package st.alr.homA;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import st.alr.homA.Control;
 import st.alr.homA.R;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -14,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -27,6 +32,11 @@ import android.widget.TextView;
 public class RoomDetailActivity extends Activity {
 	LayoutInflater inflater;
 	Room room; 
+	BroadcastReceiver deviceAddedToRoomReceiver;
+	BroadcastReceiver deviceRemovedFromRoomReceiver;
+	LinearLayout ll; 
+	HashMap <String, View> deviceViews = new HashMap<String, View>();
+	
 	private ArrayList <ValueChangedObserver> openObservers = new ArrayList<ValueChangedObserver>();
 	
 	
@@ -39,6 +49,8 @@ public class RoomDetailActivity extends Activity {
 					control.removeValueChangedObserver();
 				}
 			}
+			unregisterReceiver(deviceAddedToRoomReceiver);
+			unregisterReceiver(deviceRemovedFromRoomReceiver);
 		}
 	}
 	
@@ -50,38 +62,44 @@ public class RoomDetailActivity extends Activity {
 		inflater = getLayoutInflater();
 		
 		ScrollView sw = new ScrollView(this);
-		LinearLayout ll = new LinearLayout(this);
+		ll = new LinearLayout(this);
 		ll.setOrientation(LinearLayout.VERTICAL);
 		ll.setPadding(16, 0, 16, 0);
 		ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
 
 		if (getIntent().getStringExtra("id") != null) {
-			room = ((App) getApplicationContext()).getRooms().get(getIntent().getStringExtra("id"));
-			
+			room = ((App) getApplicationContext()).getRoom(getIntent().getStringExtra("id"));
 			setTitle(room.getId());
+			
+			deviceAddedToRoomReceiver = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+										Log.v(this.toString(), "deviceAddedToRoomReceiver with extras: " + intent.getExtras());
+					if (intent.getStringExtra("roomID").equals(room.getId())) {
+						addViewForDevice(((App)getApplicationContext()).getDevice(intent.getStringExtra("deviceID")));
+					}
+				}
+			};
+			
+			IntentFilter filter1 = new IntentFilter();
+			filter1.addAction("st.alr.homA.deviceAddedToRoom");
+			registerReceiver(deviceAddedToRoomReceiver, filter1);
+			
+			deviceRemovedFromRoomReceiver = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					if (intent.getStringExtra("roomID").equals(room.getId())) {
+						removeViewForDecice(((App)getApplicationContext()).getDevice(intent.getStringExtra("deviceID")));
+					}
+				}
+			};
+			IntentFilter filter2 = new IntentFilter();
+			filter2.addAction("st.alr.homA.deviceRemovedFromRoom");
+			registerReceiver(deviceRemovedFromRoomReceiver, filter2);
 
 			for (Device device : room.getDevices().values()) {
-				View headerView = inflater.inflate(R.layout.room_detail_device_heading, null);
-				TextView tv = (TextView) headerView.findViewById(R.id.device_heading_textview);
-				tv.setText(device.toString());
-
-				ll.addView(headerView);
-
-				int i = 0;
-				int size = device.getControls().values().size();
-				for (Control control : device.getControls().values()) {
-					
-					
-					View controlView = getControlView(control);
-					
-					// Hide divider of last control
-					if (i++ == size) {
-//						controlView.findViewById(R.id.list_divider).setVisibility(4);
-					}
-					
-					ll.addView(controlView);		
-				}
+				addViewForDevice(device);
 			}
 		}
 
@@ -89,6 +107,45 @@ public class RoomDetailActivity extends Activity {
 		setContentView(sw);
 	}
 
+	public void addViewForDevice(Device device) {
+		LinearLayout deviceLayout = new LinearLayout(this);
+		deviceLayout.setOrientation(LinearLayout.VERTICAL);
+		deviceLayout.setPadding(16, 0, 16, 0);
+		deviceLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT));
+
+
+		View headerView = inflater.inflate(R.layout.room_detail_device_heading, null);
+		TextView tv = (TextView) headerView.findViewById(R.id.device_heading_textview);
+		tv.setText(device.toString());
+
+		deviceLayout.addView(headerView);
+
+		int i = 0;
+		int size = device.getControls().values().size();
+		for (Control control : device.getControls().values()) {
+			
+			
+			View controlView = getControlView(control);
+			
+			// Hide divider of last control
+			if (i++ == size) {
+				controlView.findViewById(R.id.list_divider).setVisibility(View.INVISIBLE);
+			}
+			
+			deviceLayout.addView(controlView);		
+		}
+		deviceViews.put(device.getId(), deviceLayout);
+		ll.addView(deviceLayout);
+	}
+	
+	
+	public void removeViewForDecice(Device device) {
+		ll.removeView(deviceViews.get(device.getId()));
+		deviceViews.remove(device.getId());
+		//deviceViews.get(device.getId()).setVisibility(View.VISIBLE);
+
+	}
 	public View getControlView(Control control) {
 		if(control.getType().equals("switch")) {
 			return switchView(control);

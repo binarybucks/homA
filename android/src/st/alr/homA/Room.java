@@ -5,6 +5,7 @@ import java.util.HashMap;
 import com.commonsware.cwac.merge.MergeAdapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 
@@ -20,7 +21,6 @@ public class Room {
 		this.id = id;
 		this.context = context;
 		devices = new HashMap<String, Device>();
-//    	devicesAdapter = new DevicesHashMapAdapter(context, devices);
 	}
 	
 
@@ -41,37 +41,26 @@ public class Room {
 	}
 	
 	public void addDevice (Device device) {
-		devices.put(device.getId(), device);
+		devices.put(device.getId(), device);		
+		Intent i = new Intent("st.alr.homA.deviceAddedToRoom");
+		i.putExtra("roomID", this.id);
+		i.putExtra("deviceID", device.getId());
 		
-//		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//		view = inflater.inflate(resource, parent, false);
-
-		//devicesAdapter.addAdapter(device.getControlsAdapter());
-		
-		deviceAdapterDatasourceChanged();
+		Log.v(this.toString(), "Broadcast extras: " + i.getExtras());
+		context.sendBroadcast(i);
+	
 		Log.v(this.toString(), "Device '" + device.getId() +"' added to room '"+ this.id +"' , new count is: " + devices.size());
 	}
 	
 	public void removeDevice (Device device) {
 		devices.remove(device.getId());
+		Intent i = new Intent("st.alr.homA.deviceRemovedFromRoom").putExtra("roomID", this.id).putExtra("deviceID", device.getId());;
+		context.sendBroadcast(i);
 
-		deviceAdapterDatasourceChanged();
 		Log.v(this.toString(), "Device '" + device.getId() +"'  removed from room '"+ this.id +"', new count is: " + devices.size());
-
 	}	
 	
-	public void deviceAdapterDatasourceChanged() {
-	    ((App)context.getApplicationContext()).getUiThreadHandler().post(new Runnable() {
-            @Override
-            public void run() {
-//                devicesAdapter.notifyDataSetChanged();
-            }
-          });
-	}
 
 
-//	public DevicesHashMapAdapter getDevicesAdapter() {
-//		return devicesAdapter;
-//	}
 	
 }

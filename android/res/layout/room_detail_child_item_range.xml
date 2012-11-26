@@ -26,7 +26,7 @@
         android:layout_toRightOf="@+id/controlName_range" />
 
     <View
-        android:id="@+id/list_divider_range"
+        android:id="@+id/list_divider"
         android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_alignParentBottom="true"

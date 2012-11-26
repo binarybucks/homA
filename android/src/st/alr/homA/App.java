@@ -1,10 +1,6 @@
 package st.alr.homA;
 
-import st.alr.homA.R;
-
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -14,38 +10,34 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
-import android.app.AlertDialog;
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.MenuItem;
-import android.widget.ListAdapter;
 
-enum ConnectingState { DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING }
+enum ConnectingState {
+	DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING
+}
 
 public class App extends Application implements MqttCallback {
 	private MqttClient mqttClient;
-	private HashMap<String, Room> rooms;
 	private HashMap<String, Device> devices;
 	private Handler uiThreadHandler;
-	private ConnectingState state; 
+	private ConnectingState state;
+	private final Object mLock = new Object();
 
-	// ControlsHashMapAdapter devicesAdapter;
 	RoomsHashMapAdapter roomsAdapter;
 
 	@Override
 	public void onCreate() {
-		this.rooms = new HashMap<String, Room>();
-		this.devices = new HashMap<String, Device>();
-		roomsAdapter = new RoomsHashMapAdapter(this, rooms);
+		devices = new HashMap<String, Device>();
+		roomsAdapter = new RoomsHashMapAdapter(this);
 
 		uiThreadHandler = new Handler();
 
-		Log.v(this.toString(), "Creating application wide instances");
+		Log.v(toString(), "Creating application wide instances");
 		super.onCreate();
 
 		bootstrapAndConnectMqtt();
@@ -54,7 +46,7 @@ public class App extends Application implements MqttCallback {
 	public void bootstrapAndConnectMqtt() {
 		try {
 
-			Log.e(this.toString(), Thread.currentThread().getName());
+			Log.e(toString(), Thread.currentThread().getName());
 			if (Thread.currentThread().getName().equals("main")) {
 				new Thread(new Runnable() {
 					@Override
@@ -65,7 +57,7 @@ public class App extends Application implements MqttCallback {
 				return;
 			}
 
-			if (mqttClient != null && mqttClient.isConnected()) {
+			if ((mqttClient != null) && mqttClient.isConnected()) {
 				broadcastConnectionStateChanged(ConnectingState.DISCONNECTING);
 				mqttClient.disconnect();
 				broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
@@ -73,14 +65,9 @@ public class App extends Application implements MqttCallback {
 			}
 			broadcastConnectionStateChanged(ConnectingState.CONNECTING);
 
-			
-			SharedPreferences prefs = PreferenceManager
-					.getDefaultSharedPreferences(this);
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-			mqttClient = new MqttClient("tcp://"
-					+ prefs.getString("serverAddress", "") + ":"
-					+ prefs.getString("serverPort", "1883"),
-					MqttClient.generateClientId(), null);
+			mqttClient = new MqttClient("tcp://" + prefs.getString("serverAddress", "") + ":" + prefs.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
 			mqttClient.setCallback(this);
 
 			connectMqtt();
@@ -103,14 +90,7 @@ public class App extends Application implements MqttCallback {
 			mqttClient.subscribe("/devices/+/meta/#", 0);
 
 		} catch (MqttException e) {
-			Log.e(this.toString(), "MqttException: " + e.getMessage()); // This
-																		// does
-																		// not
-																		// retry
-																		// if
-																		// initial
-																		// connection
-																		// failed
+			Log.e(toString(), "MqttException: " + e.getMessage()); 
 			broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
 
 		} catch (Exception e) {
@@ -122,7 +102,7 @@ public class App extends Application implements MqttCallback {
 	// successfully, this will retry to reconnect
 	@Override
 	public void connectionLost(Throwable cause) {
-		Log.e(this.toString(), "Mqtt connection lost. Cause: " + cause);
+		Log.e(toString(), "Mqtt connection lost. Cause: " + cause);
 		broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
 
 		while (!mqttClient.isConnected()) {
@@ -136,7 +116,7 @@ public class App extends Application implements MqttCallback {
 
 	@Override
 	public void deliveryComplete(MqttDeliveryToken token) {
-		Log.v(this.toString(), "Mqtt QOS delivery complete. Token: " + token);
+		Log.v(toString(), "Mqtt QOS delivery complete. Token: " + token);
 	}
 
 	// public ControlsHashMapAdapter getDevicesAdapter() {
@@ -144,15 +124,13 @@ public class App extends Application implements MqttCallback {
 	// }
 
 	@Override
-	public void messageArrived(MqttTopic topic, MqttMessage message)
-			throws MqttException {
+	public void messageArrived(MqttTopic topic, MqttMessage message) throws MqttException {
 
 		String payloadStr = new String(message.getPayload());
 		String topicStr = topic.getName();
 
-		final String text = topic.getName() + ":"
-				+ new String(message.getPayload()) + "\n";
-		Log.v(this.toString(), "Received: " + text);
+		final String text = topic.getName() + ":" + new String(message.getPayload()) + "\n";
+		Log.v(toString(), "Received: " + text);
 
 		String[] splitTopic = topicStr.split("/");
 
@@ -172,8 +150,7 @@ public class App extends Application implements MqttCallback {
 			Control control = device.getControlWithId(controlName);
 
 			if (control == null) {
-				control = new Control(controlName,
-						topicStr.replace("/type", ""), device);
+				control = new Control(this, controlName, topicStr.replace("/type", ""), device);
 				device.addControl(control);
 
 			}
@@ -182,7 +159,7 @@ public class App extends Application implements MqttCallback {
 				control.setValue(payloadStr);
 			} else { // Control type
 				control.setType(payloadStr);
-				Log.v(this.toString(), "type set to: " + payloadStr);
+				Log.v(toString(), "type set to: " + payloadStr);
 			}
 		} else if (splitTopic[3].equals("meta")) {
 			if (splitTopic[4].equals("room")) { // Device Room
@@ -197,45 +174,53 @@ public class App extends Application implements MqttCallback {
 
 	public void addDevice(Device device) {
 		devices.put(device.getId(), device);
-		Log.v(this.toString(), "Device '" + device.getId()
-				+ "' added, new count is: " + devices.size());
+		Log.v(toString(), "Device '" + device.getId() + "' added, new count is: " + devices.size());
 	}
 
 	public void removeDevice(Device device) {
 		devices.remove(device.getId());
-		Log.v(this.toString(), "Device '" + device.getId()
-				+ "'  removed, new count is: " + devices.size());
+		Log.v(toString(), "Device '" + device.getId() + "'  removed, new count is: " + devices.size());
 
 	}
 
 	public void addRoom(Room room) {
-		rooms.put(room.getId(), room);
-		roomAdapterDatasourceChanged();
-		Log.v(this.toString(), "Room '" + room.getId()
-				+ "'  added, new count is: " + rooms.size());
 
+//		uiThreadHandler.post(new Runnable() {
+//	        private Room object = room;
+//			@Override
+//			public void run() {
+		synchronized (mLock) {
+
+				roomsAdapter.add(room);
+		}
+				//			}});
 	}
 
 	public void removeRoom(Room room) {
-		rooms.remove(room.getId());
-		roomAdapterDatasourceChanged();
-		Log.v(this.toString(), "Room '" + room.getId()
-				+ "'  removed, new count is: " + rooms.size());
+//		final Room r = room; 
+//		uiThreadHandler.post(new Runnable() {
+//			@Override
+//			public void run() {
+//
+		synchronized (mLock) {
+
+		roomsAdapter.remove(room);
+		}
+//			}});
+
 	}
 
-	public void roomAdapterDatasourceChanged() {
-		uiThreadHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				roomsAdapter.notifyDataSetChanged();
-			}
-		});
+	public Room getRoom(String id) {
+		return (Room)(roomsAdapter.getRoom(id));
 	}
-
-	public HashMap<String, Room> getRooms() {
-		return rooms;
+	
+//	public HashMap<String, Room> getRooms() {
+//		return rooms;
+//	}
+	public Device getDevice(String id) {
+		return devices.get(id);
 	}
-
+	
 	public HashMap<String, Device> getDevices() {
 		return devices;
 	}
@@ -272,7 +257,7 @@ public class App extends Application implements MqttCallback {
 	}
 
 	private void broadcastConnectionStateChanged(ConnectingState status) {
-		Log.e(this.toString(), "sending broadcast");
+		Log.e(toString(), "sending broadcast");
 		state = status;
 		Intent i = new Intent("st.alr.homA.mqttConnectivityChanged").putExtra("status", status);
 		this.sendBroadcast(i);
@@ -284,6 +269,6 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public boolean isConnected() {
-		return mqttClient != null && mqttClient.isConnected();
+		return (mqttClient != null) && mqttClient.isConnected();
 	}
 }

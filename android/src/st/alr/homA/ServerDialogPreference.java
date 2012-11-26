@@ -51,7 +51,7 @@ public class ServerDialogPreference extends DialogPreference {
         Log.v(this.toString(), "onBindDialogView");
 
       	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-      	address.setText(prefs.getString("serverAddress", "127.0.0.1"));
+      	address.setText(prefs.getString("serverAddress", "192.168.8.2"));
       	port.setText(prefs.getString("serverPort", "1883"));
 
       	

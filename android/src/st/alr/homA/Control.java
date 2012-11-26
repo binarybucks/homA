@@ -2,6 +2,8 @@ package st.alr.homA;
 
 import java.util.ArrayList;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 interface ValueChangedObserver
@@ -12,17 +14,18 @@ interface ValueChangedObserver
 
 public class Control {
     ValueChangedObserver observer;
-
+Context context;
     String value = "0";
     String type = "undefined";
     String topic = null;
     String id;
     Device device;
     
-    public Control(String id, String topic, Device device) {
+    public Control(Context context, String id, String topic, Device device) {
     	this.id = id;
     	this.topic = topic;
     	this.device = device;
+    	this.context = context;
     }
     
   
@@ -38,7 +41,9 @@ public class Control {
 	}
 	public void setType(String type) {
 		this.type = type;
-		this.device.getRoom().deviceAdapterDatasourceChanged();
+		Intent i = new Intent("st.alr.homA.deviceTypeChanged").putExtra("deviceID", this.id);
+		context.sendBroadcast(i);
+
 
 	}
 	public String getTopic() {

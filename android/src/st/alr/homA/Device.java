@@ -61,7 +61,7 @@ public class Device {
 	    
 		String cleanedName = roomname != null && !roomname.equals("")?  roomname : context.getString(R.string.defaultRoomName);
 	     
-	     Room newRoom = (app.getRooms().get(cleanedName));
+	     Room newRoom = app.getRoom(cleanedName);
 	    
 	   
 	      if (newRoom == null) {
@@ -84,7 +84,6 @@ public class Device {
 	}
 	public void setName(String name) {
 		this.name = name;
-		this.room.deviceAdapterDatasourceChanged();
 	}
 	
 	
