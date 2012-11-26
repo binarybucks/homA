@@ -29,7 +29,7 @@ public class RoomDetailActivity extends Activity {
 	BroadcastReceiver deviceAddedToRoomReceiver;
 	BroadcastReceiver deviceRemovedFromRoomReceiver;
 	BroadcastReceiver mqttConnectivityChangedReceiver;
-	
+
 	LinearLayout ll;
 	HashMap<String, View> deviceViews = new HashMap<String, View>();
 
@@ -247,9 +247,8 @@ public class RoomDetailActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	
-	private void establishObservers(){
+
+	private void establishObservers() {
 		deviceAddedToRoomReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -275,9 +274,7 @@ public class RoomDetailActivity extends Activity {
 		IntentFilter filter2 = new IntentFilter();
 		filter2.addAction("st.alr.homA.deviceRemovedFromRoom");
 		registerReceiver(deviceRemovedFromRoomReceiver, filter2);
-	
-	
-	
+
 		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -289,8 +286,8 @@ public class RoomDetailActivity extends Activity {
 		registerReceiver(mqttConnectivityChangedReceiver, filter);
 
 	}
-	
-	private void clearObservers(){
+
+	private void clearObservers() {
 		if (room != null) {
 			for (Device device : room.getDevices().values()) {
 				for (Control control : device.getControls().values()) {
@@ -302,5 +299,5 @@ public class RoomDetailActivity extends Activity {
 		}
 
 	}
-	
+
 }

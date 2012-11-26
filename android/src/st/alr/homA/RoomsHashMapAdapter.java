@@ -24,36 +24,36 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 		map = new HashMap<String, Room>();
 	}
 
-	public void add( Room room) {
-				synchronized (mLock) {
-					Log.v(this.toString(), "adding room with id: " + room.getId());
+	public void add(Room room) {
+		synchronized (mLock) {
+			Log.v(toString(), "adding room with id: " + room.getId());
 
-					map.put(room.getId(), room);
-					Log.v(this.toString(), "checking: " + map.get(room.getId().toString()));
+			map.put(room.getId(), room);
+			Log.v(toString(), "checking: " + map.get(room.getId().toString()));
 
-				}
+		}
 
-				notifyDataSetChangedOnMainThread();
-				}
-
-	
-	public void notifyDataSetChangedOnMainThread(){
-		uiThreadHandler.post(new Runnable() {
-			public void run() {				
-				notifyDataSetChanged();
-			}});
-			
+		notifyDataSetChangedOnMainThread();
 	}
-	
-	public void remove( Room room) {
 
+	public void notifyDataSetChangedOnMainThread() {
+		uiThreadHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				notifyDataSetChanged();
+			}
+		});
 
-				synchronized (mLock) {
+	}
 
-					map.remove(room.getId());
-					Log.v(this.toString(), "roomRemoved. New content is: " + map);
-				}
-				notifyDataSetChangedOnMainThread();
+	public void remove(Room room) {
+
+		synchronized (mLock) {
+
+			map.remove(room.getId());
+			Log.v(toString(), "roomRemoved. New content is: " + map);
+		}
+		notifyDataSetChangedOnMainThread();
 	}
 
 	public void clear() {
@@ -77,9 +77,9 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 	}
 
 	public Object getRoom(String id) {
-		Log.v(this.toString(), "getting room with id: " + id);
+		Log.v(toString(), "getting room with id: " + id);
 		Room r = map.get(id);
-		Log.v(this.toString(), "Got:" + r);
+		Log.v(toString(), "Got:" + r);
 
 		return r;
 	}

@@ -25,6 +25,7 @@ public class SettingsActivity extends PreferenceActivity {
 	private BroadcastReceiver mqttConnectivityChangedReceiver;
 	private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
 	private static Context context;
+
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -146,8 +147,8 @@ public class SettingsActivity extends PreferenceActivity {
 				break;
 		}
 	}
-	
-	private static short getConnectivity(){
-		return ((App)context.getApplicationContext()).getState();
+
+	private static short getConnectivity() {
+		return ((App) context.getApplicationContext()).getState();
 	}
 }
