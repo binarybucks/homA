@@ -11,7 +11,10 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -27,7 +30,8 @@ public class App extends Application implements MqttCallback {
 	private Handler uiThreadHandler;
 	private ConnectingState state;
 	private final Object mLock = new Object();
-
+	private BroadcastReceiver serverAdressChanged;
+	
 	RoomsHashMapAdapter roomsAdapter;
 
 	@Override
@@ -40,6 +44,27 @@ public class App extends Application implements MqttCallback {
 		Log.v(toString(), "Creating application wide instances");
 		super.onCreate();
 
+		
+		serverAdressChanged = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				try {
+					disconnect();
+					removeAllRooms();
+				} catch (MqttException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}
+		};
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("st.alr.homA.serverAdressChanged");
+		registerReceiver(serverAdressChanged, filter);
+
+		
+		
 		bootstrapAndConnectMqtt();
 	}
 
@@ -57,12 +82,8 @@ public class App extends Application implements MqttCallback {
 				return;
 			}
 
-			if ((mqttClient != null) && mqttClient.isConnected()) {
-				broadcastConnectionStateChanged(ConnectingState.DISCONNECTING);
-				mqttClient.disconnect();
-				broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
-
-			}
+			disconnect();
+			
 			broadcastConnectionStateChanged(ConnectingState.CONNECTING);
 
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -172,6 +193,16 @@ public class App extends Application implements MqttCallback {
 
 	}
 
+	public void disconnect() throws MqttException{
+		if ((mqttClient != null) && mqttClient.isConnected()) {
+			broadcastConnectionStateChanged(ConnectingState.DISCONNECTING);
+			mqttClient.disconnect();
+			broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
+
+		}
+	}
+	
+	
 	public void addDevice(Device device) {
 		devices.put(device.getId(), device);
 		Log.v(toString(), "Device '" + device.getId() + "' added, new count is: " + devices.size());
@@ -194,6 +225,12 @@ public class App extends Application implements MqttCallback {
 				roomsAdapter.add(room);
 		}
 				//			}});
+	}
+	
+	public void removeAllRooms(){
+		synchronized (mLock) {
+			roomsAdapter.clear();
+			}
 	}
 
 	public void removeRoom(Room room) {
@@ -271,4 +308,6 @@ public class App extends Application implements MqttCallback {
 	public boolean isConnected() {
 		return (mqttClient != null) && mqttClient.isConnected();
 	}
+	
+
 }

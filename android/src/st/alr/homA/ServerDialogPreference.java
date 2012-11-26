@@ -2,6 +2,7 @@ package st.alr.homA;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.DialogPreference;
 import android.preference.PreferenceManager;
@@ -64,13 +65,26 @@ public class ServerDialogPreference extends DialogPreference {
         case DialogInterface.BUTTON_POSITIVE: // User clicked OK!
             Log.v(this.toString(), "onClick BUTTON_POSITIVE");
 
+            
         	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         	SharedPreferences.Editor editor = prefs.edit();
         	
-        	editor.putString("serverAddress", address.getText().toString());
-        	editor.putString("serverPort", port.getText().toString());
+        	String oldAddress = prefs.getString("serverAddress", "192.168.8.2"); 
+        	String oldPort = prefs.getString("serverPort", "1883");
+        	
+        	String newAdress = address.getText().toString();
+        	String newPort = port.getText().toString();
+        	
+        	editor.putString("serverAddress", newAdress);
+        	editor.putString("serverPort", newPort);
 
         	editor.apply();
+        	
+        	// 
+        	if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
+        		Intent i = new Intent("st.alr.homA.serverAdressChanged");
+        		context.sendBroadcast(i);
+        	}
         	
         	((App)context.getApplicationContext()).bootstrapAndConnectMqtt();
 
