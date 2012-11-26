@@ -1,3 +1,6 @@
 [submodule "webinterface/lighttpd/mod_websocket"]
 	path = webinterface/lighttpd/mod_websocket
 	url = git://github.com/nori0428/mod_websocket.git
+[submodule "webinterface/websocketServer"]
+	path = webinterface/websocketServer
+	url = https://github.com/stylpen/WSS.git
