@@ -76,7 +76,7 @@ public class Device {
 
 	public void addControl(Control control) {
 		controls.put(control.getId(), control);
-		controlsAdapterDatasourceChanged();
+		// TODO: Update view to reflect newly added device
 	}
 
 	public HashMap<String, Control> getControls() {
@@ -88,12 +88,4 @@ public class Device {
 		return (name != null) && !name.equals("") ? name : id;
 	}
 
-	public void controlsAdapterDatasourceChanged() {
-		((App) context.getApplicationContext()).getUiThreadHandler().post(new Runnable() {
-			@Override
-			public void run() {
-				Log.v(toString(), "Datasource changeddd");
-			}
-		});
-	}
 }

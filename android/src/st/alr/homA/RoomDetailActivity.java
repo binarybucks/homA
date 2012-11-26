@@ -252,7 +252,6 @@ public class RoomDetailActivity extends Activity {
 		deviceAddedToRoomReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				Log.v(toString(), "deviceAddedToRoomReceiver with extras: " + intent.getExtras());
 				if (intent.getStringExtra("roomID").equals(room.getId())) {
 					addViewForDevice(((App) getApplicationContext()).getDevice(intent.getStringExtra("deviceID")));
 				}

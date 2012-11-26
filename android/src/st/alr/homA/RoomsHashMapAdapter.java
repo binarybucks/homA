@@ -26,11 +26,7 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 
 	public void add(Room room) {
 		synchronized (mLock) {
-			Log.v(toString(), "adding room with id: " + room.getId());
-
 			map.put(room.getId(), room);
-			Log.v(toString(), "checking: " + map.get(room.getId().toString()));
-
 		}
 
 		notifyDataSetChangedOnMainThread();
@@ -47,11 +43,8 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 	}
 
 	public void remove(Room room) {
-
 		synchronized (mLock) {
-
 			map.remove(room.getId());
-			Log.v(toString(), "roomRemoved. New content is: " + map);
 		}
 		notifyDataSetChangedOnMainThread();
 	}
@@ -77,10 +70,7 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 	}
 
 	public Object getRoom(String id) {
-		Log.v(toString(), "getting room with id: " + id);
 		Room r = map.get(id);
-		Log.v(toString(), "Got:" + r);
-
 		return r;
 	}
 

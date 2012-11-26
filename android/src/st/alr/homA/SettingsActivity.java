@@ -67,8 +67,6 @@ public class SettingsActivity extends PreferenceActivity {
 				String stringValue = sharedPreference.getString(key, "");
 
 				if (key.equals("serverAddress")) {
-					Log.e(toString(), "onPreferenceChangeListener with stringValue " + stringValue);
-
 					setServerPreferenceSummary(stringValue);
 				} else {
 					Log.v(toString(), "OnPreferenceChangeListener not implemented for key " + key);
@@ -127,8 +125,6 @@ public class SettingsActivity extends PreferenceActivity {
 	}
 
 	private static void setServerPreferenceSummary(String stringValue) {
-		Log.v("setServerPreferenceSummary", "string value is: " + stringValue);
-
 		switch (getConnectivity()) {
 			case App.MQTT_CONNECTIVITY_CONNECTING:
 				serverPreference.setSummary("Connecting to " + stringValue);
@@ -142,7 +138,6 @@ public class SettingsActivity extends PreferenceActivity {
 			case App.MQTT_CONNECTIVITY_DISCONNECTED:
 				serverPreference.setSummary("Disconnected from " + stringValue);
 				break;
-
 			default:
 				break;
 		}

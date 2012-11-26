@@ -48,7 +48,6 @@ public class App extends Application implements MqttCallback {
 
 		uiThreadHandler = new Handler();
 
-		Log.v(toString(), "Creating application wide instances");
 		super.onCreate();
 
 		serverAdressChanged = new BroadcastReceiver() {
@@ -72,8 +71,6 @@ public class App extends Application implements MqttCallback {
 
 	public void bootstrapAndConnectMqtt() {
 		try {
-
-			Log.e(toString(), Thread.currentThread().getName());
 			if (Thread.currentThread().getName().equals("main")) {
 				new Thread(new Runnable() {
 					@Override
@@ -243,7 +240,6 @@ public class App extends Application implements MqttCallback {
 		// public void run() {
 		//
 		synchronized (mLock) {
-			Log.v(toString(), "removing " + room.toString() + "  room in app");
 			roomsAdapter.remove(room);
 		}
 		// }});

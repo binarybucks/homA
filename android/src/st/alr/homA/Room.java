@@ -39,8 +39,6 @@ public class Room {
 		Intent i = new Intent(App.DEVICE_ADDED_TO_ROOM);
 		i.putExtra("roomID", id);
 		i.putExtra("deviceID", device.getId());
-
-		Log.v(toString(), "Broadcast extras: " + i.getExtras());
 		context.sendBroadcast(i);
 
 		Log.v(toString(), "Device '" + device.getId() + "' added to room '" + id + "' , new count is: " + devices.size());
@@ -49,7 +47,6 @@ public class Room {
 	public void removeDevice(Device device) {
 		devices.remove(device.getId());
 		Intent i = new Intent(App.DEVICE_REMOVED_FROM_ROOM).putExtra("roomID", id).putExtra("deviceID", device.getId());
-		;
 		context.sendBroadcast(i);
 
 		Log.v(toString(), "Device '" + device.getId() + "'  removed from room '" + id + "', new count is: " + devices.size());
