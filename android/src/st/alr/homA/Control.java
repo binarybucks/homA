@@ -41,9 +41,10 @@ Context context;
 	}
 	public void setType(String type) {
 		this.type = type;
-		Intent i = new Intent("st.alr.homA.deviceTypeChanged").putExtra("deviceID", this.id);
+		// TODO: Add listeners in RoomDetailActivity
+		Intent i = new Intent(App.DEVICE_ATTRIBUTE_TYPE_CHANGED).putExtra("deviceID", this.id);
 		context.sendBroadcast(i);
-
+		
 
 	}
 	public String getTopic() {

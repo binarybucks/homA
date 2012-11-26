@@ -20,11 +20,11 @@ import android.view.Menu;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
-	private static ConnectingState state = ConnectingState.DISCONNECTED;
+	private static short mqttConnectivityState = App.MQTT_CONNECTIVITY_DISCONNECTED;
 	private static SharedPreferences sharedPreferences;
 	private BroadcastReceiver mqttConnectivityChangedReceiver;
 	private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
-
+	private static Context context;
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -54,8 +54,9 @@ public class SettingsActivity extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		context = this;
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		state = ((App) getApplicationContext()).getState();
+		mqttConnectivityState = ((App) getApplicationContext()).getState();
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
 
@@ -81,12 +82,11 @@ public class SettingsActivity extends PreferenceActivity {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				Log.e(toString(), "action is: " + intent.getAction());
-				state = ((App) getApplicationContext()).getState();
 				setServerPreferenceSummaryManually();
 			}
 		};
 		IntentFilter filter = new IntentFilter();
-		filter.addAction("st.alr.homA.mqttConnectivityChanged ");
+		filter.addAction(App.MQTT_CONNECTIVITY_CHANGED);
 		registerReceiver(mqttConnectivityChangedReceiver, filter);
 
 	}
@@ -128,22 +128,26 @@ public class SettingsActivity extends PreferenceActivity {
 	private static void setServerPreferenceSummary(String stringValue) {
 		Log.v("setServerPreferenceSummary", "string value is: " + stringValue);
 
-		switch (state) {
-			case CONNECTING:
+		switch (getConnectivity()) {
+			case App.MQTT_CONNECTIVITY_CONNECTING:
 				serverPreference.setSummary("Connecting to " + stringValue);
 				break;
-			case CONNECTED:
+			case App.MQTT_CONNECTIVITY_CONNECTED:
 				serverPreference.setSummary("Connected to " + stringValue);
 				break;
-			case DISCONNECTING:
+			case App.MQTT_CONNECTIVITY_DISCONNECTING:
 				serverPreference.setSummary("Disconnecting from " + stringValue);
 				break;
-			case DISCONNECTED:
+			case App.MQTT_CONNECTIVITY_DISCONNECTED:
 				serverPreference.setSummary("Disconnected from " + stringValue);
 				break;
 
 			default:
 				break;
 		}
+	}
+	
+	private static short getConnectivity(){
+		return ((App)context.getApplicationContext()).getState();
 	}
 }

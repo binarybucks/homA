@@ -82,7 +82,7 @@ public class ServerDialogPreference extends DialogPreference {
         	
         	// 
         	if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
-        		Intent i = new Intent("st.alr.homA.serverAdressChanged");
+        		Intent i = new Intent(App.SERVER_SETTINGS_CHANGED);
         		context.sendBroadcast(i);
         	}
         	

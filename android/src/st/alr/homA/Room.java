@@ -1,13 +1,9 @@
 package st.alr.homA;
 
 import java.util.HashMap;
-
-import com.commonsware.cwac.merge.MergeAdapter;
-
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.LayoutInflater;
 
 
 public class Room {
@@ -42,7 +38,7 @@ public class Room {
 	
 	public void addDevice (Device device) {
 		devices.put(device.getId(), device);		
-		Intent i = new Intent("st.alr.homA.deviceAddedToRoom");
+		Intent i = new Intent(App.DEVICE_ADDED_TO_ROOM);
 		i.putExtra("roomID", this.id);
 		i.putExtra("deviceID", device.getId());
 		
@@ -54,7 +50,7 @@ public class Room {
 	
 	public void removeDevice (Device device) {
 		devices.remove(device.getId());
-		Intent i = new Intent("st.alr.homA.deviceRemovedFromRoom").putExtra("roomID", this.id).putExtra("deviceID", device.getId());;
+		Intent i = new Intent(App.DEVICE_REMOVED_FROM_ROOM).putExtra("roomID", this.id).putExtra("deviceID", device.getId());;
 		context.sendBroadcast(i);
 
 		Log.v(this.toString(), "Device '" + device.getId() +"'  removed from room '"+ this.id +"', new count is: " + devices.size());

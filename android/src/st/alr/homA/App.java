@@ -20,15 +20,27 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-enum ConnectingState {
-	DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING
-}
+
 
 public class App extends Application implements MqttCallback {
+	public static final String MQTT_CONNECTIVITY_CHANGED = "st.alr.homA.mqttConnectivityChanged";
+	public static final short  MQTT_CONNECTIVITY_DISCONNECTED = 0x01;
+	public static final short  MQTT_CONNECTIVITY_CONNECTING = 0x02;
+	public static final short  MQTT_CONNECTIVITY_CONNECTED = 0x03;
+	public static final short  MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
+
+	
+	
+	public static final String DEVICE_ATTRIBUTE_TYPE_CHANGED = "st.alr.homA.deviceAttributeTypeChanged";
+	public static final String DEVICE_ADDED_TO_ROOM = "st.alr.homA.deviceAddedToRoom";
+	public static final String DEVICE_REMOVED_FROM_ROOM = "st.alr.homA.deviceRemovedFromRoom";
+	public static final String SERVER_SETTINGS_CHANGED = "st.alr.homA.serverSettingsChanged";
+
+	
 	private MqttClient mqttClient;
 	private HashMap<String, Device> devices;
 	private Handler uiThreadHandler;
-	private ConnectingState state;
+	private short mqttConnectivity;
 	private final Object mLock = new Object();
 	private BroadcastReceiver serverAdressChanged;
 	
@@ -52,7 +64,6 @@ public class App extends Application implements MqttCallback {
 					disconnect();
 					removeAllRooms();
 				} catch (MqttException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -60,7 +71,7 @@ public class App extends Application implements MqttCallback {
 			}
 		};
 		IntentFilter filter = new IntentFilter();
-		filter.addAction("st.alr.homA.serverAdressChanged");
+		filter.addAction(App.SERVER_SETTINGS_CHANGED);
 		registerReceiver(serverAdressChanged, filter);
 
 		
@@ -84,13 +95,15 @@ public class App extends Application implements MqttCallback {
 
 			disconnect();
 			
-			broadcastConnectionStateChanged(ConnectingState.CONNECTING);
+			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTING);
 
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+			
+			
 			mqttClient = new MqttClient("tcp://" + prefs.getString("serverAddress", "") + ":" + prefs.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
+			
 			mqttClient.setCallback(this);
-
 			connectMqtt();
 
 		} catch (Exception e) {
@@ -100,11 +113,11 @@ public class App extends Application implements MqttCallback {
 
 	}
 
-	public void connectMqtt() {
+	private void connectMqtt() {
 		try {
-
+			Log.v(this.toString(), "Connecting to MQTT broker");
 			mqttClient.connect();
-			broadcastConnectionStateChanged(ConnectingState.CONNECTED);
+			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTED);
 
 			mqttClient.subscribe("/devices/+/controls/+/type", 0);
 			mqttClient.subscribe("/devices/+/controls/+", 0);
@@ -112,8 +125,11 @@ public class App extends Application implements MqttCallback {
 
 		} catch (MqttException e) {
 			Log.e(toString(), "MqttException: " + e.getMessage()); 
-			broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
 
+			if (e.getReasonCode() == MqttException.REASON_CODE_SERVER_CONNECT_ERROR) {
+				connectionLost(e.getCause());
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -124,7 +140,7 @@ public class App extends Application implements MqttCallback {
 	@Override
 	public void connectionLost(Throwable cause) {
 		Log.e(toString(), "Mqtt connection lost. Cause: " + cause);
-		broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
+		updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
 
 		while (!mqttClient.isConnected()) {
 			try {
@@ -195,10 +211,9 @@ public class App extends Application implements MqttCallback {
 
 	public void disconnect() throws MqttException{
 		if ((mqttClient != null) && mqttClient.isConnected()) {
-			broadcastConnectionStateChanged(ConnectingState.DISCONNECTING);
+			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTING);
 			mqttClient.disconnect();
-			broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
-
+			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
 		}
 	}
 	
@@ -240,7 +255,7 @@ public class App extends Application implements MqttCallback {
 //			public void run() {
 //
 		synchronized (mLock) {
-		Log.v(this.toString(), "removing "+ room.toString() +"  room in app");
+		Log.v(toString(), "removing "+ room.toString() +"  room in app");
 		roomsAdapter.remove(room);
 		}
 //			}});
@@ -293,16 +308,14 @@ public class App extends Application implements MqttCallback {
 
 	}
 
-	private void broadcastConnectionStateChanged(ConnectingState status) {
-		Log.e(toString(), "sending broadcast");
-		state = status;
-		Intent i = new Intent("st.alr.homA.mqttConnectivityChanged").putExtra("status", status);
+	private void updateMqttConnectivity(short state) {
+		mqttConnectivity = state;
+		Intent i = new Intent(App.MQTT_CONNECTIVITY_CHANGED);
 		this.sendBroadcast(i);
-
 	}
 
-	public ConnectingState getState() {
-		return state;
+	public short getState() {
+		return mqttConnectivity;
 	}
 
 	public boolean isConnected() {
