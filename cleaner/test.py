@@ -1,71 +1,69 @@
 import mqtt, time, sqlite3, re, threading
 
 TABLE_NAME = "messages"
+DB_NAME = "homa.db"
 
-def db_prepare():
-  db_connection = sqlite3.connect('homa.db')
-  return db_connection, db_connection.cursor()
+database = None
 
-def db_close(db_connection):
-  db_connection.commit()
-  db_connection.close()
+class HomaDB:
+  def __init__(self):
+    self._db_connection = None
+    self._db_cursor = None
 
-def db_remove_topics(topic):
-  global test
-  print "db_remove_topic"
-  db_connection, db_cursor = db_prepare()
+  def db_prepare(self):
+    self._db_connection = sqlite3.connect(DB_NAME)
+    self._db_cursor = self._db_connection.cursor()
 
-  #get all topics from this device
-  m = re.search('(?<=\/devices\/)\d+', topic)
-  try:
-    identifier = m.group(0)
-  except:
-    #doesn't seem to follow the /devices/$id/xyz naming scheme
-    print "Topic doesn't follow the naming scheme"
-    return
+  def db_close(self, db_connection):
+    self._db_connection.commit()
+    self._db_connection.close()
 
-  try:
-    for row in db_cursor.execute("SELECT * FROM %s WHERE id = %s" % (TABLE_NAME, identifier)):
-      print "Removing ",str(row[0])
-      test.publish(str(row[0]), "")
-  except sqlite3.Error as e:
-    print "An error occurred:", e
-    return
+  def db_remove_topics(self, topic):
+    global test
+    print "db_remove_topic"
 
-  r = Remover(identifier)
-  r.start()
-  
-  db_close(db_connection)
-  return;
+    #get all topics from this device
+    m = re.search('(?<=\/devices\/)\d+', topic)
+    try:
+      identifier = m.group(0)
+    except:
+      #doesn't seem to follow the /devices/$id/xyz naming scheme
+      print "Topic doesn't follow the naming scheme"
+      return
 
-def db_write(topic, value):
-  print "db_write"
-  db_connection, db_cursor = db_prepare()
+    try:
+      for row in self._db_cursor.execute("SELECT * FROM %s WHERE id = %s" % (TABLE_NAME, identifier)):
+        print "Removing ",str(row[0])
+        test.publish(str(row[0]), "")
+    except sqlite3.Error as e:
+      print "An error occurred:", e
+      return
 
-  m = re.search('(?<=\/devices\/)\d+', topic)
-  try:
-    identifier = m.group(0)
-  except:
-    identifier = 9999
+    r = Remover(identifier)
+    r.start()
+    
+    self._db_connection.commit()
+    return;
 
-  query = "INSERT INTO %s VALUES (\"%s\", \"%s\", %s)" % (TABLE_NAME, topic, value, identifier)
-  print query
-  try:
-    db_cursor.execute(query)
-  except sqlite3.Error as e:
-    print "An error occurred:", e
+  def db_write(self, topic, value):
+    print "db_write"
 
-  db_close(db_connection)
-  return;
+    m = re.search('(?<=\/devices\/)\d+', topic)
+    try:
+      identifier = m.group(0)
+    except:
+      identifier = 9999
 
-def message_callback(message):
-  print "message callback!"
-  if str(message.payload) == "remove":
-    print
-    db_remove_topics(message.topic)
-  else:
-    db_write(message.topic, message.payload)
+    if not str(value):
+      query = "INSERT INTO %s VALUES (\"%s\", \"%s\", %s)" % (TABLE_NAME, topic, value, identifier)
+      print query
+      try:
+        self._db_cursor.execute(query)
+      except sqlite3.Error as e:
+        print "An error occurred:", e
 
+    self._db_connection.commit()
+    return;
 
 class Remover(threading.Thread):
   def __init__(self, identifier):
@@ -73,16 +71,31 @@ class Remover(threading.Thread):
     super(Remover, self).__init__()
 
   def run(self):
-    time.sleep(3)
     try:
-      db_connection, db_cursor = db_prepare()
+      db_connection = sqlite3.connect(DB_NAME)
+      db_cursor = db_connection.cursor()
+
       query = "DELETE FROM %s WHERE id = %s" % (TABLE_NAME, self._identifier)
       print "Executing ",query
       db_cursor.execute(query)
     except sqlite3.Error as e:
       print "An error occurred:", e
-    db_close(db_connection)
+    db_connection.commit()
+    db_connection.close()
 
+
+def message_callback(message):
+  print "message callback!"
+  database.db_prepare()
+
+  if str(message.payload) == "remove":
+    print
+    database.db_remove_topics(message.topic)
+  else:
+    database.db_write(message.topic, message.payload)
+
+
+database = HomaDB()
 
 # make a new mqtt client. You can pass broker and port. Defaults to 127.0.0.1 (localhost) and 1883
 test = mqtt.mqtt()
