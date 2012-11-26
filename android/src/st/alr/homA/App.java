@@ -1,4 +1,5 @@
 package st.alr.homA;
+
 import st.alr.homA.R;
 
 import java.util.HashMap;
@@ -13,217 +14,250 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
-
-
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ListAdapter;
 
-public class App extends Application implements MqttCallback{
+enum ConnectingState { DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING }
+
+public class App extends Application implements MqttCallback {
 	private MqttClient mqttClient;
 	private HashMap<String, Room> rooms;
 	private HashMap<String, Device> devices;
 	private Handler uiThreadHandler;
+	private ConnectingState state; 
 
-//	ControlsHashMapAdapter devicesAdapter;
+	// ControlsHashMapAdapter devicesAdapter;
 	RoomsHashMapAdapter roomsAdapter;
 
-	
-    @Override
-    public void onCreate() {
-    	this.rooms = new HashMap<String, Room>();
-    	this.devices = new HashMap<String, Device>();
-    	roomsAdapter = new RoomsHashMapAdapter(this, rooms);
+	@Override
+	public void onCreate() {
+		this.rooms = new HashMap<String, Room>();
+		this.devices = new HashMap<String, Device>();
+		roomsAdapter = new RoomsHashMapAdapter(this, rooms);
 
-    	uiThreadHandler = new Handler();
+		uiThreadHandler = new Handler();
 
-    	Log.v(this.toString(), "Creating application wide instances");
-    	super.onCreate();
-    	
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				connectMqtt();
-			}
-		}).start();
-    }
+		Log.v(this.toString(), "Creating application wide instances");
+		super.onCreate();
 
-
-	 
-	private void connectMqtt() {
-      try {
-    	Log.v(this.toString(), "Connecting to broker");
-   
-    	if (mqttClient == null) {
-    		mqttClient = new MqttClient("tcp://192.168.8.2:1883", MqttClient.generateClientId(), null);
-			mqttClient.setCallback(this);
-    	}
-		
-		mqttClient.connect();
-		
-		mqttClient.subscribe("/devices/+/controls/+/type", 0);
-		mqttClient.subscribe("/devices/+/controls/+", 0);
-		mqttClient.subscribe("/devices/+/meta/#", 0);
-
-	    
-      } catch (MqttException e) {
-    	//Log.v(this.toString(), "Exception: " + e);
-    	Log.v(this.toString(), "Reason is: " + e.getMessage());
-    	final String message = e.getMessage();
-    	Log.e(this.toString(), message);
-     	
-      } catch (Exception e) {
-    	  e.printStackTrace();
-      }
+		bootstrapAndConnectMqtt();
 	}
-	
+
+	public void bootstrapAndConnectMqtt() {
+		try {
+
+			Log.e(this.toString(), Thread.currentThread().getName());
+			if (Thread.currentThread().getName().equals("main")) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						bootstrapAndConnectMqtt();
+					}
+				}).start();
+				return;
+			}
+
+			if (mqttClient != null && mqttClient.isConnected()) {
+				broadcastConnectionStateChanged(ConnectingState.DISCONNECTING);
+				mqttClient.disconnect();
+				broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
+
+			}
+			broadcastConnectionStateChanged(ConnectingState.CONNECTING);
+
+			
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(this);
+
+			mqttClient = new MqttClient("tcp://"
+					+ prefs.getString("serverAddress", "") + ":"
+					+ prefs.getString("serverPort", "1883"),
+					MqttClient.generateClientId(), null);
+			mqttClient.setCallback(this);
+
+			connectMqtt();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void connectMqtt() {
+		try {
+
+			mqttClient.connect();
+			broadcastConnectionStateChanged(ConnectingState.CONNECTED);
+
+			mqttClient.subscribe("/devices/+/controls/+/type", 0);
+			mqttClient.subscribe("/devices/+/controls/+", 0);
+			mqttClient.subscribe("/devices/+/meta/#", 0);
+
+		} catch (MqttException e) {
+			Log.e(this.toString(), "MqttException: " + e.getMessage()); // This
+																		// does
+																		// not
+																		// retry
+																		// if
+																		// initial
+																		// connection
+																		// failed
+			broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	// When the connection is lost after a connection has been established
+	// successfully, this will retry to reconnect
 	@Override
 	public void connectionLost(Throwable cause) {
-    	Log.v(this.toString(), "Mqtt connectin lost. Cause: " + cause);
+		Log.e(this.toString(), "Mqtt connection lost. Cause: " + cause);
+		broadcastConnectionStateChanged(ConnectingState.DISCONNECTED);
 
-    	while (!mqttClient.isConnected()) {
-    		try {
-				Thread.sleep(2000);
+		while (!mqttClient.isConnected()) {
+			try {
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 			}
-    		connectMqtt();	
-    	}    	
+			bootstrapAndConnectMqtt();
+		}
 	}
-
 
 	@Override
 	public void deliveryComplete(MqttDeliveryToken token) {
-    	Log.v(this.toString(), "Mqtt QOS delivery complete. Token: " + token);
+		Log.v(this.toString(), "Mqtt QOS delivery complete. Token: " + token);
 	}
 
-
-//	public ControlsHashMapAdapter getDevicesAdapter() {
-//		return devicesAdapter;
-//	}
-
-
+	// public ControlsHashMapAdapter getDevicesAdapter() {
+	// return devicesAdapter;
+	// }
 
 	@Override
-	public void messageArrived(MqttTopic topic, MqttMessage message) throws MqttException {
-    
-    	String payloadStr = new String(message.getPayload());
-    	String topicStr = topic.getName();
-    	
-		final String text = topic.getName()+":"+ new String(message.getPayload()) + "\n";
-    	Log.v(this.toString(), "Received: " + text);
+	public void messageArrived(MqttTopic topic, MqttMessage message)
+			throws MqttException {
 
-    	String[] splitTopic = topicStr.split("/");
-    	
-        // Ensure the device for the message exists
-    	String deviceId = splitTopic[2];
-    	Device device = devices.get(deviceId);
-        if (device == null) {
-          device = new Device(deviceId, this);
-          addDevice(device);
-          device.moveToRoom(this.getString(R.string.defaultRoomName));
+		String payloadStr = new String(message.getPayload());
+		String topicStr = topic.getName();
 
-        }
-        
-        // Topic parsing
-        if(splitTopic[3].equals("controls")) {
-        	String controlName = splitTopic[4]; 
-        	Control control = device.getControlWithId(controlName);
+		final String text = topic.getName() + ":"
+				+ new String(message.getPayload()) + "\n";
+		Log.v(this.toString(), "Received: " + text);
 
-        	if (control == null) {
-        		control = new Control(controlName, topicStr.replace("/type", ""), device);
-        		device.addControl(control);
+		String[] splitTopic = topicStr.split("/");
 
-        	}
+		// Ensure the device for the message exists
+		String deviceId = splitTopic[2];
+		Device device = devices.get(deviceId);
+		if (device == null) {
+			device = new Device(deviceId, this);
+			addDevice(device);
+			device.moveToRoom(this.getString(R.string.defaultRoomName));
 
-        	
-          if(splitTopic.length < 6) {                                       // Control value
-        	control.setValue(payloadStr);
-          } else {                                                          // Control type 
-          	control.setType(payloadStr);
-          	Log.v(this.toString(), "type set to: " + payloadStr);
-          } 
-        } else if(splitTopic[3].equals("meta") ) { 
-          if (splitTopic[4].equals("room")) {                                    // Device Room
-            device.moveToRoom(payloadStr);
+		}
 
-          } else if(splitTopic[4].equals("name")) {                              // Device name
-        	  device.setName(payloadStr);
-          }
-        }
-        
+		// Topic parsing
+		if (splitTopic[3].equals("controls")) {
+			String controlName = splitTopic[4];
+			Control control = device.getControlWithId(controlName);
 
+			if (control == null) {
+				control = new Control(controlName,
+						topicStr.replace("/type", ""), device);
+				device.addControl(control);
 
-    }
+			}
 
+			if (splitTopic.length < 6) { // Control value
+				control.setValue(payloadStr);
+			} else { // Control type
+				control.setType(payloadStr);
+				Log.v(this.toString(), "type set to: " + payloadStr);
+			}
+		} else if (splitTopic[3].equals("meta")) {
+			if (splitTopic[4].equals("room")) { // Device Room
+				device.moveToRoom(payloadStr);
 
-	public void addDevice (Device device) {
+			} else if (splitTopic[4].equals("name")) { // Device name
+				device.setName(payloadStr);
+			}
+		}
+
+	}
+
+	public void addDevice(Device device) {
 		devices.put(device.getId(), device);
-		Log.v(this.toString(), "Device '" + device.getId() +"' added, new count is: " + devices.size());
+		Log.v(this.toString(), "Device '" + device.getId()
+				+ "' added, new count is: " + devices.size());
 	}
-	public void removeDevice (Device device) {
+
+	public void removeDevice(Device device) {
 		devices.remove(device.getId());
-		Log.v(this.toString(), "Device '" + device.getId() +"'  removed, new count is: " + devices.size());
+		Log.v(this.toString(), "Device '" + device.getId()
+				+ "'  removed, new count is: " + devices.size());
 
 	}
-	public void addRoom (Room room) {
+
+	public void addRoom(Room room) {
 		rooms.put(room.getId(), room);
 		roomAdapterDatasourceChanged();
-		Log.v(this.toString(), "Room '" + room.getId() +"'  added, new count is: " + rooms.size());
+		Log.v(this.toString(), "Room '" + room.getId()
+				+ "'  added, new count is: " + rooms.size());
 
 	}
-	public void removeRoom (Room room) {
-		rooms.remove(room.getId());		
+
+	public void removeRoom(Room room) {
+		rooms.remove(room.getId());
 		roomAdapterDatasourceChanged();
-		Log.v(this.toString(), "Room '" + room.getId() +"'  removed, new count is: " + rooms.size());
+		Log.v(this.toString(), "Room '" + room.getId()
+				+ "'  removed, new count is: " + rooms.size());
 	}
 
-	
-
-	public void roomAdapterDatasourceChanged(){
-	     uiThreadHandler.post(new Runnable() {
-             @Override
-             public void run() {
-                 roomsAdapter.notifyDataSetChanged();
-             }
-           });
+	public void roomAdapterDatasourceChanged() {
+		uiThreadHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				roomsAdapter.notifyDataSetChanged();
+			}
+		});
 	}
 
 	public HashMap<String, Room> getRooms() {
-	return rooms;
-}
-
+		return rooms;
+	}
 
 	public HashMap<String, Device> getDevices() {
 		return devices;
 	}
 
-
-
 	public RoomsHashMapAdapter getRoomsAdapter() {
 		return roomsAdapter;
 	}
-
-
 
 	public Handler getUiThreadHandler() {
 		return uiThreadHandler;
 	}
 
 	public void publishMqtt(String topicStr, String value) {
-    	MqttTopic t = mqttClient.getTopic(topicStr+"/on");
+		MqttTopic t = mqttClient.getTopic(topicStr + "/on");
 
-   		MqttMessage message = new MqttMessage(value.getBytes());
-    	message.setQos(0);
+		MqttMessage message = new MqttMessage(value.getBytes());
+		message.setQos(0);
 
-    	// Publish the message
-    	//String time = new Timestamp(System.currentTimeMillis()).toString();
-    	//log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
-    	try {
+		// Publish the message
+		// String time = new Timestamp(System.currentTimeMillis()).toString();
+		// log("Publishing at: "+time+ " to topic \""+topicName+"\" qos "+qos);
+		try {
 			MqttDeliveryToken token = t.publish(message);
 		} catch (MqttPersistenceException e) {
 			// TODO Auto-generated catch block
@@ -232,9 +266,24 @@ public class App extends Application implements MqttCallback{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-       // mqttSocket.publish(topic+"/on", value, 0, true);
+
+		// mqttSocket.publish(topic+"/on", value, 0, true);
 
 	}
-	
+
+	private void broadcastConnectionStateChanged(ConnectingState status) {
+		Log.e(this.toString(), "sending broadcast");
+		state = status;
+		Intent i = new Intent("st.alr.homA.mqttConnectivityChanged").putExtra("status", status);
+		this.sendBroadcast(i);
+
+	}
+
+	public ConnectingState getState() {
+		return state;
+	}
+
+	public boolean isConnected() {
+		return mqttClient != null && mqttClient.isConnected();
+	}
 }

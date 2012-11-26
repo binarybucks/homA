@@ -37,10 +37,14 @@ public final class R {
         public static final int list_divider_switch=0x7f090005;
         public static final int list_divider_text=0x7f090008;
         public static final int list_divider_unknown=0x7f09000a;
-        public static final int menu_settings=0x7f090011;
+        public static final int menu_settings=0x7f090015;
         public static final int room_device_count=0x7f090010;
         public static final int room_name=0x7f09000f;
         public static final int scroll=0x7f09000b;
+        public static final int serverAddress=0x7f090012;
+        public static final int serverAddressLabel=0x7f090011;
+        public static final int serverPort=0x7f090014;
+        public static final int serverPortLabel=0x7f090013;
     }
     public static final class layout {
         public static final int room_detail_child_item_range=0x7f030000;
@@ -51,6 +55,7 @@ public final class R {
         public static final int room_detail_device_heading=0x7f030005;
         public static final int room_list_container=0x7f030006;
         public static final int room_list_item=0x7f030007;
+        public static final int server_dialog_preferences=0x7f030008;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;
