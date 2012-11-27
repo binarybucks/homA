@@ -13,7 +13,8 @@ public final class R {
     public static final class drawable {
         public static final int divider_horizontal_dark=0x7f020000;
         public static final int homa=0x7f020001;
-        public static final int room_detail_group_item_divider=0x7f020002;
+        public static final int homamonochrome=0x7f020002;
+        public static final int room_detail_group_item_divider=0x7f020003;
     }
     public static final class id {
         public static final int MyListItem=0x7f08000b;

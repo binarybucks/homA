@@ -28,8 +28,8 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 		synchronized (mLock) {
 			map.put(room.getId(), room);
 		}
+		notifyDataSetChanged();
 
-		notifyDataSetChangedOnMainThread();
 	}
 
 	public void notifyDataSetChangedOnMainThread() {
@@ -46,22 +46,15 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 		synchronized (mLock) {
 			map.remove(room.getId());
 		}
-		notifyDataSetChangedOnMainThread();
+		notifyDataSetChanged();
 	}
 
 	public void clear() {
-		uiThreadHandler.post(new Runnable() {
-			@Override
-			public void run() {
-
 				synchronized (mLock) {
-
 					map.clear();
 				}
 
 				notifyDataSetChanged();
-			}
-		});
 	}
 
 	@Override
