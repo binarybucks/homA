@@ -15,29 +15,34 @@
 #define BCOEFFICIENT 4791       // The beta coefficient of the thermistor (usually 3000-4000)
 #define SERIESRESISTOR 2200     // the value of the 'other' resistor
 
-#define DEVICE_1_COMMAND_WILDCARD "/devices/321995-ambilight/controls/+/on"    // Incomming values and commands for device
-#define DEVICE_2_COMMAND_WILDCARD "/devices/862671-wirelessSwitch/controls/+/on"
-#define DEVICE_3_COMMAND_WILDCARD "/devices/558426-wirelessSwitch/controls/+/on"
-#define DEVICE_1_POWER_INTERFACE "/devices/321995-ambilight/controls/power"
-#define DEVICE_1_POWER_COMMAND "/devices/321995-ambilight/controls/power/on"
-#define DEVICE_1_POWER_TYPE "/devices/321995-ambilight/controls/power/type"
-#define DEVICE_1_FADING_INTERFACE "/devices/321995-ambilight/controls/fading"
-#define DEVICE_1_FADING_COMMAND "/devices/321995-ambilight/controls/fading/on"
-#define DEVICE_1_FADING_TYPE "/devices/321995-ambilight/controls/fading/type"
-#define DEVICE_1_VALUE_INTERFACE "/devices/321995-ambilight/controls/brightness"
-#define DEVICE_1_VALUE_COMMAND"/devices/321995-ambilight/controls/brightness/on"
-#define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/brightness/type"
-#define DEVICE_1_HUE_INTERFACE "/devices/321995-ambilight/controls/color"
-#define DEVICE_1_HUE_COMMAND "/devices/321995-ambilight/controls/color/on"
-#define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/color/type"
-#define DEVICE_2_POWER_INTERFACE "/devices/862671-wirelessSwitch/controls/power"
-#define DEVICE_2_POWER_COMMAND "/devices/862671-wirelessSwitch/controls/power/on"
-#define DEVICE_2_POWER_TYPE "/devices/862671-wirelessSwitch/controls/power/type"
-#define DEVICE_3_POWER_INTERFACE "/devices/558426-wirelessSwitch/controls/power"
-#define DEVICE_3_POWER_COMMAND "/devices/558426-wirelessSwitch/controls/power"
-#define DEVICE_3_POWER_TYPE "/devices/558426-wirelessSwitch/controls/power/type"
-#define SENSORS_1_TEMPERATURE_INTERFACE"/devices/482031-sensors/controls/temp"
-#define SENSORS_1_TEMPERATURE_TYPE "/devices/482031-sensors/controls/temp/type"
+#define DEVICE_COMMAND_WILDCARD "/devices/+/controls/+/on"    // Incomming values and commands for device
+
+#define DEVICE_1_POWER_INTERFACE "/devices/321995-ambilight/controls/Power"
+#define DEVICE_1_POWER_COMMAND "/devices/321995-ambilight/controls/Power/on"
+#define DEVICE_1_POWER_TYPE "/devices/321995-ambilight/controls/Power/type"
+#define DEVICE_1_FADING_INTERFACE "/devices/321995-ambilight/controls/Fading"
+#define DEVICE_1_FADING_COMMAND "/devices/321995-ambilight/controls/Fading/on"
+#define DEVICE_1_FADING_TYPE "/devices/321995-ambilight/controls/Fading/type"
+#define DEVICE_1_VALUE_INTERFACE "/devices/321995-ambilight/controls/Brightness"
+#define DEVICE_1_VALUE_COMMAND"/devices/321995-ambilight/controls/Brightness/on"
+#define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/Brightness/type"
+#define DEVICE_1_HUE_INTERFACE "/devices/321995-ambilight/controls/Color"
+#define DEVICE_1_HUE_COMMAND "/devices/321995-ambilight/controls/Color/on"
+#define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/Color/type"
+#define DEVICE_2_POWER_INTERFACE "/devices/862671-wirelessSwitch/controls/Power"
+#define DEVICE_2_POWER_COMMAND "/devices/862671-wirelessSwitch/controls/Power/on"
+#define DEVICE_2_POWER_TYPE "/devices/862671-wirelessSwitch/controls/Power/type"
+#define DEVICE_3_POWER_INTERFACE "/devices/558426-wirelessSwitch/controls/Power"
+#define DEVICE_3_POWER_COMMAND "/devices/558426-wirelessSwitch/controls/Power/on"
+#define DEVICE_3_POWER_TYPE "/devices/558426-wirelessSwitch/controls/Power/type"
+
+#define DEVICE_5_POWER_INTERFACE "/devices/E-wirelessSwitch/controls/Power"
+#define DEVICE_5_POWER_COMMAND "/devices/E-wirelessSwitch/controls/Power/on"
+#define DEVICE_5_POWER_TYPE "/devices/E-wirelessSwitch/controls/Power/type"
+
+
+#define SENSORS_1_TEMPERATURE_INTERFACE"/devices/482031-sensors/Controls/temp"
+#define SENSORS_1_TEMPERATURE_TYPE "/devices/482031-sensors/controls/Temp/type"
 
 // Prototypes
 void fadeLoop();
@@ -95,7 +100,7 @@ void loop() {
   client.loop();
 
   if (sensorcounter % 65000 == 0) {
-  //  sensorLoop();
+    sensorLoop();
     sensorcounter= 0;
   }
     
@@ -128,9 +133,9 @@ void sensorLoop(){
 
 
 void subscribe() {
- client.subscribe(DEVICE_1_COMMAND_WILDCARD);
- client.subscribe(DEVICE_2_COMMAND_WILDCARD);
- client.subscribe(DEVICE_3_COMMAND_WILDCARD);   
+ client.subscribe(DEVICE_COMMAND_WILDCARD);
+ //client.subscribe(DEVICE_2_COMMAND_WILDCARD);
+ //client.subscribe(DEVICE_3_COMMAND_WILDCARD);   
 }
 
 
@@ -146,6 +151,8 @@ void publishDeviceMetaInformation() {
  publishRetained(DEVICE_1_VALUE_TYPE, "range"); 
  publishRetained(DEVICE_2_POWER_TYPE, "switch");
  publishRetained(DEVICE_3_POWER_TYPE, "switch");
+  publishRetained(DEVICE_5_POWER_TYPE, "switch");
+
  publishRetained(SENSORS_1_TEMPERATURE_TYPE, "text");
 }
 
@@ -183,18 +190,31 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   }else if(strcmp(topic,DEVICE_3_POWER_COMMAND)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 3);
     publishRetained(DEVICE_3_POWER_INTERFACE, payload);
+  } else if(strcmp(topic,DEVICE_5_POWER_COMMAND)  == 0) {
+    setWifi((char*)payload, wifiSwitchHomeGroup, 5);
+    publishRetained(DEVICE_5_POWER_INTERFACE, payload);
   }
+  
 }
 
 void setWifi(char* state, char* group, int switchNumber) {
   if (strcmp(state, "1") == 0) {
     wifiTransmitter.switchOn(group, switchNumber);
-    delay(500);
+      wifiTransmitter.enableTransmit(WIFIPIN);
+
+    delay(150);
     wifiTransmitter.switchOn(group, switchNumber);  
+    delay(350);
+    wifiTransmitter.switchOn(group, switchNumber);  
+
+
   } else if (strcmp(state, "0") == 0)  {  
     wifiTransmitter.switchOff(group, switchNumber); 
-    delay(500);
-    wifiTransmitter.switchOff(group, switchNumber); 
+    delay(150);
+    wifiTransmitter.switchOff(group, switchNumber);  
+    delay(350);
+    wifiTransmitter.switchOff(group, switchNumber);  
+
   } 
 }
 

@@ -35,22 +35,20 @@ public class Device {
 
 			if (room.getDevices().size() == 0) {
 				Log.v(toString(), "Room " + room.getId() + " is empty, removing it");
-				((App) context.getApplicationContext()).removeRoom(room);
+				App.removeRoom(room);
 			}
 		}
 
 	}
 
 	void moveToRoom(String roomname) {
-		App app = (App) context.getApplicationContext();
-
 		String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultRoomName);
 
-		Room newRoom = app.getRoom(cleanedName);
+		Room newRoom = App.getRoom(cleanedName);
 
 		if (newRoom == null) {
 			newRoom = new Room(context, cleanedName);
-			app.addRoom(newRoom);
+			App.addRoom(newRoom);
 		}
 
 		removeFromCurrentRoom();

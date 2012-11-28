@@ -26,55 +26,51 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class App extends Application implements MqttCallback {
+    private static App instance;
+
 	public static final String MQTT_CONNECTIVITY_CHANGED = "st.alr.homA.mqttConnectivityChanged";
 	public static final short MQTT_CONNECTIVITY_DISCONNECTED = 0x01;
 	public static final short MQTT_CONNECTIVITY_CONNECTING = 0x02;
 	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
 	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
-
 	public static final String DEVICE_ATTRIBUTE_TYPE_CHANGED = "st.alr.homA.deviceAttributeTypeChanged";
 	public static final String DEVICE_ADDED_TO_ROOM = "st.alr.homA.deviceAddedToRoom";
 	public static final String DEVICE_REMOVED_FROM_ROOM = "st.alr.homA.deviceRemovedFromRoom";
 	public static final String SERVER_SETTINGS_CHANGED = "st.alr.homA.serverSettingsChanged";
 
-	private MqttClient mqttClient;
-	private HashMap<String, Device> devices;
-	private Handler uiThreadHandler;
-	private short mqttConnectivity;
-	private final Object mLock = new Object();
-	private BroadcastReceiver serverAdressChanged;
-
-	RoomsHashMapAdapter roomsAdapter;
-
+	private static MqttClient mqttClient;
+	private static HashMap<String, Device> devices;
+	private static Handler uiThreadHandler;
+	private static short mqttConnectivity;
+	private static final Object mLock = new Object();
+	private static BroadcastReceiver serverAdressChanged;
+	private static RoomsHashMapAdapter roomsAdapter;
+	private static SharedPreferences sharedPreferences;
+	
+	
 	@Override
 	public void onCreate() {
-		devices = new HashMap<String, Device>();
-		roomsAdapter = new RoomsHashMapAdapter(this);
-
-		uiThreadHandler = new Handler();
-//		showRecordingNotification();
 		super.onCreate();
 
-		serverAdressChanged = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				try {
-					disconnect();
-					removeAllRooms();
-				} catch (MqttException e) {
-					e.printStackTrace();
-				}
-
-			}
-		};
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(App.SERVER_SETTINGS_CHANGED);
-		registerReceiver(serverAdressChanged, filter);
-
+		instance = this;
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		devices = new HashMap<String, Device>();
+		roomsAdapter = new RoomsHashMapAdapter(this);
+		uiThreadHandler = new Handler();
+		establishObservers();
 		bootstrapAndConnectMqtt();
 	}
 
-	public void bootstrapAndConnectMqtt() {
+	
+	
+	
+	
+    public static App getInstance() {
+        return instance;
+    }
+
+    
+	public static void bootstrapAndConnectMqtt() {
 		try {
 			if (Thread.currentThread().getName().equals("main")) {
 				new Thread(new Runnable() {
@@ -90,23 +86,21 @@ public class App extends Application implements MqttCallback {
 
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTING);
 
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-			mqttClient = new MqttClient("tcp://" + prefs.getString("serverAddress", "") + ":" + prefs.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
+			mqttClient = new MqttClient("tcp://" + sharedPreferences.getString("serverAddress", "") + ":" + sharedPreferences.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
 
-			mqttClient.setCallback(this);
+			mqttClient.setCallback(getInstance());
 			connectMqtt();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 
-	private void connectMqtt() {
+	private static void connectMqtt() {
 		try {
-			Log.v(toString(), "Connecting to MQTT broker");
+			Log.v("Application", "Connecting to MQTT broker");
 			mqttClient.connect();
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTED);
 
@@ -115,10 +109,10 @@ public class App extends Application implements MqttCallback {
 			mqttClient.subscribe("/devices/+/meta/#", 0);
 
 		} catch (MqttException e) {
-			Log.e(toString(), "MqttException: " + e.getMessage());
+			Log.e("Application", "MqttException: " + e.getMessage());
 
 			if (e.getReasonCode() == MqttException.REASON_CODE_SERVER_CONNECT_ERROR) {
-				connectionLost(e.getCause());
+				getInstance().connectionLost(e.getCause());
 			}
 
 		} catch (Exception e) {
@@ -146,10 +140,6 @@ public class App extends Application implements MqttCallback {
 	public void deliveryComplete(MqttDeliveryToken token) {
 		Log.v(toString(), "Mqtt QOS delivery complete. Token: " + token);
 	}
-
-	// public ControlsHashMapAdapter getDevicesAdapter() {
-	// return devicesAdapter;
-	// }
 
 	@Override
 	public void messageArrived(MqttTopic topic, MqttMessage message) throws MqttException {
@@ -180,9 +170,7 @@ public class App extends Application implements MqttCallback {
 			if (control == null) {
 				control = new Control(this, controlName, topicStr.replace("/type", ""), device);
 				device.addControl(control);
-
 			}
-
 			if (splitTopic.length < 6) { // Control value
 				control.setValue(payloadStr);
 			} else { // Control type
@@ -200,7 +188,7 @@ public class App extends Application implements MqttCallback {
 
 	}
 
-	public void disconnect() throws MqttException {
+	public static void disconnect() throws MqttException {
 		if ((mqttClient != null) && mqttClient.isConnected()) {
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTING);
 			mqttClient.disconnect();
@@ -208,80 +196,56 @@ public class App extends Application implements MqttCallback {
 		}
 	}
 
-	public void addDevice(Device device) {
+	public static void addDevice(Device device) {
 		devices.put(device.getId(), device);
-		Log.v(toString(), "Device '" + device.getId() + "' added, new count is: " + devices.size());
+		Log.v("Application", "Device '" + device.getId() + "' added, new count is: " + devices.size());
 	}
 
-	public void removeDevice(Device device) {
+	public static void removeDevice(Device device) {
 		devices.remove(device.getId());
-		Log.v(toString(), "Device '" + device.getId() + "'  removed, new count is: " + devices.size());
-
+		Log.v("Application", "Device '" + device.getId() + "'  removed, new count is: " + devices.size());
 	}
 
-	public void addRoom(Room room) {
-
-		// uiThreadHandler.post(new Runnable() {
-		// private Room object = room;
-		// @Override
-		// public void run() {
-		synchronized (mLock) {
-
-			roomsAdapter.add(room);
-		}
-		// }});
+	public static void addRoom(Room room) {
+			roomsAdapter.addOnMainThread(room);
 	}
 
-	public void removeAllRooms() {
+	public static void removeAllRooms() {
 		synchronized (mLock) {
-			roomsAdapter.clear();
+			roomsAdapter.clearOnMainThread();
 		}
 	}
 
-	public void removeRoom(Room room) {
-		// final Room r = room;
-		// uiThreadHandler.post(new Runnable() {
-		// @Override
-		// public void run() {
-		//
-		synchronized (mLock) {
-			roomsAdapter.remove(room);
-		}
-		// }});
+	public static void removeRoom(Room room) {
+
+			roomsAdapter.removeOnMainThread(room);
 
 	}
 
-	public Room getRoom(String id) {
+	public static Room getRoom(String id) {
 		return (Room) (roomsAdapter.getRoom(id));
 	}
 
-	// public HashMap<String, Room> getRooms() {
-	// return rooms;
-	// }
-	public Device getDevice(String id) {
+	
+	public static Device getDevice(String id) {
 		return devices.get(id);
 	}
 
-	public HashMap<String, Device> getDevices() {
-		return devices;
-	}
-
-	public RoomsHashMapAdapter getRoomsAdapter() {
+	public static RoomsHashMapAdapter getRoomsAdapter() {
 		return roomsAdapter;
 	}
 
-	public Handler getUiThreadHandler() {
+	public static Handler getUiThreadHandler() {
 		return uiThreadHandler;
 	}
 
-	public void publishMqtt(String topicStr, String value) {
-		MqttTopic t = mqttClient.getTopic(topicStr + "/on");
+	public static void publishMqtt(String topicStr, String value) {
 
 		MqttMessage message = new MqttMessage(value.getBytes());
 		message.setQos(0);
 
 		try {
-			MqttDeliveryToken token = t.publish(message);
+			mqttClient.getTopic(topicStr + "/on").publish(message);
 		} catch (MqttPersistenceException e) {
 			e.printStackTrace();
 		} catch (MqttException e) {
@@ -289,47 +253,63 @@ public class App extends Application implements MqttCallback {
 		}
 	}
 
-	private void updateMqttConnectivity(short state) {
+	private static void updateMqttConnectivity(short state) {
 		mqttConnectivity = state;
 		Intent i = new Intent(App.MQTT_CONNECTIVITY_CHANGED);
-		this.sendBroadcast(i);
+		getInstance().sendBroadcast(i);
 	}
 
-	public short getState() {
+	public static short getState() {
 		return mqttConnectivity;
 	}
 
-	public boolean isConnected() {
+	public static boolean isConnected() {
 		return (mqttClient != null) && mqttClient.isConnected();
 	}
-	private void showRecordingNotification(){
-		NotificationCompat.Builder mBuilder =
-		        new NotificationCompat.Builder(this)
-		        .setSmallIcon(R.drawable.homamonochrome)
-		        .setContentTitle("HomA")
-		        .setContentText("Connected to broker!");
-		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = new Intent(this, RoomListActivity.class);
-
-		// The stack builder object will contain an artificial back stack for the
-		// started Activity.
-		// This ensures that navigating backward from the Activity leads out of
-		// your application to the Home screen.
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-		// Adds the back stack for the Intent (but not the Intent itself)
-		stackBuilder.addParentStack(RoomListActivity.class);
-		// Adds the Intent that starts the Activity to the top of the stack
-		stackBuilder.addNextIntent(resultIntent);
-		PendingIntent resultPendingIntent =
-		        stackBuilder.getPendingIntent(
-		            0,
-		            PendingIntent.FLAG_UPDATE_CURRENT
-		        );
-		mBuilder.setContentIntent(resultPendingIntent);
-		NotificationManager mNotificationManager =
-		    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		// mId allows you to update the notification later on.
-		mNotificationManager.notify(1, mBuilder.build());
-
+//	private static void showRecordingNotification(){
+//		NotificationCompat.Builder mBuilder =
+//		        new NotificationCompat.Builder(this)
+//		        .setSmallIcon(R.drawable.homamonochrome)
+//		        .setContentTitle("HomA")
+//		        .setContentText("Connected to broker!");
+//		// Creates an explicit intent for an Activity in your app
+//		Intent resultIntent = new Intent(this, RoomListActivity.class);
+//
+//		// The stack builder object will contain an artificial back stack for the
+//		// started Activity.
+//		// This ensures that navigating backward from the Activity leads out of
+//		// your application to the Home screen.
+//		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+//		// Adds the back stack for the Intent (but not the Intent itself)
+//		stackBuilder.addParentStack(RoomListActivity.class);
+//		// Adds the Intent that starts the Activity to the top of the stack
+//		stackBuilder.addNextIntent(resultIntent);
+//		PendingIntent resultPendingIntent =
+//		        stackBuilder.getPendingIntent(
+//		            0,
+//		            PendingIntent.FLAG_UPDATE_CURRENT
+//		        );
+//		mBuilder.setContentIntent(resultPendingIntent);
+//		NotificationManager mNotificationManager =
+//		    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//		// mId allows you to update the notification later on.
+//		mNotificationManager.notify(1, mBuilder.build());
+//
+//	}
+	
+	private void establishObservers() {
+		serverAdressChanged = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				try {
+					disconnect();
+					removeAllRooms();
+				} catch (MqttException e) {e.printStackTrace();}
+			}
+		};
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(App.SERVER_SETTINGS_CHANGED);
+		registerReceiver(serverAdressChanged, filter);
 	}
 }

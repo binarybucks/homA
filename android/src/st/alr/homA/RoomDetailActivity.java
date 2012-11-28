@@ -54,7 +54,7 @@ public class RoomDetailActivity extends Activity {
 		ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 		if (getIntent().getStringExtra("id") != null) {
-			room = ((App) getApplicationContext()).getRoom(getIntent().getStringExtra("id"));
+			room = App.getRoom(getIntent().getStringExtra("id"));
 			setTitle(room.getId());
 
 			establishObservers();
@@ -68,6 +68,16 @@ public class RoomDetailActivity extends Activity {
 		setContentView(sw);
 	}
 
+//	protected void onPause(){
+//		super.onPause();
+//		clearObservers();		
+//	}
+//	
+//	protected void onResume() {
+//		super.onResume();
+//		establishObservers();
+//	}
+	
 	public void addViewForDevice(Device device) {
 		LinearLayout deviceLayout = new LinearLayout(this);
 		deviceLayout.setOrientation(LinearLayout.VERTICAL);
@@ -143,7 +153,7 @@ public class RoomDetailActivity extends Activity {
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				if (fromUser) {
 					String payload = Integer.toString(progress);
-					((App) getApplicationContext()).publishMqtt(control.getTopic(), payload);
+					App.publishMqtt(control.getTopic(), payload);
 				}
 			}
 
@@ -155,6 +165,7 @@ public class RoomDetailActivity extends Activity {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 			}
 		});
+
 
 		value.setMax(255);
 		value.setProgress(Math.round(Float.parseFloat(control.getValue())));
@@ -186,7 +197,7 @@ public class RoomDetailActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				String payload = control.getValue().equals("1") ? "0" : "1";
-				((App) getApplicationContext()).publishMqtt(control.getTopic(), payload);
+				App.publishMqtt(control.getTopic(), payload);
 			}
 		});
 
@@ -253,7 +264,7 @@ public class RoomDetailActivity extends Activity {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if (intent.getStringExtra("roomID").equals(room.getId())) {
-					addViewForDevice(((App) getApplicationContext()).getDevice(intent.getStringExtra("deviceID")));
+					addViewForDevice(App.getDevice(intent.getStringExtra("deviceID")));
 				}
 			}
 		};
@@ -266,7 +277,7 @@ public class RoomDetailActivity extends Activity {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				if (intent.getStringExtra("roomID").equals(room.getId())) {
-					removeViewForDecice(((App) getApplicationContext()).getDevice(intent.getStringExtra("deviceID")));
+					removeViewForDecice(App.getDevice(intent.getStringExtra("deviceID")));
 				}
 			}
 		};
@@ -295,8 +306,8 @@ public class RoomDetailActivity extends Activity {
 			}
 			unregisterReceiver(deviceAddedToRoomReceiver);
 			unregisterReceiver(deviceRemovedFromRoomReceiver);
+			unregisterReceiver(mqttConnectivityChangedReceiver);
 		}
-
 	}
 
 }

@@ -24,12 +24,19 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 		map = new HashMap<String, Room>();
 	}
 
-	public void add(Room room) {
-		synchronized (mLock) {
-			map.put(room.getId(), room);
-		}
-		notifyDataSetChanged();
-
+	public void addOnMainThread(Room room) {
+		
+		  class AddRunnable implements Runnable {
+		        Room room;
+		        AddRunnable(Room r) { room = r; }
+		        public void run() {
+					synchronized (mLock) {
+						map.put(room.getId(), room);
+						notifyDataSetChanged(); 
+					}
+		        }
+		    }
+		  uiThreadHandler.post(new AddRunnable(room));
 	}
 
 	public void notifyDataSetChangedOnMainThread() {
@@ -42,19 +49,42 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 
 	}
 
-	public void remove(Room room) {
-		synchronized (mLock) {
-			map.remove(room.getId());
-		}
-		notifyDataSetChanged();
+	public void removeOnMainThread(Room room) {
+//		synchronized (mLock) {
+//			map.remove(room.getId());
+//		}
+//		notifyDataSetChanged();
+		  class RemoveRunnable implements Runnable {
+		        Room room;
+		        RemoveRunnable(Room r) { room = r; }
+		        public void run() {
+					synchronized (mLock) {
+						map.remove(room.getId());
+						notifyDataSetChanged(); 
+					}
+		        }
+		    }
+		  uiThreadHandler.post(new RemoveRunnable(room));
+	
 	}
 
-	public void clear() {
-				synchronized (mLock) {
-					map.clear();
-				}
-
-				notifyDataSetChanged();
+	public void clearOnMainThread() {
+		  class ClearRunnable implements Runnable {
+		        public void run() {
+					synchronized (mLock) {
+						map.clear();
+						notifyDataSetChanged(); 
+					}
+		        }
+		    }
+		  uiThreadHandler.post(new ClearRunnable());
+//
+//		  
+//				synchronized (mLock) {
+//					map.clear();
+//				}
+//
+//				notifyDataSetChanged();
 	}
 
 	@Override
