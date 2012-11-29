@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -270,7 +271,7 @@ public class RoomDetailActivity extends Activity {
 		};
 
 		IntentFilter filter1 = new IntentFilter();
-		filter1.addAction("st.alr.homA.deviceAddedToRoom");
+		filter1.addAction(App.DEVICE_ADDED_TO_ROOM);
 		registerReceiver(deviceAddedToRoomReceiver, filter1);
 
 		deviceRemovedFromRoomReceiver = new BroadcastReceiver() {
@@ -282,13 +283,17 @@ public class RoomDetailActivity extends Activity {
 			}
 		};
 		IntentFilter filter2 = new IntentFilter();
-		filter2.addAction("st.alr.homA.deviceRemovedFromRoom");
+		filter2.addAction(App.DEVICE_REMOVED_FROM_ROOM);
 		registerReceiver(deviceRemovedFromRoomReceiver, filter2);
 
 		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				// TODO: enable or disable controls based on connection state
+//				Log.e(this.toString(), "disabling");
+//				boolean enabled = App.getState() == App.MQTT_CONNECTIVITY_CONNECTED;
+//				for (View view : deviceViews.values()) {
+//					//SetDisabled = enabled
+//				}
 			}
 		};
 		IntentFilter filter = new IntentFilter();

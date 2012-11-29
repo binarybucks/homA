@@ -79,7 +79,7 @@ public class ServerDialogPreference extends DialogPreference {
         		context.sendBroadcast(i);
         	}
         	
-        	((App)context.getApplicationContext()).bootstrapAndConnectMqtt();
+        	App.bootstrapAndConnectMqtt();
 
         break;
       }
