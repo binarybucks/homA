@@ -30,14 +30,24 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 		        Room room;
 		        AddRunnable(Room r) { room = r; }
 		        public void run() {
-					synchronized (mLock) {
+					synchronized (this) {
 						map.put(room.getId(), room);
 						notifyDataSetChanged(); 
+						this.notifyAll();
 					}
 		        }
 		    }
-		  uiThreadHandler.post(new AddRunnable(room));
+		  
+		  AddRunnable r = new AddRunnable(room);
+		  synchronized (r) {
+			  uiThreadHandler.post(r);
+			  try {
+				  r.wait();
+			} catch (InterruptedException e) {e.printStackTrace();}
+		}
 	}
+	
+	
 
 	public void notifyDataSetChangedOnMainThread() {
 		uiThreadHandler.post(new Runnable() {
@@ -58,33 +68,43 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 		        Room room;
 		        RemoveRunnable(Room r) { room = r; }
 		        public void run() {
-					synchronized (mLock) {
+					synchronized (this) {
 						map.remove(room.getId());
 						notifyDataSetChanged(); 
+						this.notifyAll();
 					}
 		        }
 		    }
-		  uiThreadHandler.post(new RemoveRunnable(room));
+		  RemoveRunnable r = new RemoveRunnable(room);
+		  synchronized (r) {
+			  uiThreadHandler.post(r);
+			  try {
+				  r.wait();
+			} catch (InterruptedException e) {e.printStackTrace();}
+		}
+
+		  
 	
 	}
 
 	public void clearOnMainThread() {
 		  class ClearRunnable implements Runnable {
 		        public void run() {
-					synchronized (mLock) {
+					synchronized (this) {
 						map.clear();
 						notifyDataSetChanged(); 
+						this.notifyAll();
 					}
 		        }
 		    }
-		  uiThreadHandler.post(new ClearRunnable());
-//
-//		  
-//				synchronized (mLock) {
-//					map.clear();
-//				}
-//
-//				notifyDataSetChanged();
+		  ClearRunnable r = new ClearRunnable();
+		  synchronized (r) {
+			  uiThreadHandler.post(r);
+			  try {
+				  r.wait();
+			} catch (InterruptedException e) {e.printStackTrace();}
+		}
+		  
 	}
 
 	@Override
@@ -93,8 +113,7 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 	}
 
 	public Object getRoom(String id) {
-		Room r = map.get(id);
-		return r;
+		return map.get(id);
 	}
 
 	@Override

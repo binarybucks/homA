@@ -207,7 +207,18 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public static void addRoom(Room room) {
+		Log.e("addRoom", "adding new room: " + room.getId());
+ 
 			roomsAdapter.addOnMainThread(room);
+			Room r =(Room)  roomsAdapter.getRoom(room.getId());
+			
+			if ( r != null) {
+				Log.e("addRoom", "add ok");
+			} else {
+				Log.e("addRoom", "add fail");
+
+			}
+
 	}
 
 	public static void removeAllRooms() {
@@ -223,7 +234,17 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public static Room getRoom(String id) {
-		return (Room) (roomsAdapter.getRoom(id));
+		Log.e("getRoom", "getRoom called with id: " + id);
+
+		Room r = (Room) roomsAdapter.getRoom(id);
+		if (r != null) {
+			Log.e("getRoom", "returns: " + r.getId());
+		} else {
+			Log.e("getRoom", "nothing found");
+
+		}
+		
+		return r;
 	}
 
 	

@@ -47,6 +47,8 @@ public class Device {
 		Room newRoom = App.getRoom(cleanedName);
 
 		if (newRoom == null) {
+			Log.e("moveToRoom", "Room not found, creating new instance: " + cleanedName);
+
 			newRoom = new Room(context, cleanedName);
 			App.addRoom(newRoom);
 		}
