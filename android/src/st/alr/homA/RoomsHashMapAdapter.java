@@ -60,10 +60,6 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 	}
 
 	public void removeOnMainThread(Room room) {
-//		synchronized (mLock) {
-//			map.remove(room.getId());
-//		}
-//		notifyDataSetChanged();
 		  class RemoveRunnable implements Runnable {
 		        Room room;
 		        RemoveRunnable(Room r) { room = r; }

@@ -34,7 +34,7 @@ public class Device {
 			room.removeDevice(this);
 
 			if (room.getDevices().size() == 0) {
-				Log.v(toString(), "Room " + room.getId() + " is empty, removing it");
+//				Log.v(toString(), "Room " + room.getId() + " is empty, removing it");
 				App.removeRoom(room);
 			}
 		}
@@ -47,7 +47,7 @@ public class Device {
 		Room newRoom = App.getRoom(cleanedName);
 
 		if (newRoom == null) {
-			Log.e("moveToRoom", "Room not found, creating new instance: " + cleanedName);
+//			Log.e("moveToRoom", "Room not found, creating new instance: " + cleanedName);
 
 			newRoom = new Room(context, cleanedName);
 			App.addRoom(newRoom);

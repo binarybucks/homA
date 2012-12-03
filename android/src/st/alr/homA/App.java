@@ -100,7 +100,7 @@ public class App extends Application implements MqttCallback {
 
 	private static void connectMqtt() {
 		try {
-			Log.v("Application", "Connecting to MQTT broker");
+//			Log.v("Application", "Connecting to MQTT broker");
 			mqttClient.connect();
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTED);
 
@@ -109,7 +109,7 @@ public class App extends Application implements MqttCallback {
 			mqttClient.subscribe("/devices/+/meta/#", 0);
 
 		} catch (MqttException e) {
-			Log.e("Application", "MqttException: " + e.getMessage());
+//			Log.e("Application", "MqttException: " + e.getMessage());
 
 			if (e.getReasonCode() == MqttException.REASON_CODE_SERVER_CONNECT_ERROR) {
 				getInstance().connectionLost(e.getCause());
@@ -124,7 +124,7 @@ public class App extends Application implements MqttCallback {
 	// successfully, this will retry to reconnect
 	@Override
 	public void connectionLost(Throwable cause) {
-		Log.e(toString(), "Mqtt connection lost. Cause: " + cause);
+//		Log.e(toString(), "Mqtt connection lost. Cause: " + cause);
 		updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
 
 		while (!mqttClient.isConnected()) {
@@ -138,7 +138,7 @@ public class App extends Application implements MqttCallback {
 
 	@Override
 	public void deliveryComplete(MqttDeliveryToken token) {
-		Log.v(toString(), "Mqtt QOS delivery complete. Token: " + token);
+//		Log.v(toString(), "Mqtt QOS delivery complete. Token: " + token);
 	}
 
 	@Override
@@ -148,7 +148,7 @@ public class App extends Application implements MqttCallback {
 		String topicStr = topic.getName();
 
 		final String text = topic.getName() + ":" + new String(message.getPayload()) + "\n";
-		Log.v(toString(), "Received: " + text);
+//		Log.v(toString(), "Received: " + text);
 
 		String[] splitTopic = topicStr.split("/");
 
@@ -175,7 +175,7 @@ public class App extends Application implements MqttCallback {
 				control.setValue(payloadStr);
 			} else { // Control type
 				control.setType(payloadStr);
-				Log.v(toString(), "type set to: " + payloadStr);
+//				Log.v(toString(), "type set to: " + payloadStr);
 			}
 		} else if (splitTopic[3].equals("meta")) {
 			if (splitTopic[4].equals("room")) { // Device Room
@@ -198,26 +198,26 @@ public class App extends Application implements MqttCallback {
 
 	public static void addDevice(Device device) {
 		devices.put(device.getId(), device);
-		Log.v("Application", "Device '" + device.getId() + "' added, new count is: " + devices.size());
+//		Log.v("Application", "Device '" + device.getId() + "' added, new count is: " + devices.size());
 	}
 
 	public static void removeDevice(Device device) {
 		devices.remove(device.getId());
-		Log.v("Application", "Device '" + device.getId() + "'  removed, new count is: " + devices.size());
+//		Log.v("Application", "Device '" + device.getId() + "'  removed, new count is: " + devices.size());
 	}
 
 	public static void addRoom(Room room) {
-		Log.e("addRoom", "adding new room: " + room.getId());
+//		Log.e("addRoom", "adding new room: " + room.getId());
  
 			roomsAdapter.addOnMainThread(room);
 			Room r =(Room)  roomsAdapter.getRoom(room.getId());
 			
-			if ( r != null) {
-				Log.e("addRoom", "add ok");
-			} else {
-				Log.e("addRoom", "add fail");
-
-			}
+//			if ( r != null) {
+//				Log.e("addRoom", "add ok");
+//			} else {
+//				Log.e("addRoom", "add fail");
+//
+//			}
 
 	}
 
@@ -234,15 +234,15 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public static Room getRoom(String id) {
-		Log.e("getRoom", "getRoom called with id: " + id);
+//		Log.e("getRoom", "getRoom called with id: " + id);
 
 		Room r = (Room) roomsAdapter.getRoom(id);
-		if (r != null) {
-			Log.e("getRoom", "returns: " + r.getId());
-		} else {
-			Log.e("getRoom", "nothing found");
-
-		}
+//		if (r != null) {
+//			Log.e("getRoom", "returns: " + r.getId());
+//		} else {
+//			Log.e("getRoom", "nothing found");
+//
+//		}
 		
 		return r;
 	}

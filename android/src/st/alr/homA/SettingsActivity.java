@@ -69,7 +69,7 @@ public class SettingsActivity extends PreferenceActivity {
 				if (key.equals("serverAddress")) {
 					setServerPreferenceSummary(stringValue);
 				} else {
-					Log.v(toString(), "OnPreferenceChangeListener not implemented for key " + key);
+//					Log.v(toString(), "OnPreferenceChangeListener not implemented for key " + key);
 				}
 
 			}
@@ -80,7 +80,7 @@ public class SettingsActivity extends PreferenceActivity {
 		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				Log.e(toString(), "action is: " + intent.getAction());
+//				Log.e(toString(), "action is: " + intent.getAction());
 				setServerPreferenceSummaryManually();
 			}
 		};
