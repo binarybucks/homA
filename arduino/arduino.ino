@@ -59,8 +59,8 @@ void setLedColor(int red, int green, int blue);
 
 
 // Settings 
-byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFF };
-//byte ip[]     = { 192, 168, 8, 4 };
+byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD };
+byte ip[]     = { 192, 168, 8, 4 };
 byte mqttServer[] = { 192, 168, 8, 2 };
 char* mqttClientId = "homeduino";
 char* wifiSwitchHomeGroup = "11011";
@@ -77,8 +77,11 @@ int ambilightHue = 359;
 
 
 void setup() {
- // Serial.begin(9600);
- // Serial.println("Starting");
+//  Serial.begin(9600);
+//  Serial.println("Starting");
+  
+
+  Ethernet.begin(mac, ip);
 
   pinMode(AMBILIGHTREDPIN, OUTPUT);
   pinMode(AMBILIGHTGREENPIN, OUTPUT);
@@ -87,11 +90,13 @@ void setup() {
   
   wifiTransmitter.enableTransmit(WIFIPIN);
 
-  Ethernet.begin(mac);
+  
+  
   if (client.connect(mqttClientId)) {
     subscribe();
     publishDeviceMetaInformation();
   }
+
 }
 
 
