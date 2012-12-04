@@ -8,56 +8,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
-	private static short mqttConnectivityState = App.MQTT_CONNECTIVITY_DISCONNECTED;
 	private static SharedPreferences sharedPreferences;
 	private BroadcastReceiver mqttConnectivityChangedReceiver;
 	private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
-	private static Context context;
-
-	/**
-	 * Determines whether to always show the simplified settings UI, where
-	 * settings are presented in a single list. When false, settings are shown
-	 * as a master/detail two-pane view on tablets. When true, a single pane is
-	 * shown on tablets.
-	 */
-
-	@Override
-	protected void onPostCreate(Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);
-
-	}
 
 	@Override
 	protected void onDestroy() {
 		unregisterReceiver(mqttConnectivityChangedReceiver);
 		sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferencesChangedListener);
-
 		super.onDestroy();
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		context = this;
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		mqttConnectivityState = ((App) getApplicationContext()).getState();
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
 
@@ -68,8 +43,6 @@ public class SettingsActivity extends PreferenceActivity {
 
 				if (key.equals("serverAddress")) {
 					setServerPreferenceSummary(stringValue);
-				} else {
-//					Log.v(toString(), "OnPreferenceChangeListener not implemented for key " + key);
 				}
 
 			}
@@ -80,7 +53,6 @@ public class SettingsActivity extends PreferenceActivity {
 		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-//				Log.e(toString(), "action is: " + intent.getAction());
 				setServerPreferenceSummaryManually();
 			}
 		};
@@ -144,6 +116,6 @@ public class SettingsActivity extends PreferenceActivity {
 	}
 
 	private static short getConnectivity() {
-		return ((App) context.getApplicationContext()).getState();
+		return App.getState();
 	}
 }

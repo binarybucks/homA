@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,41 +12,43 @@ import android.widget.TextView;
 
 public class RoomsHashMapAdapter extends BaseAdapter {
 	private HashMap<String, Room> map;
-	private Context context;
 	private LayoutInflater inflater;
-	private final Object mLock = new Object();
 	final Handler uiThreadHandler = new Handler();
 
 	public RoomsHashMapAdapter(Context context) {
-		this.context = context;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		map = new HashMap<String, Room>();
 	}
 
 	public void addOnMainThread(Room room) {
-		
-		  class AddRunnable implements Runnable {
-		        Room room;
-		        AddRunnable(Room r) { room = r; }
-		        public void run() {
-					synchronized (this) {
-						map.put(room.getId(), room);
-						notifyDataSetChanged(); 
-						this.notifyAll();
-					}
-		        }
-		    }
-		  
-		  AddRunnable r = new AddRunnable(room);
-		  synchronized (r) {
-			  uiThreadHandler.post(r);
-			  try {
-				  r.wait();
-			} catch (InterruptedException e) {e.printStackTrace();}
+
+		class AddRunnable implements Runnable {
+			Room room;
+
+			AddRunnable(Room r) {
+				room = r;
+			}
+
+			@Override
+			public void run() {
+				synchronized (this) {
+					map.put(room.getId(), room);
+					notifyDataSetChanged();
+					notifyAll();
+				}
+			}
+		}
+
+		AddRunnable r = new AddRunnable(room);
+		synchronized (r) {
+			uiThreadHandler.post(r);
+			try {
+				r.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
-	
 
 	public void notifyDataSetChangedOnMainThread() {
 		uiThreadHandler.post(new Runnable() {
@@ -60,47 +61,55 @@ public class RoomsHashMapAdapter extends BaseAdapter {
 	}
 
 	public void removeOnMainThread(Room room) {
-		  class RemoveRunnable implements Runnable {
-		        Room room;
-		        RemoveRunnable(Room r) { room = r; }
-		        public void run() {
-					synchronized (this) {
-						map.remove(room.getId());
-						notifyDataSetChanged(); 
-						this.notifyAll();
-					}
-		        }
-		    }
-		  RemoveRunnable r = new RemoveRunnable(room);
-		  synchronized (r) {
-			  uiThreadHandler.post(r);
-			  try {
-				  r.wait();
-			} catch (InterruptedException e) {e.printStackTrace();}
+		class RemoveRunnable implements Runnable {
+			Room room;
+
+			RemoveRunnable(Room r) {
+				room = r;
+			}
+
+			@Override
+			public void run() {
+				synchronized (this) {
+					map.remove(room.getId());
+					notifyDataSetChanged();
+					notifyAll();
+				}
+			}
+		}
+		RemoveRunnable r = new RemoveRunnable(room);
+		synchronized (r) {
+			uiThreadHandler.post(r);
+			try {
+				r.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
-		  
-	
 	}
 
 	public void clearOnMainThread() {
-		  class ClearRunnable implements Runnable {
-		        public void run() {
-					synchronized (this) {
-						map.clear();
-						notifyDataSetChanged(); 
-						this.notifyAll();
-					}
-		        }
-		    }
-		  ClearRunnable r = new ClearRunnable();
-		  synchronized (r) {
-			  uiThreadHandler.post(r);
-			  try {
-				  r.wait();
-			} catch (InterruptedException e) {e.printStackTrace();}
+		class ClearRunnable implements Runnable {
+			@Override
+			public void run() {
+				synchronized (this) {
+					map.clear();
+					notifyDataSetChanged();
+					notifyAll();
+				}
+			}
 		}
-		  
+		ClearRunnable r = new ClearRunnable();
+		synchronized (r) {
+			uiThreadHandler.post(r);
+			try {
+				r.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	@Override

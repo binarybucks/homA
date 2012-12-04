@@ -9,81 +9,77 @@ import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-
-
 
 public class ServerDialogPreference extends DialogPreference {
 	private Context context;
 	private EditText address;
 	private EditText port;
-	
-    public ServerDialogPreference(Context context, AttributeSet attrs) {
+
+	public ServerDialogPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
-	    this.context = context;
-	    
+		this.context = context;
+
 		setDialogLayoutResource(R.layout.server_dialog_preferences);
-	    
-    }
 
-    @Override
-    protected void onDialogClosed(boolean positiveResult) {
-        super.onDialogClosed(positiveResult);
-        //persistBoolean(positiveResult);
-    }
+	}
 
+	@Override
+	protected void onDialogClosed(boolean positiveResult) {
+		super.onDialogClosed(positiveResult);
+	}
 
-    @Override
-    protected View onCreateDialogView() {
-      View root = super.onCreateDialogView();
-      address = (EditText) root.findViewById(R.id.serverAddress);
-      port = (EditText) root.findViewById(R.id.serverPort);
+	@Override
+	protected View onCreateDialogView() {
+		View root = super.onCreateDialogView();
+		address = (EditText) root.findViewById(R.id.serverAddress);
+		port = (EditText) root.findViewById(R.id.serverPort);
 
-      return root;
-    }
-    
-    @Override
-    protected void onBindDialogView(View view) {
-      	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-      	address.setText(prefs.getString("serverAddress", "192.168.8.2"));
-      	port.setText(prefs.getString("serverPort", "1883"));
-    }
-    
+		return root;
+	}
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-      switch(which) {
-        case DialogInterface.BUTTON_POSITIVE: // User clicked OK!
-            
-        	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        	SharedPreferences.Editor editor = prefs.edit();
-        	
-        	String oldAddress = prefs.getString("serverAddress", "192.168.8.2"); 
-        	String oldPort = prefs.getString("serverPort", "1883");
-        	
-        	String newAdress = address.getText().toString();
-        	String newPort = port.getText().toString();
-        	
-        	editor.putString("serverAddress", newAdress);
-        	editor.putString("serverPort", newPort);
+	@Override
+	protected void onBindDialogView(View view) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		address.setText(prefs.getString("serverAddress", "192.168.8.2"));
+		port.setText(prefs.getString("serverPort", "1883"));
+	}
 
-        	editor.apply();
-        	
-        	// 
-        	if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
-        		Intent i = new Intent(App.SERVER_SETTINGS_CHANGED);
-        		context.sendBroadcast(i);
-        	}
-        	
-        	App.bootstrapAndConnectMqtt();
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		switch (which) {
+			case DialogInterface.BUTTON_POSITIVE: // User clicked ok
 
-        break;
-      }
-      super.onClick(dialog, which);
-    }
-    
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+				SharedPreferences.Editor editor = prefs.edit();
+
+				String oldAddress = prefs.getString("serverAddress", "192.168.8.2");
+				String oldPort = prefs.getString("serverPort", "1883");
+
+				String newAdress = address.getText().toString();
+				String newPort = port.getText().toString();
+
+				editor.putString("serverAddress", newAdress);
+				editor.putString("serverPort", newPort);
+
+				editor.apply();
+
+				if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
+					Log.v(toString(), "Server address changed");
+					Intent i = new Intent(App.SERVER_SETTINGS_CHANGED);
+					context.sendBroadcast(i);
+					App.bootstrapAndConnectMqtt(true); // Server changed, clean
+														// up everything from
+														// old server
+				} else {
+					App.bootstrapAndConnectMqtt(false); // Connect to same
+														// server, no cleanup
+														// needed
+				}
+
+				break;
+		}
+		super.onClick(dialog, which);
+	}
+
 }

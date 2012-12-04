@@ -10,12 +10,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -69,16 +67,16 @@ public class RoomDetailActivity extends Activity {
 		setContentView(sw);
 	}
 
-//	protected void onPause(){
-//		super.onPause();
-//		clearObservers();		
-//	}
-//	
-//	protected void onResume() {
-//		super.onResume();
-//		establishObservers();
-//	}
-	
+	// protected void onPause(){
+	// super.onPause();
+	// clearObservers();
+	// }
+	//
+	// protected void onResume() {
+	// super.onResume();
+	// establishObservers();
+	// }
+
 	public void addViewForDevice(Device device) {
 		LinearLayout deviceLayout = new LinearLayout(this);
 		deviceLayout.setOrientation(LinearLayout.VERTICAL);
@@ -166,7 +164,6 @@ public class RoomDetailActivity extends Activity {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 			}
 		});
-
 
 		value.setMax(255);
 		value.setProgress(Math.round(Float.parseFloat(control.getValue())));
@@ -289,11 +286,12 @@ public class RoomDetailActivity extends Activity {
 		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-//				Log.e(this.toString(), "disabling");
-//				boolean enabled = App.getState() == App.MQTT_CONNECTIVITY_CONNECTED;
-//				for (View view : deviceViews.values()) {
-//					//SetDisabled = enabled
-//				}
+				// Log.e(this.toString(), "disabling");
+				// boolean enabled = App.getState() ==
+				// App.MQTT_CONNECTIVITY_CONNECTED;
+				// for (View view : deviceViews.values()) {
+				// //SetDisabled = enabled
+				// }
 			}
 		};
 		IntentFilter filter = new IntentFilter();

@@ -15,7 +15,7 @@ public class RoomListActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.room_list_container);
-		setListAdapter(((App) getApplicationContext()).getRoomsAdapter());
+		setListAdapter(App.getRoomsAdapter());
 	}
 
 	@Override
