@@ -59,14 +59,14 @@ public class App extends Application implements MqttCallback {
 		bootstrapAndConnectMqtt(false);
 	}
 
-	public static void bootstrapAndConnectMqtt(boolean clear) {
+	public static void bootstrapAndConnectMqtt(final boolean clear) {
 		try {
 			// Ensures that this method is not called on the main thread
 			if (Thread.currentThread().getName().equals("main")) { 
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						bootstrapAndConnectMqtt();
+						bootstrapAndConnectMqtt(clear);
 					}
 				}).start();
 				return;
@@ -177,7 +177,6 @@ public class App extends Application implements MqttCallback {
 		} else if (splitTopic[3].equals("meta")) {
 			if (splitTopic[4].equals("room")) { // Device Room
 				device.moveToRoom(payloadStr);
-
 			} else if (splitTopic[4].equals("name")) { // Device name
 				device.setName(payloadStr);
 			}

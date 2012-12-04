@@ -17,32 +17,36 @@
 
 #define DEVICE_COMMAND_WILDCARD "/devices/+/controls/+/on"    // Incomming values and commands for device
 
-#define DEVICE_1_POWER_INTERFACE "/devices/321995-ambilight/controls/Power"
-#define DEVICE_1_POWER_COMMAND "/devices/321995-ambilight/controls/Power/on"
-#define DEVICE_1_POWER_TYPE "/devices/321995-ambilight/controls/Power/type"
-#define DEVICE_1_FADING_INTERFACE "/devices/321995-ambilight/controls/Fading"
-#define DEVICE_1_FADING_COMMAND "/devices/321995-ambilight/controls/Fading/on"
-#define DEVICE_1_FADING_TYPE "/devices/321995-ambilight/controls/Fading/type"
-#define DEVICE_1_VALUE_INTERFACE "/devices/321995-ambilight/controls/Brightness"
-#define DEVICE_1_VALUE_COMMAND"/devices/321995-ambilight/controls/Brightness/on"
-#define DEVICE_1_VALUE_TYPE "/devices/321995-ambilight/controls/Brightness/type"
-#define DEVICE_1_HUE_INTERFACE "/devices/321995-ambilight/controls/Color"
-#define DEVICE_1_HUE_COMMAND "/devices/321995-ambilight/controls/Color/on"
-#define DEVICE_1_HUE_TYPE "/devices/321995-ambilight/controls/Color/type"
-#define DEVICE_2_POWER_INTERFACE "/devices/862671-wirelessSwitch/controls/Power"
-#define DEVICE_2_POWER_COMMAND "/devices/862671-wirelessSwitch/controls/Power/on"
-#define DEVICE_2_POWER_TYPE "/devices/862671-wirelessSwitch/controls/Power/type"
-#define DEVICE_3_POWER_INTERFACE "/devices/558426-wirelessSwitch/controls/Power"
-#define DEVICE_3_POWER_COMMAND "/devices/558426-wirelessSwitch/controls/Power/on"
-#define DEVICE_3_POWER_TYPE "/devices/558426-wirelessSwitch/controls/Power/type"
+#define DEVICE_1_POWER_INTERFACE "/devices/Device-A/controls/Power"
+#define DEVICE_1_POWER_COMMAND "/devices/Device-A/controls/Power/on"
+#define DEVICE_1_POWER_TYPE   "/devices/Device-A/controls/Power/type"
+#define DEVICE_1_FADING_INTERFACE "/devices/Device-A/controls/Fading"
+#define DEVICE_1_FADING_COMMAND "/devices/Device-A/controls/Fading/on"
+#define DEVICE_1_FADING_TYPE "/devices/Device-A/controls/Fading/type"
+#define DEVICE_1_VALUE_INTERFACE "/devices/Device-A/controls/Brightness"
+#define DEVICE_1_VALUE_COMMAND "/devices/Device-A/controls/Brightness/on"
+#define DEVICE_1_VALUE_TYPE "/devices/Device-A/controls/Brightness/type"
+#define DEVICE_1_HUE_INTERFACE "/devices/Device-A/controls/Color"
+#define DEVICE_1_HUE_COMMAND "/devices/Device-A/controls/Color/on"
+#define DEVICE_1_HUE_TYPE "/devices/Device-A/controls/Color/type"
+#define DEVICE_2_POWER_INTERFACE "/devices/Device-B/controls/Power"
+#define DEVICE_2_POWER_COMMAND "/devices/Device-B/controls/Power/on"
+#define DEVICE_2_POWER_TYPE "/devices/Device-B/controls/Power/type"
+#define DEVICE_3_POWER_INTERFACE "/devices/Device-C/controls/Power"
+#define DEVICE_3_POWER_COMMAND "/devices/Device-C/controls/Power/on"
+#define DEVICE_3_POWER_TYPE "/devices/Device-C/controls/Power/type"
 
-#define DEVICE_5_POWER_INTERFACE "/devices/E-wirelessSwitch/controls/Power"
-#define DEVICE_5_POWER_COMMAND "/devices/E-wirelessSwitch/controls/Power/on"
-#define DEVICE_5_POWER_TYPE "/devices/E-wirelessSwitch/controls/Power/type"
+#define DEVICE_4_POWER_INTERFACE "/devices/Device-D/controls/Power"
+#define DEVICE_4_POWER_COMMAND "/devices/Device-D/controls/Power/on"
+#define DEVICE_4_POWER_TYPE "/devices/Device-D/controls/Power/type"
+
+#define DEVICE_5_POWER_INTERFACE "/devices/Device-E/controls/Power"
+#define DEVICE_5_POWER_COMMAND "/devices/Device-E/controls/Power/on"
+#define DEVICE_5_POWER_TYPE "/devices/Device-E/controls/Power/type"
 
 
-#define SENSORS_1_TEMPERATURE_INTERFACE"/devices/482031-sensors/Controls/temp"
-#define SENSORS_1_TEMPERATURE_TYPE "/devices/482031-sensors/controls/Temp/type"
+#define SENSORS_1_TEMPERATURE_INTERFACE"/devices/Sensors/controls/Temp"
+#define SENSORS_1_TEMPERATURE_TYPE "/devices/Sensors/controls/Temp/type"
 
 // Prototypes
 void fadeLoop();
@@ -59,7 +63,7 @@ void setLedColor(int red, int green, int blue);
 
 
 // Settings 
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD };
+byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFF };
 byte ip[]     = { 192, 168, 8, 4 };
 byte mqttServer[] = { 192, 168, 8, 2 };
 char* mqttClientId = "homeduino";
@@ -77,11 +81,8 @@ int ambilightHue = 359;
 
 
 void setup() {
-//  Serial.begin(9600);
-//  Serial.println("Starting");
-  
-
-  Ethernet.begin(mac, ip);
+ // Serial.begin(9600);
+ // Serial.println("Starting");
 
   pinMode(AMBILIGHTREDPIN, OUTPUT);
   pinMode(AMBILIGHTGREENPIN, OUTPUT);
@@ -90,13 +91,11 @@ void setup() {
   
   wifiTransmitter.enableTransmit(WIFIPIN);
 
-  
-  
+  Ethernet.begin(mac, ip);
   if (client.connect(mqttClientId)) {
     subscribe();
     publishDeviceMetaInformation();
   }
-
 }
 
 
@@ -156,8 +155,8 @@ void publishDeviceMetaInformation() {
  publishRetained(DEVICE_1_VALUE_TYPE, "range"); 
  publishRetained(DEVICE_2_POWER_TYPE, "switch");
  publishRetained(DEVICE_3_POWER_TYPE, "switch");
-  publishRetained(DEVICE_5_POWER_TYPE, "switch");
-
+ publishRetained(DEVICE_4_POWER_TYPE, "switch");
+ publishRetained(DEVICE_5_POWER_TYPE, "switch");
  publishRetained(SENSORS_1_TEMPERATURE_TYPE, "text");
 }
 
@@ -184,17 +183,34 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
     publishRetained(DEVICE_1_HUE_INTERFACE, payload);
 
   } else if(strcmp(topic, DEVICE_1_POWER_COMMAND) == 0) {
-    setWifi((char*)payload, wifiSwitchHomeGroup, 1);
-    publishRetained(DEVICE_1_POWER_INTERFACE, payload);
+   
+    // switch on/off by adjusting brightness, until hardware bug is fixed in new revision
+    //setWifi((char*)payload, wifiSwitchHomeGroup, 1);
+ 
+     publishRetained(DEVICE_1_POWER_INTERFACE, payload);
+
+    if (strcmp(payload, "1") == 0) {
+     // setLedColorHSV(ambilightHue, 0.0);  
+     publishRetained(DEVICE_1_VALUE_COMMAND, "255");
+//
+    } else {
+    //  setLedColorHSV(ambilightHue, 1.0);
+      publishRetained(DEVICE_1_VALUE_COMMAND, "0");
+    }
+
+ 
   } else if(strcmp(topic, DEVICE_1_FADING_COMMAND)  == 0 ) {
     fadeStepFlag  = !(*payload == '0');
     publishRetained(DEVICE_1_FADING_INTERFACE, payload);
   } else if(strcmp(topic, DEVICE_2_POWER_COMMAND)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 2);
     publishRetained(DEVICE_2_POWER_INTERFACE, payload);
-  }else if(strcmp(topic,DEVICE_3_POWER_COMMAND)  == 0) {
+  } else if(strcmp(topic,DEVICE_3_POWER_COMMAND)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 3);
     publishRetained(DEVICE_3_POWER_INTERFACE, payload);
+  } else if(strcmp(topic,DEVICE_4_POWER_COMMAND)  == 0) {
+    setWifi((char*)payload, wifiSwitchHomeGroup, 4);
+    publishRetained(DEVICE_4_POWER_INTERFACE, payload);
   } else if(strcmp(topic,DEVICE_5_POWER_COMMAND)  == 0) {
     setWifi((char*)payload, wifiSwitchHomeGroup, 5);
     publishRetained(DEVICE_5_POWER_INTERFACE, payload);
@@ -205,20 +221,20 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
 void setWifi(char* state, char* group, int switchNumber) {
   if (strcmp(state, "1") == 0) {
     wifiTransmitter.switchOn(group, switchNumber);
-      wifiTransmitter.enableTransmit(WIFIPIN);
+     // wifiTransmitter.enableTransmit(WIFIPIN);
 
-    delay(150);
-    wifiTransmitter.switchOn(group, switchNumber);  
-    delay(350);
-    wifiTransmitter.switchOn(group, switchNumber);  
+    //delay(150);
+    //wifiTransmitter.switchOn(group, switchNumber);  
+ //   delay(350);
+   // wifiTransmitter.switchOn(group, switchNumber);  
 
 
   } else if (strcmp(state, "0") == 0)  {  
     wifiTransmitter.switchOff(group, switchNumber); 
-    delay(150);
-    wifiTransmitter.switchOff(group, switchNumber);  
-    delay(350);
-    wifiTransmitter.switchOff(group, switchNumber);  
+   // delay(150);
+    //wifiTransmitter.switchOff(group, switchNumber);  
+   // delay(350);
+  //  wifiTransmitter.switchOff(group, switchNumber);  
 
   } 
 }

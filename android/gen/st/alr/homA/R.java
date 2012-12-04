@@ -56,10 +56,7 @@ public final class R {
         public static final int app_name=0x7f050000;
         public static final int defaultRoomName=0x7f050002;
         public static final int menu_settings=0x7f050001;
-        public static final int preferences_server_default=0x7f050003;
-        public static final int preferences_server_summary=0x7f050005;
-        public static final int preferences_server_title=0x7f050004;
-        public static final int title_room_list=0x7f050006;
+        public static final int preferences_server_title=0x7f050003;
     }
     public static final class style {
         /** 
