@@ -7,12 +7,7 @@
             android:key="serverPreference"
             android:negativeButtonText="Cancel"
             android:positiveButtonText="Connect"
-            android:summary="@string/preferences_server_summary"
             android:title="Server"  >
-            
-            
-            
-           
         </st.alr.homA.ServerDialogPreference>
         
     </PreferenceCategory>
