@@ -75368,7 +75368,7 @@ _____________________________________________________________________
 Interfaces (count = 1):
   + Class [org/eclipse/paho/client/mqttv3/MqttCallback]
 
-Constant Pool (count = 435):
+Constant Pool (count = 436):
   + Integer [2131034114]
   + String []
   + String [
@@ -75495,7 +75495,7 @@ Constant Pool (count = 435):
   + Methodref [st/alr/homA/App.removeAllRooms ()V]
   + Methodref [st/alr/homA/App.sendBroadcast (Landroid/content/Intent;)V]
   + Methodref [st/alr/homA/App.updateMqttConnectivity (S)V]
-  + Methodref [st/alr/homA/App$1.<init> ()V]
+  + Methodref [st/alr/homA/App$1.<init> (Z)V]
   + Methodref [st/alr/homA/Control.<init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Lst/alr/homA/Device;)V]
   + Methodref [st/alr/homA/Control.setType (Ljava/lang/String;)V]
   + Methodref [st/alr/homA/Control.setValue (Ljava/lang/String;)V]
@@ -75518,6 +75518,7 @@ Constant Pool (count = 435):
   + NameAndType [<init> (Ljava/lang/String;)V]
   + NameAndType [<init> (Ljava/lang/String;Landroid/content/Context;)V]
   + NameAndType [<init> (Ljava/lang/String;Ljava/lang/String;Lorg/eclipse/paho/client/mqttv3/MqttClientPersistence;)V]
+  + NameAndType [<init> (Z)V]
   + NameAndType [<init> ([B)V]
   + NameAndType [addControl (Lst/alr/homA/Control;)V]
   + NameAndType [addDevice (Lst/alr/homA/Device;)V]
@@ -75937,7 +75938,7 @@ Methods (count = 21):
     Access flags: 0x9
       = public static void bootstrapAndConnectMqtt(boolean)
     Class member attributes (count = 1):
-    + Code attribute instructions (code length = 153, locals = 2, stack = 6):
+    + Code attribute instructions (code length = 154, locals = 2, stack = 6):
       [0] invokestatic #89
         + Methodref [java/lang/Thread.currentThread ()Ljava/lang/Thread;]
       [3] invokevirtual #90
@@ -75946,139 +75947,140 @@ Methods (count = 21):
         + String [main]
       [8] invokevirtual #79
         + Methodref [java/lang/String.equals (Ljava/lang/Object;)Z]
-      [11] ifeq +21 (target=32)
+      [11] ifeq +22 (target=33)
       [14] new #46
         + Class [java/lang/Thread]
       [17] dup
       [18] new #55
         + Class [st/alr/homA/App$1]
       [21] dup
-      [22] invokespecial #127
-        + Methodref [st/alr/homA/App$1.<init> ()V]
-      [25] invokespecial #88
+      [22] iload_0 v0
+      [23] invokespecial #127
+        + Methodref [st/alr/homA/App$1.<init> (Z)V]
+      [26] invokespecial #88
         + Methodref [java/lang/Thread.<init> (Ljava/lang/Runnable;)V]
-      [28] invokevirtual #92
+      [29] invokevirtual #92
         + Methodref [java/lang/Thread.start ()V]
-      [31] return
-      [32] invokestatic #120
+      [32] return
+      [33] invokestatic #120
         + Methodref [st/alr/homA/App.disconnect ()V]
-      [35] iload_0 v0
-      [36] ifeq +28 (target=64)
-      [39] ldc #23
+      [36] iload_0 v0
+      [37] ifeq +28 (target=65)
+      [40] ldc #23
         + String [bootstrapAndConnectMqtt]
-      [41] ldc #14
+      [42] ldc #14
         + String [Clearing all rooms]
-      [43] invokestatic #75
+      [44] invokestatic #75
         + Methodref [android/util/Log.v (Ljava/lang/String;Ljava/lang/String;)I]
-      [46] pop
-      [47] invokestatic #124
+      [47] pop
+      [48] invokestatic #124
         + Methodref [st/alr/homA/App.removeAllRooms ()V]
-      [50] ldc #23
+      [51] ldc #23
         + String [bootstrapAndConnectMqtt]
-      [52] ldc #13
+      [53] ldc #13
         + String [Clearing all devices]
-      [54] invokestatic #75
+      [55] invokestatic #75
         + Methodref [android/util/Log.v (Ljava/lang/String;Ljava/lang/String;)I]
-      [57] pop
-      [58] getstatic #62
+      [58] pop
+      [59] getstatic #62
         + Fieldref [st/alr/homA/App.devices Ljava/util/HashMap;]
-      [61] invokevirtual #94
+      [62] invokevirtual #94
         + Methodref [java/util/HashMap.clear ()V]
-      [64] invokestatic #120
+      [65] invokestatic #120
         + Methodref [st/alr/homA/App.disconnect ()V]
-      [67] iconst_2
-      [68] invokestatic #126
+      [68] iconst_2
+      [69] invokestatic #126
         + Methodref [st/alr/homA/App.updateMqttConnectivity (S)V]
-      [71] new #49
+      [72] new #49
         + Class [org/eclipse/paho/client/mqttv3/MqttClient]
-      [74] dup
-      [75] new #45
+      [75] dup
+      [76] new #45
         + Class [java/lang/StringBuilder]
-      [78] dup
-      [79] ldc #33
+      [79] dup
+      [80] ldc #33
         + String [tcp://]
-      [81] invokespecial #84
+      [82] invokespecial #84
         + Methodref [java/lang/StringBuilder.<init> (Ljava/lang/String;)V]
-      [84] getstatic #67
+      [85] getstatic #67
         + Fieldref [st/alr/homA/App.sharedPreferences Landroid/content/SharedPreferences;]
-      [87] ldc #30
+      [88] ldc #30
         + String [serverAddress]
-      [89] ldc #2
+      [90] ldc #2
         + String []
-      [91] invokeinterface #142
+      [92] invokeinterface #142
         + InterfaceMethodref [android/content/SharedPreferences.getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;]
-      [96] invokevirtual #86
+      [97] invokevirtual #86
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [99] ldc #11
+      [100] ldc #11
         + String [:]
-      [101] invokevirtual #86
+      [102] invokevirtual #86
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [104] getstatic #67
+      [105] getstatic #67
         + Fieldref [st/alr/homA/App.sharedPreferences Landroid/content/SharedPreferences;]
-      [107] ldc #31
+      [108] ldc #31
         + String [serverPort]
-      [109] ldc #10
+      [110] ldc #10
         + String [1883]
-      [111] invokeinterface #142
+      [112] invokeinterface #142
         + InterfaceMethodref [android/content/SharedPreferences.getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;]
-      [116] invokevirtual #86
+      [117] invokevirtual #86
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [119] invokevirtual #87
+      [120] invokevirtual #87
         + Methodref [java/lang/StringBuilder.toString ()Ljava/lang/String;]
-      [122] invokestatic #100
+      [123] invokestatic #100
         + Methodref [org/eclipse/paho/client/mqttv3/MqttClient.generateClientId ()Ljava/lang/String;]
-      [125] aconst_null
-      [126] invokespecial #97
+      [126] aconst_null
+      [127] invokespecial #97
         + Methodref [org/eclipse/paho/client/mqttv3/MqttClient.<init> (Ljava/lang/String;Ljava/lang/String;Lorg/eclipse/paho/client/mqttv3/MqttClientPersistence;)V]
-      [129] putstatic #64
+      [130] putstatic #64
         + Fieldref [st/alr/homA/App.mqttClient Lorg/eclipse/paho/client/mqttv3/MqttClient;]
-      [132] getstatic #64
+      [133] getstatic #64
         + Fieldref [st/alr/homA/App.mqttClient Lorg/eclipse/paho/client/mqttv3/MqttClient;]
-      [135] invokestatic #122
+      [136] invokestatic #122
         + Methodref [st/alr/homA/App.getInstance ()Lst/alr/homA/App;]
-      [138] invokevirtual #103
+      [139] invokevirtual #103
         + Methodref [org/eclipse/paho/client/mqttv3/MqttClient.setCallback (Lorg/eclipse/paho/client/mqttv3/MqttCallback;)V]
-      [141] invokestatic #118
+      [142] invokestatic #118
         + Methodref [st/alr/homA/App.connectMqtt ()V]
-      [144] goto +8 (target=152)
-      [147] astore_1 v1
-      [148] aload_1 v1
-      [149] invokevirtual #76
+      [145] goto +8 (target=153)
+      [148] astore_1 v1
+      [149] aload_1 v1
+      [150] invokevirtual #76
         + Methodref [java/lang/Exception.printStackTrace ()V]
-      [152] return
+      [153] return
       Code attribute exceptions (count = 2):
-      + ExceptionInfo (0 -> 31: 147):
+      + ExceptionInfo (0 -> 32: 148):
       + Class [java/lang/Exception]
-      + ExceptionInfo (32 -> 144: 147):
+      + ExceptionInfo (33 -> 145: 148):
       + Class [java/lang/Exception]
       Code attribute attributes (attribute count = 3):
       + Line number table attribute (count = 18)
         [0] -> line 65
         [14] -> line 66
-        [28] -> line 71
-        [31] -> line 72
-        [32] -> line 75
-        [35] -> line 77
-        [39] -> line 78
-        [47] -> line 79
-        [50] -> line 80
-        [58] -> line 81
-        [64] -> line 84
-        [67] -> line 86
-        [71] -> line 88
-        [132] -> line 90
-        [141] -> line 91
-        [147] -> line 93
-        [148] -> line 94
-        [152] -> line 97
+        [29] -> line 71
+        [32] -> line 72
+        [33] -> line 75
+        [36] -> line 77
+        [40] -> line 78
+        [48] -> line 79
+        [51] -> line 80
+        [59] -> line 81
+        [65] -> line 84
+        [68] -> line 86
+        [72] -> line 88
+        [133] -> line 90
+        [142] -> line 91
+        [148] -> line 93
+        [149] -> line 94
+        [153] -> line 97
       + Local variable table attribute (count = 2)
-        v0: 0 -> 153 [Z clear]
-        v1: 148 -> 152 [Ljava/lang/Exception; e]
+        v0: 0 -> 154 [Z clear]
+        v1: 149 -> 153 [Ljava/lang/Exception; e]
       + Stack map table attribute (count = 4):
-        - [32] Var: ..., Stack: (empty)
-        - [64] Var: ..., Stack: (empty)
-        - [147] Var: ..., Stack: [a:java/lang/Exception]
-        - [152] Var: ..., Stack: (empty)
+        - [33] Var: ..., Stack: (empty)
+        - [65] Var: ..., Stack: (empty)
+        - [148] Var: ..., Stack: [a:java/lang/Exception]
+        - [153] Var: ..., Stack: (empty)
   + Method:       connectMqtt()V
     Access flags: 0xa
       = private static void connectMqtt()
@@ -76481,9 +76483,9 @@ Methods (count = 21):
         [235] -> line 177
         [247] -> line 178
         [259] -> line 179
-        [268] -> line 181
-        [280] -> line 182
-        [286] -> line 186
+        [268] -> line 180
+        [280] -> line 181
+        [286] -> line 185
       + Local variable table attribute (count = 11)
         v0: 0 -> 287 [Lst/alr/homA/App; this]
         v1: 0 -> 287 [Lorg/eclipse/paho/client/mqttv3/MqttTopic; topic]
@@ -76562,15 +76564,15 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 3):
       + Line number table attribute (count = 9)
-        [0] -> line 189
-        [15] -> line 190
-        [23] -> line 192
-        [27] -> line 193
-        [33] -> line 194
-        [37] -> line 195
-        [48] -> line 197
-        [56] -> line 200
-        [64] -> line 202
+        [0] -> line 188
+        [15] -> line 189
+        [23] -> line 191
+        [27] -> line 192
+        [33] -> line 193
+        [37] -> line 194
+        [48] -> line 196
+        [56] -> line 199
+        [64] -> line 201
       + Local variable table attribute (count = 0)
       + Stack map table attribute (count = 2):
         - [48] Var: ..., Stack: (empty)
@@ -76595,8 +76597,8 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 2)
-        [0] -> line 205
-        [12] -> line 206
+        [0] -> line 204
+        [12] -> line 205
       + Local variable table attribute (count = 1)
         v0: 0 -> 13 [Lst/alr/homA/Device; device]
   + Method:       addRoom(Lst/alr/homA/Room;)V
@@ -76613,8 +76615,8 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 2)
-        [0] -> line 213
-        [7] -> line 214
+        [0] -> line 212
+        [7] -> line 213
       + Local variable table attribute (count = 1)
         v0: 0 -> 8 [Lst/alr/homA/Room; room]
   + Method:       removeAllRooms()V
@@ -76630,8 +76632,8 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 2)
-        [0] -> line 217
-        [6] -> line 218
+        [0] -> line 216
+        [6] -> line 217
       + Local variable table attribute (count = 0)
   + Method:       removeRoom(Lst/alr/homA/Room;)V
     Access flags: 0x9
@@ -76647,8 +76649,8 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 2)
-        [0] -> line 221
-        [7] -> line 222
+        [0] -> line 220
+        [7] -> line 221
       + Local variable table attribute (count = 1)
         v0: 0 -> 8 [Lst/alr/homA/Room; room]
   + Method:       getRoom(Ljava/lang/String;)Lst/alr/homA/Room;
@@ -76667,7 +76669,7 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 1)
-        [0] -> line 225
+        [0] -> line 224
       + Local variable table attribute (count = 1)
         v0: 0 -> 11 [Ljava/lang/String; id]
   + Method:       getDevice(Ljava/lang/String;)Lst/alr/homA/Device;
@@ -76686,7 +76688,7 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 1)
-        [0] -> line 229
+        [0] -> line 228
       + Local variable table attribute (count = 1)
         v0: 0 -> 11 [Ljava/lang/String; id]
   + Method:       getRoomsAdapter()Lst/alr/homA/RoomsHashMapAdapter;
@@ -76700,7 +76702,7 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 1)
-        [0] -> line 233
+        [0] -> line 232
       + Local variable table attribute (count = 0)
   + Method:       publishMqtt(Ljava/lang/String;Ljava/lang/String;)V
     Access flags: 0x9
@@ -76760,14 +76762,14 @@ Methods (count = 21):
       + Class [org/eclipse/paho/client/mqttv3/MqttException]
       Code attribute attributes (attribute count = 3):
       + Line number table attribute (count = 8)
-        [0] -> line 242
-        [12] -> line 243
-        [17] -> line 246
-        [50] -> line 247
-        [51] -> line 248
-        [58] -> line 249
-        [59] -> line 250
-        [63] -> line 252
+        [0] -> line 241
+        [12] -> line 242
+        [17] -> line 245
+        [50] -> line 246
+        [51] -> line 247
+        [58] -> line 248
+        [59] -> line 249
+        [63] -> line 251
       + Local variable table attribute (count = 5)
         v0: 0 -> 64 [Ljava/lang/String; topicStr]
         v1: 0 -> 64 [Ljava/lang/String; value]
@@ -76803,10 +76805,10 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 4)
-        [0] -> line 255
-        [4] -> line 256
-        [14] -> line 257
-        [21] -> line 258
+        [0] -> line 254
+        [4] -> line 255
+        [14] -> line 256
+        [21] -> line 257
       + Local variable table attribute (count = 2)
         v0: 0 -> 22 [S state]
         v1: 14 -> 22 [Landroid/content/Intent; i]
@@ -76821,7 +76823,7 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 1)
-        [0] -> line 261
+        [0] -> line 260
       + Local variable table attribute (count = 0)
   + Method:       establishObservers()V
     Access flags: 0x2
@@ -76832,7 +76834,7 @@ Methods (count = 21):
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 1)
-        [0] -> line 311
+        [0] -> line 310
       + Local variable table attribute (count = 1)
         v0: 0 -> 1 [Lst/alr/homA/App; this]
 
@@ -76855,16 +76857,17 @@ _____________________________________________________________________
 Interfaces (count = 1):
   + Class [java/lang/Runnable]
 
-Constant Pool (count = 28):
+Constant Pool (count = 31):
   + Class [java/lang/Object]
   + Class [java/lang/Runnable]
   + Class [st/alr/homA/App]
   + Class [st/alr/homA/App$1]
+  + Fieldref [st/alr/homA/App$1.val$clear Z]
   + Methodref [java/lang/Object.<init> ()V]
-  + Methodref [st/alr/homA/App.bootstrapAndConnectMqtt ()V]
+  + Methodref [st/alr/homA/App.bootstrapAndConnectMqtt (Z)V]
   + NameAndType [<init> ()V]
-  + NameAndType [bootstrapAndConnectMqtt ()V]
   + NameAndType [bootstrapAndConnectMqtt (Z)V]
+  + NameAndType [val$clear Z]
   + Utf8 [()V]
   + Utf8 [(Z)V]
   + Utf8 [<init>]
@@ -76876,6 +76879,7 @@ Constant Pool (count = 28):
   + Utf8 [LocalVariableTable]
   + Utf8 [Lst/alr/homA/App$1;]
   + Utf8 [SourceFile]
+  + Utf8 [Z]
   + Utf8 [bootstrapAndConnectMqtt]
   + Utf8 [java/lang/Object]
   + Utf8 [java/lang/Runnable]
@@ -76883,41 +76887,52 @@ Constant Pool (count = 28):
   + Utf8 [st/alr/homA/App]
   + Utf8 [st/alr/homA/App$1]
   + Utf8 [this]
+  + Utf8 [val$clear]
 
-Fields (count = 0):
+Fields (count = 1):
+  + Field:        val$clear Z
+    Access flags: 0x1012
+      = private final synthetic boolean val$clear
 
 Methods (count = 2):
-  + Method:       <init>()V
+  + Method:       <init>(Z)V
     Access flags: 0x0
-      = App$1()
+      = App$1(boolean)
     Class member attributes (count = 1):
-    + Code attribute instructions (code length = 5, locals = 1, stack = 1):
+    + Code attribute instructions (code length = 10, locals = 2, stack = 2):
       [0] aload_0 v0
-      [1] invokespecial #5
+      [1] iload_1 v1
+      [2] putfield #5
+        + Fieldref [st/alr/homA/App$1.val$clear Z]
+      [5] aload_0 v0
+      [6] invokespecial #6
         + Methodref [java/lang/Object.<init> ()V]
-      [4] return
+      [9] return
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 2)
-        [0] -> line 66
-        [4] -> line 1
+        [0] -> line 1
+        [5] -> line 66
       + Local variable table attribute (count = 1)
-        v0: 0 -> 5 [Lst/alr/homA/App$1; this]
+        v0: 0 -> 10 [Lst/alr/homA/App$1; this]
   + Method:       run()V
     Access flags: 0x1
       = public void run()
     Class member attributes (count = 1):
-    + Code attribute instructions (code length = 4, locals = 1, stack = 0):
-      [0] invokestatic #6
-        + Methodref [st/alr/homA/App.bootstrapAndConnectMqtt ()V]
-      [3] return
+    + Code attribute instructions (code length = 8, locals = 1, stack = 1):
+      [0] aload_0 v0
+      [1] getfield #5
+        + Fieldref [st/alr/homA/App$1.val$clear Z]
+      [4] invokestatic #7
+        + Methodref [st/alr/homA/App.bootstrapAndConnectMqtt (Z)V]
+      [7] return
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 2)
         [0] -> line 69
-        [3] -> line 70
+        [7] -> line 70
       + Local variable table attribute (count = 1)
-        v0: 0 -> 4 [Lst/alr/homA/App$1; this]
+        v0: 0 -> 8 [Lst/alr/homA/App$1; this]
 
 Class file attributes (count = 3):
   + Enclosing method attribute:
@@ -83826,7 +83841,7 @@ _____________________________________________________________________
 
 Interfaces (count = 0):
 
-Constant Pool (count = 196):
+Constant Pool (count = 204):
   + Integer [11]
   + Integer [16908290]
   + Integer [2130968577]
@@ -83835,6 +83850,7 @@ Constant Pool (count = 196):
   + String [Connecting to ]
   + String [Disconnected from ]
   + String [Disconnecting from ]
+  + String [No server set]
   + String [serverAddress]
   + String [st.alr.homA.mqttConnectivityChanged]
   + Class [android/app/FragmentManager]
@@ -83846,6 +83862,7 @@ Constant Pool (count = 196):
   + Class [android/preference/PreferenceActivity]
   + Class [android/preference/PreferenceActivity$Header]
   + Class [android/preference/PreferenceManager]
+  + Class [java/lang/String]
   + Class [java/lang/StringBuilder]
   + Class [st/alr/homA/App]
   + Class [st/alr/homA/SettingsActivity]
@@ -83867,6 +83884,7 @@ Constant Pool (count = 196):
   + Methodref [android/preference/PreferenceActivity.onDestroy ()V]
   + Methodref [android/preference/PreferenceActivity.onPrepareOptionsMenu (Landroid/view/Menu;)Z]
   + Methodref [android/preference/PreferenceManager.getDefaultSharedPreferences (Landroid/content/Context;)Landroid/content/SharedPreferences;]
+  + Methodref [java/lang/String.equals (Ljava/lang/Object;)Z]
   + Methodref [java/lang/StringBuilder.<init> (Ljava/lang/String;)V]
   + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
   + Methodref [java/lang/StringBuilder.toString ()Ljava/lang/String;]
@@ -83891,6 +83909,7 @@ Constant Pool (count = 196):
   + NameAndType [append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
   + NameAndType [beginTransaction ()Landroid/app/FragmentTransaction;]
   + NameAndType [commit ()I]
+  + NameAndType [equals (Ljava/lang/Object;)Z]
   + NameAndType [getConnectivity ()S]
   + NameAndType [getDefaultSharedPreferences (Landroid/content/Context;)Landroid/content/SharedPreferences;]
   + NameAndType [getFragmentManager ()Landroid/app/FragmentManager;]
@@ -83931,6 +83950,7 @@ Constant Pool (count = 196):
   + Utf8 [(Landroid/preference/Preference;)V]
   + Utf8 [(Landroid/view/Menu;)Z]
   + Utf8 [(Ljava/lang/CharSequence;)V]
+  + Utf8 [(Ljava/lang/Object;)Z]
   + Utf8 [(Ljava/lang/String;)Ljava/lang/StringBuilder;]
   + Utf8 [(Ljava/lang/String;)V]
   + Utf8 [(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;]
@@ -83960,6 +83980,7 @@ Constant Pool (count = 196):
   + Utf8 [LocalVariableTable]
   + Utf8 [LocalVariableTypeTable]
   + Utf8 [Lst/alr/homA/SettingsActivity;]
+  + Utf8 [No server set]
   + Utf8 [OnSharedPreferenceChangeListener]
   + Utf8 [RuntimeInvisibleAnnotations]
   + Utf8 [SettingsActivity.java]
@@ -83983,12 +84004,14 @@ Constant Pool (count = 196):
   + Utf8 [append]
   + Utf8 [beginTransaction]
   + Utf8 [commit]
+  + Utf8 [equals]
   + Utf8 [filter]
   + Utf8 [getConnectivity]
   + Utf8 [getDefaultSharedPreferences]
   + Utf8 [getFragmentManager]
   + Utf8 [getState]
   + Utf8 [getString]
+  + Utf8 [java/lang/String]
   + Utf8 [java/lang/StringBuilder]
   + Utf8 [loadHeadersFromResource]
   + Utf8 [menu]
@@ -84044,7 +84067,7 @@ Methods (count = 12):
     Class member attributes (count = 1):
     + Code attribute instructions (code length = 5, locals = 1, stack = 1):
       [0] aload_0 v0
-      [1] invokespecial #36
+      [1] invokespecial #38
         + Methodref [android/preference/PreferenceActivity.<init> ()V]
       [4] return
       Code attribute exceptions (count = 0):
@@ -84060,19 +84083,19 @@ Methods (count = 12):
     + Code attribute instructions (code length = 25, locals = 1, stack = 2):
       [0] aload_0 v0
       [1] aload_0 v0
-      [2] getfield #26
+      [2] getfield #28
         + Fieldref [st/alr/homA/SettingsActivity.mqttConnectivityChangedReceiver Landroid/content/BroadcastReceiver;]
-      [5] invokevirtual #51
+      [5] invokevirtual #54
         + Methodref [st/alr/homA/SettingsActivity.unregisterReceiver (Landroid/content/BroadcastReceiver;)V]
-      [8] getstatic #29
+      [8] getstatic #31
         + Fieldref [st/alr/homA/SettingsActivity.sharedPreferences Landroid/content/SharedPreferences;]
       [11] aload_0 v0
-      [12] getfield #27
+      [12] getfield #29
         + Fieldref [st/alr/homA/SettingsActivity.preferencesChangedListener Landroid/content/SharedPreferences$OnSharedPreferenceChangeListener;]
-      [15] invokeinterface #57
+      [15] invokeinterface #60
         + InterfaceMethodref [android/content/SharedPreferences.unregisterOnSharedPreferenceChangeListener (Landroid/content/SharedPreferences$OnSharedPreferenceChangeListener;)V]
       [20] aload_0 v0
-      [21] invokespecial #38
+      [21] invokespecial #40
         + Methodref [android/preference/PreferenceActivity.onDestroy ()V]
       [24] return
       Code attribute exceptions (count = 0):
@@ -84091,72 +84114,72 @@ Methods (count = 12):
     + Code attribute instructions (code length = 96, locals = 3, stack = 4):
       [0] aload_0 v0
       [1] aload_1 v1
-      [2] invokespecial #37
+      [2] invokespecial #39
         + Methodref [android/preference/PreferenceActivity.onCreate (Landroid/os/Bundle;)V]
       [5] aload_0 v0
-      [6] invokestatic #40
+      [6] invokestatic #42
         + Methodref [android/preference/PreferenceManager.getDefaultSharedPreferences (Landroid/content/Context;)Landroid/content/SharedPreferences;]
-      [9] putstatic #29
+      [9] putstatic #31
         + Fieldref [st/alr/homA/SettingsActivity.sharedPreferences Landroid/content/SharedPreferences;]
       [12] aload_0 v0
-      [13] invokevirtual #46
+      [13] invokevirtual #49
         + Methodref [st/alr/homA/SettingsActivity.getFragmentManager ()Landroid/app/FragmentManager;]
-      [16] invokevirtual #30
+      [16] invokevirtual #32
         + Methodref [android/app/FragmentManager.beginTransaction ()Landroid/app/FragmentTransaction;]
       [19] ldc #2
         + Integer [16908290]
-      [21] new #25
+      [21] new #27
         + Class [st/alr/homA/SettingsActivity$UserPreferencesFragment]
       [24] dup
-      [25] invokespecial #54
+      [25] invokespecial #57
         + Methodref [st/alr/homA/SettingsActivity$UserPreferencesFragment.<init> ()V]
-      [28] invokevirtual #32
+      [28] invokevirtual #34
         + Methodref [android/app/FragmentTransaction.replace (ILandroid/app/Fragment;)Landroid/app/FragmentTransaction;]
-      [31] invokevirtual #31
+      [31] invokevirtual #33
         + Methodref [android/app/FragmentTransaction.commit ()I]
       [34] pop
       [35] aload_0 v0
-      [36] new #23
+      [36] new #25
         + Class [st/alr/homA/SettingsActivity$1]
       [39] dup
       [40] aload_0 v0
-      [41] invokespecial #52
+      [41] invokespecial #55
         + Methodref [st/alr/homA/SettingsActivity$1.<init> (Lst/alr/homA/SettingsActivity;)V]
-      [44] putfield #27
+      [44] putfield #29
         + Fieldref [st/alr/homA/SettingsActivity.preferencesChangedListener Landroid/content/SharedPreferences$OnSharedPreferenceChangeListener;]
-      [47] getstatic #29
+      [47] getstatic #31
         + Fieldref [st/alr/homA/SettingsActivity.sharedPreferences Landroid/content/SharedPreferences;]
       [50] aload_0 v0
-      [51] getfield #27
+      [51] getfield #29
         + Fieldref [st/alr/homA/SettingsActivity.preferencesChangedListener Landroid/content/SharedPreferences$OnSharedPreferenceChangeListener;]
-      [54] invokeinterface #56
+      [54] invokeinterface #59
         + InterfaceMethodref [android/content/SharedPreferences.registerOnSharedPreferenceChangeListener (Landroid/content/SharedPreferences$OnSharedPreferenceChangeListener;)V]
       [59] aload_0 v0
-      [60] new #24
+      [60] new #26
         + Class [st/alr/homA/SettingsActivity$2]
       [63] dup
       [64] aload_0 v0
-      [65] invokespecial #53
+      [65] invokespecial #56
         + Methodref [st/alr/homA/SettingsActivity$2.<init> (Lst/alr/homA/SettingsActivity;)V]
-      [68] putfield #26
+      [68] putfield #28
         + Fieldref [st/alr/homA/SettingsActivity.mqttConnectivityChangedReceiver Landroid/content/BroadcastReceiver;]
-      [71] new #13
+      [71] new #14
         + Class [android/content/IntentFilter]
       [74] dup
-      [75] invokespecial #33
+      [75] invokespecial #35
         + Methodref [android/content/IntentFilter.<init> ()V]
       [78] astore_2 v2
       [79] aload_2 v2
-      [80] ldc #10
+      [80] ldc #11
         + String [st.alr.homA.mqttConnectivityChanged]
-      [82] invokevirtual #34
+      [82] invokevirtual #36
         + Methodref [android/content/IntentFilter.addAction (Ljava/lang/String;)V]
       [85] aload_0 v0
       [86] aload_0 v0
-      [87] getfield #26
+      [87] getfield #28
         + Fieldref [st/alr/homA/SettingsActivity.mqttConnectivityChangedReceiver Landroid/content/BroadcastReceiver;]
       [90] aload_2 v2
-      [91] invokevirtual #48
+      [91] invokevirtual #51
         + Methodref [st/alr/homA/SettingsActivity.registerReceiver (Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;]
       [94] pop
       [95] return
@@ -84184,7 +84207,7 @@ Methods (count = 12):
     + Code attribute instructions (code length = 8, locals = 2, stack = 2):
       [0] aload_0 v0
       [1] aload_1 v1
-      [2] invokespecial #39
+      [2] invokespecial #41
         + Methodref [android/preference/PreferenceActivity.onPrepareOptionsMenu (Landroid/view/Menu;)Z]
       [5] pop
       [6] iconst_1
@@ -84219,7 +84242,7 @@ Methods (count = 12):
       [1] ldc #3
         + Integer [2130968577]
       [3] aload_1 v1
-      [4] invokevirtual #47
+      [4] invokevirtual #50
         + Methodref [st/alr/homA/SettingsActivity.loadHeadersFromResource (ILjava/util/List;)V]
       [7] return
       Code attribute exceptions (count = 0):
@@ -84243,15 +84266,15 @@ Methods (count = 12):
       = private static void setServerPreferenceSummaryManually()
     Class member attributes (count = 1):
     + Code attribute instructions (code length = 16, locals = 0, stack = 3):
-      [0] getstatic #29
+      [0] getstatic #31
         + Fieldref [st/alr/homA/SettingsActivity.sharedPreferences Landroid/content/SharedPreferences;]
-      [3] ldc #9
+      [3] ldc #10
         + String [serverAddress]
       [5] ldc #4
         + String []
-      [7] invokeinterface #55
+      [7] invokeinterface #58
         + InterfaceMethodref [android/content/SharedPreferences.getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;]
-      [12] invokestatic #49
+      [12] invokestatic #52
         + Methodref [st/alr/homA/SettingsActivity.setServerPreferenceSummary (Ljava/lang/String;)V]
       [15] return
       Code attribute exceptions (count = 0):
@@ -84264,117 +84287,136 @@ Methods (count = 12):
     Access flags: 0xa
       = private static void setServerPreferenceSummary(java.lang.String)
     Class member attributes (count = 1):
-    + Code attribute instructions (code length = 133, locals = 1, stack = 4):
-      [0] invokestatic #45
+    + Code attribute instructions (code length = 157, locals = 1, stack = 4):
+      [0] aload_0 v0
+      [1] ifnull +12 (target=13)
+      [4] aload_0 v0
+      [5] ldc #4
+        + String []
+      [7] invokevirtual #43
+        + Methodref [java/lang/String.equals (Ljava/lang/Object;)Z]
+      [10] ifeq +14 (target=24)
+      [13] getstatic #30
+        + Fieldref [st/alr/homA/SettingsActivity.serverPreference Landroid/preference/Preference;]
+      [16] ldc #9
+        + String [No server set]
+      [18] invokevirtual #37
+        + Methodref [android/preference/Preference.setSummary (Ljava/lang/CharSequence;)V]
+      [21] goto +135 (target=156)
+      [24] invokestatic #48
         + Methodref [st/alr/homA/SettingsActivity.getConnectivity ()S]
-      [3] tableswitch (4 offsets, default=129) (target=132)
-        1: offset = 104, target = 107
-        2: offset = 29, target = 32
-        3: offset = 54, target = 57
-        4: offset = 79, target = 82
-        default: offset = 129, target = 132
-      [32] getstatic #28
+      [27] tableswitch (4 offsets, default=129) (target=156)
+        1: offset = 104, target = 131
+        2: offset = 29, target = 56
+        3: offset = 54, target = 81
+        4: offset = 79, target = 106
+        default: offset = 129, target = 156
+      [56] getstatic #30
         + Fieldref [st/alr/homA/SettingsActivity.serverPreference Landroid/preference/Preference;]
-      [35] new #20
+      [59] new #22
         + Class [java/lang/StringBuilder]
-      [38] dup
-      [39] ldc #6
+      [62] dup
+      [63] ldc #6
         + String [Connecting to ]
-      [41] invokespecial #41
+      [65] invokespecial #44
         + Methodref [java/lang/StringBuilder.<init> (Ljava/lang/String;)V]
-      [44] aload_0 v0
-      [45] invokevirtual #42
+      [68] aload_0 v0
+      [69] invokevirtual #45
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [48] invokevirtual #43
+      [72] invokevirtual #46
         + Methodref [java/lang/StringBuilder.toString ()Ljava/lang/String;]
-      [51] invokevirtual #35
+      [75] invokevirtual #37
         + Methodref [android/preference/Preference.setSummary (Ljava/lang/CharSequence;)V]
-      [54] goto +78 (target=132)
-      [57] getstatic #28
+      [78] goto +78 (target=156)
+      [81] getstatic #30
         + Fieldref [st/alr/homA/SettingsActivity.serverPreference Landroid/preference/Preference;]
-      [60] new #20
+      [84] new #22
         + Class [java/lang/StringBuilder]
-      [63] dup
-      [64] ldc #5
+      [87] dup
+      [88] ldc #5
         + String [Connected to ]
-      [66] invokespecial #41
+      [90] invokespecial #44
         + Methodref [java/lang/StringBuilder.<init> (Ljava/lang/String;)V]
-      [69] aload_0 v0
-      [70] invokevirtual #42
+      [93] aload_0 v0
+      [94] invokevirtual #45
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [73] invokevirtual #43
+      [97] invokevirtual #46
         + Methodref [java/lang/StringBuilder.toString ()Ljava/lang/String;]
-      [76] invokevirtual #35
+      [100] invokevirtual #37
         + Methodref [android/preference/Preference.setSummary (Ljava/lang/CharSequence;)V]
-      [79] goto +53 (target=132)
-      [82] getstatic #28
+      [103] goto +53 (target=156)
+      [106] getstatic #30
         + Fieldref [st/alr/homA/SettingsActivity.serverPreference Landroid/preference/Preference;]
-      [85] new #20
+      [109] new #22
         + Class [java/lang/StringBuilder]
-      [88] dup
-      [89] ldc #8
+      [112] dup
+      [113] ldc #8
         + String [Disconnecting from ]
-      [91] invokespecial #41
+      [115] invokespecial #44
         + Methodref [java/lang/StringBuilder.<init> (Ljava/lang/String;)V]
-      [94] aload_0 v0
-      [95] invokevirtual #42
+      [118] aload_0 v0
+      [119] invokevirtual #45
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [98] invokevirtual #43
+      [122] invokevirtual #46
         + Methodref [java/lang/StringBuilder.toString ()Ljava/lang/String;]
-      [101] invokevirtual #35
+      [125] invokevirtual #37
         + Methodref [android/preference/Preference.setSummary (Ljava/lang/CharSequence;)V]
-      [104] goto +28 (target=132)
-      [107] getstatic #28
+      [128] goto +28 (target=156)
+      [131] getstatic #30
         + Fieldref [st/alr/homA/SettingsActivity.serverPreference Landroid/preference/Preference;]
-      [110] new #20
+      [134] new #22
         + Class [java/lang/StringBuilder]
-      [113] dup
-      [114] ldc #7
+      [137] dup
+      [138] ldc #7
         + String [Disconnected from ]
-      [116] invokespecial #41
+      [140] invokespecial #44
         + Methodref [java/lang/StringBuilder.<init> (Ljava/lang/String;)V]
-      [119] aload_0 v0
-      [120] invokevirtual #42
+      [143] aload_0 v0
+      [144] invokevirtual #45
         + Methodref [java/lang/StringBuilder.append (Ljava/lang/String;)Ljava/lang/StringBuilder;]
-      [123] invokevirtual #43
+      [147] invokevirtual #46
         + Methodref [java/lang/StringBuilder.toString ()Ljava/lang/String;]
-      [126] invokevirtual #35
+      [150] invokevirtual #37
         + Methodref [android/preference/Preference.setSummary (Ljava/lang/CharSequence;)V]
-      [129] goto +3 (target=132)
-      [132] return
+      [153] goto +3 (target=156)
+      [156] return
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 3):
-      + Line number table attribute (count = 10)
+      + Line number table attribute (count = 12)
         [0] -> line 100
-        [32] -> line 102
-        [54] -> line 103
-        [57] -> line 105
-        [79] -> line 106
-        [82] -> line 108
-        [104] -> line 109
-        [107] -> line 111
-        [129] -> line 112
-        [132] -> line 116
+        [13] -> line 101
+        [24] -> line 104
+        [56] -> line 106
+        [78] -> line 107
+        [81] -> line 109
+        [103] -> line 110
+        [106] -> line 112
+        [128] -> line 113
+        [131] -> line 115
+        [153] -> line 116
+        [156] -> line 122
       + Local variable table attribute (count = 1)
-        v0: 0 -> 133 [Ljava/lang/String; stringValue]
-      + Stack map table attribute (count = 5):
-        - [32] Var: ..., Stack: (empty)
-        - [57] Var: ..., Stack: (empty)
-        - [82] Var: ..., Stack: (empty)
-        - [107] Var: ..., Stack: (empty)
-        - [132] Var: ..., Stack: (empty)
+        v0: 0 -> 157 [Ljava/lang/String; stringValue]
+      + Stack map table attribute (count = 7):
+        - [13] Var: ..., Stack: (empty)
+        - [24] Var: ..., Stack: (empty)
+        - [56] Var: ..., Stack: (empty)
+        - [81] Var: ..., Stack: (empty)
+        - [106] Var: ..., Stack: (empty)
+        - [131] Var: ..., Stack: (empty)
+        - [156] Var: ..., Stack: (empty)
   + Method:       getConnectivity()S
     Access flags: 0xa
       = private static short getConnectivity()
     Class member attributes (count = 1):
     + Code attribute instructions (code length = 4, locals = 0, stack = 1):
-      [0] invokestatic #44
+      [0] invokestatic #47
         + Methodref [st/alr/homA/App.getState ()S]
       [3] ireturn
       Code attribute exceptions (count = 0):
       Code attribute attributes (attribute count = 2):
       + Line number table attribute (count = 1)
-        [0] -> line 119
+        [0] -> line 125
       + Local variable table attribute (count = 0)
   + Method:       access$0(Landroid/preference/Preference;)V
     Access flags: 0x1008
@@ -84382,7 +84424,7 @@ Methods (count = 12):
     Class member attributes (count = 1):
     + Code attribute instructions (code length = 5, locals = 1, stack = 1):
       [0] aload_0 v0
-      [1] putstatic #28
+      [1] putstatic #30
         + Fieldref [st/alr/homA/SettingsActivity.serverPreference Landroid/preference/Preference;]
       [4] return
       Code attribute exceptions (count = 0):
@@ -84395,7 +84437,7 @@ Methods (count = 12):
       = static synthetic void access$1()
     Class member attributes (count = 1):
     + Code attribute instructions (code length = 4, locals = 0, stack = 0):
-      [0] invokestatic #50
+      [0] invokestatic #53
         + Methodref [st/alr/homA/SettingsActivity.setServerPreferenceSummaryManually ()V]
       [3] return
       Code attribute exceptions (count = 0):
@@ -84409,7 +84451,7 @@ Methods (count = 12):
     Class member attributes (count = 1):
     + Code attribute instructions (code length = 5, locals = 1, stack = 1):
       [0] aload_0 v0
-      [1] invokestatic #49
+      [1] invokestatic #52
         + Methodref [st/alr/homA/SettingsActivity.setServerPreferenceSummary (Ljava/lang/String;)V]
       [4] return
       Code attribute exceptions (count = 0):

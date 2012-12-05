@@ -85,10 +85,7 @@ st.alr.homA.R$menu: int activity_room
 st.alr.homA.R$string: int app_name
 st.alr.homA.R$string: int defaultRoomName
 st.alr.homA.R$string: int menu_settings
-st.alr.homA.R$string: int preferences_server_default
-st.alr.homA.R$string: int preferences_server_summary
 st.alr.homA.R$string: int preferences_server_title
-st.alr.homA.R$string: int title_room_list
 st.alr.homA.R$style: int AppBaseTheme
 st.alr.homA.R$style: int AppTheme
 st.alr.homA.R$xml: int preferences

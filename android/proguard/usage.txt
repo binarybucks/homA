@@ -918,9 +918,9 @@ st.alr.homA.App:
     public static final java.lang.String DEVICE_ADDED_TO_ROOM
     public static final java.lang.String DEVICE_REMOVED_FROM_ROOM
     public static final java.lang.String SERVER_SETTINGS_CHANGED
-    209:210:public static void removeDevice(st.alr.homA.Device)
-    237:237:public static android.os.Handler getUiThreadHandler()
-    265:265:public static boolean isConnected()
+    208:209:public static void removeDevice(st.alr.homA.Device)
+    236:236:public static android.os.Handler getUiThreadHandler()
+    264:264:public static boolean isConnected()
 st.alr.homA.BuildConfig
 st.alr.homA.Device:
     15:15:public st.alr.homA.Room getRoom()
