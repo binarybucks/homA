@@ -1,4 +1,4 @@
-Donut protocol
+MQTT protocol
 
 Values of device controls are a available at
 /devices/$uniquedeviceid/controls/$deviceUniqueControlName

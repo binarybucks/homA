@@ -679,6 +679,9 @@ $(function(){
   mqttSocket.ondisconnect = function(rc){ 
     Settings.set("connectionStatus", "disconnected");
     console.log("Connection terminated");
+      setTimeout(function () {
+        mqttSocketConnect();
+      }, 5000);
   };
 
   mqttSocket.onmessage = function(topic, payload, qos){
@@ -722,7 +725,13 @@ $(function(){
      // console.log("-----------/ RECEIVED-----------");
   };
 
+  function mqttSocketConnect() {
+            console.log("Connecting")
 
+    mqttSocket.connect("ws://" + Settings.get("server") + ":1337"); 
+    // console.log("socket:");
+    // console.log(mqttSocket);   
+  }
 
 
 
@@ -734,7 +743,8 @@ $(function(){
 
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
+  mqttSocketConnect();
 
-  mqttSocket.connect("ws://" + Settings.get("server") + ":1337");
+
 
 });
