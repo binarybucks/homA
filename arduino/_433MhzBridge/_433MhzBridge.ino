@@ -96,14 +96,15 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   payload[length] = '\0';
   
   //char * splitTopic = strtok(topic, "/");
-  //Serial.println("Received something"); 
-  //Serial.println(topic); 
-  //Serial.println(payload); 
+  Serial.println("Received something"); 
+  Serial.println(topic); 
+  Serial.println(payload); 
 
   if (strncmp(topic,"/sys", 4) == 0) { // Cheap parsing here since there is just one function for /sys on this device
   
-    if((strcmp(topic, "") == 0) || (topic == NULL)) {
-      removeWifiSwitch(topic, payload);    
+    if((strcmp(payload, "") == 0) || (rawPayload == NULL)) {
+      removeWifiSwitch(topic, payload);
+      return;    
     }
   
     addWifiSwitch(topic, payload);
@@ -134,6 +135,9 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
 void removeWifiSwitch(char* topic, char* payload) {
   int switchNumber = switchNumberFromTopic(topic);
   Ws *targetSwitch = findSwitch(switchNumber);
+
+  Serial.println("Removing switch with id:");
+  Serial.println(switchNumber);
 
   if (targetSwitch != NULL) {
      
