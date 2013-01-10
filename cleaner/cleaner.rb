@@ -37,6 +37,9 @@ end
 
 
 def connect
+		puts "HomA cleaner starting"	
+		puts "Broker is at: #{MQTT_SERVER}"
+
 	Thread.new {
 		$c = MQTT::Client.connect(MQTT_SERVER)
 		  $c.get('#') do |topic,message|
