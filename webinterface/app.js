@@ -96,8 +96,6 @@ $(function(){
       } 
     },
 
-
-
     moveToRoom: function(roomName) {
       var cleanedName = roomName || "unassigned";
       var targetRoom = Rooms.get(cleanedName);
@@ -116,14 +114,6 @@ $(function(){
     },
   });
 
-    var SystemDeviceSetting = Backbone.Model.extend({
-      defaults: function () {
-        return {
-          actions: {},
-          devices: {}
-        }
-      }
-    });
 
   var Room = Backbone.Model.extend({
     initialize: function() {
@@ -131,10 +121,6 @@ $(function(){
     },
   });
 
-
-  var SystemDeviceSettingsCollection = Backbone.Collection.extend({
-    model: SystemDeviceSetting,
-  });
 
   var DeviceCollection = Backbone.Collection.extend({
     model: Device,
@@ -158,11 +144,10 @@ $(function(){
     rerenderToplevelView: function() {
       App.renderToplevelView(this);
     },
-  });
+  })
 
   var SettingsView = ToplevelView.extend({
     template: $("#settings-template").html(),
-    deviceConfigurationTemplate: $("#deviceConfiguration-template").html(),
 
 
     events: {
@@ -189,52 +174,7 @@ $(function(){
         this.$el.html(tmpl(this.model.toJSON()));
         return this;
     },
-
    });
-
-
-  var SystemDeviceView = Backbone.View.extend({
-        template: $("#system-device-template").html(),
-    tagName: "li",
-    className: "system-device",
-
-    initialize: function() {
-      this.model.on('change', this.render, this);
-    },
-
-
-    render: function() {
-        this.el.html("<h1>ACTIONS FOR: " + this.model.id + "</h1>")
-
-      for (var action in this.model.get("actions")) {
-        this.$el.html().append(action);
-      }
-    },
-
-  })
-  
-  var SystemDeviceSettingsView = ToplevelView.extend({
-    template: $("#system-device-settings-template").html(),
-
-    initialize: function() {
-      this.model = SystemDeviceSettings;
-      this.model.on('change', this.render, this);
-    },
-
-
-    render: function () {
-      var tmpl = _.template(this.template);
-      this.$el.html(tmpl(this.model.toJSON()));
-
-      var systemDeviceList = this.$('#system-device-list');
-      for (var i = 0, l = this.model.length; i < l; i++) {
-        var systemDeviceView = new SystemDeviceView(model: this.model.models[i]);
-        systemDeviceList.append(systemDeviceView.render().$el);
-      }
-
-      return this;
-    }
-  });
 
 
 
@@ -706,11 +646,6 @@ $(function(){
 
   },
 
-  systemDeviceSettings: function(){
-    var systemDeviceSettingsView = new SystemDeviceSettingsView();
-    App.showView(systemDeviceSettingsView);
-  }
-
 
   room: function(id) {
     console.log("showing roomDetailView for room: " + id);
@@ -739,7 +674,6 @@ $(function(){
     mqttSocket.subscribe('/devices/+/controls/+/type', 0);
     mqttSocket.subscribe('/devices/+/controls/+', 0);
     mqttSocket.subscribe('/devices/+/meta/#', 0);
-    mqttSocket.subscribe('/sys/#', 0);
   };
 
   mqttSocket.ondisconnect = function(rc){ 
@@ -752,16 +686,9 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-
-
       // console.log("-----------RECEIVED-----------");
       // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
-
-    if (splitTopic[1] == "sys") {
-      onSysMessage(splitTopic, payload);
-      return;
-    }
 
     // Ensure the device for the message exists
     var deviceId = splitTopic[2]
@@ -798,24 +725,12 @@ $(function(){
      // console.log("-----------/ RECEIVED-----------");
   };
 
-  function onSysMessage(splitTopic, payload) {
-    console.log("Received sys topic with payload " +payload);
-
-    // var deviceConfigurationID = splitTopic[2];
-    // var deviceConfiguration = DeviceConfigurations.get(deviceConfigurationID);
-    // if (deviceConfiguration == null) {
-    //   deviceConfiguration = new DeviceConfiguration({id: deviceConfigurationID})
-    //   DeviceConfigurations.add(deviceConfiguration);
-    // }
-
-    // deviceConfiguration.get(splitTopic[3])[splitTopic[4]]= payload;
-    // console.log("Modified device deviceConfiguration " + deviceConfigurationID);
-    // console.log(deviceConfiguration);
-  }
-
   function mqttSocketConnect() {
-    console.log("Connecting")
+            console.log("Connecting")
+
     mqttSocket.connect("ws://" + Settings.get("server") + ":1337"); 
+    // console.log("socket:");
+    // console.log(mqttSocket);   
   }
 
 
@@ -823,8 +738,6 @@ $(function(){
   var Settings = new AppSettings;
   Settings.fetch();
   var Devices = new DeviceCollection;
-  var SystemDeviceSettings = new SystemDeviceSettingsCollection;
-
   var Rooms = new RoomCollection;
   var App = new AppView;
 
