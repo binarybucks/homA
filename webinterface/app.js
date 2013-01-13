@@ -539,6 +539,8 @@ $(function(){
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
+      this.model.controls.on('remove', this.render, this);
+
       this.model.view = this;
     },  
 
@@ -690,14 +692,31 @@ $(function(){
       // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
+  console.log("pl")
+     console.log(payload)
+ 
+
     // Ensure the device for the message exists
     var deviceId = splitTopic[2]
     var device = Devices.get(deviceId);
-    if (device == null) {
+    if (device == null && payload != "") {
       device = new Device({id: deviceId});
       Devices.add(device);
       device.moveToRoom(undefined);
+    } else if (device != null && payload == "") {   
+      console.log("removing " + deviceId);
+      console.log(payload);
+      // Remove the device when any received topic under that device tree is "" (actually this also removes the device when just a control should be removed, but 
+      // but right now there is no usecase to remove a single control only.)
+      // This just removes the device when the webinterface is loaded and a "" is received. This does not ensure persistent removal during reloads. 
+      // It's the devices job to ensure that all of its values are correctly unpublished 
+      device.removeFromCurrentRoom();
+      Devices.remove(deviceId);
+      return;
     }
+
+
+
 
     // Topic parsing
     if(splitTopic[3] == "controls") {
@@ -709,7 +728,7 @@ $(function(){
         control.set("topic", topic.replace("/type", ""));
       }
 
-      if(splitTopic[5] == null) {                                       // Control value
+      if(splitTopic[5] == null) {                                       // Control value        
         control.set("value", payload);
       } else {                                                          // Control type 
         control.set("type", payload);
@@ -720,7 +739,6 @@ $(function(){
       } else if(splitTopic[4] == "name") {                              // Device name
         device.set('name', payload);
       }
-//      device.set(splitTopic[4], payload);
     }
      // console.log("-----------/ RECEIVED-----------");
   };

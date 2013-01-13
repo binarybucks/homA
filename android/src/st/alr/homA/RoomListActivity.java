@@ -11,6 +11,24 @@ import android.widget.ListView;
 
 public class RoomListActivity extends ListActivity {
 
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onPause() {
+	    App.activityPaused();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+	    App.activityActivated();
+		super.onResume();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

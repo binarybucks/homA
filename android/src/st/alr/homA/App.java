@@ -11,10 +11,18 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class App extends Application implements MqttCallback {
@@ -29,25 +37,48 @@ public class App extends Application implements MqttCallback {
 	public static final String DEVICE_ADDED_TO_ROOM = "st.alr.homA.deviceAddedToRoom";
 	public static final String DEVICE_REMOVED_FROM_ROOM = "st.alr.homA.deviceRemovedFromRoom";
 	public static final String SERVER_SETTINGS_CHANGED = "st.alr.homA.serverSettingsChanged";
+	public static final String MQTT_RECONNECT_MIGHT_BE_REQUIRED = "st.alr.homA.reconnectMightBeRequired";
 
+	
 	private static MqttClient mqttClient;
 	private static HashMap<String, Device> devices;
 	private static Handler uiThreadHandler;
 	private static short mqttConnectivity;
-	// private static BroadcastReceiver serverAdressChanged;
+	private static BroadcastReceiver mqttReconnectReceiver;
 	private static RoomsHashMapAdapter roomsAdapter;
 	private static SharedPreferences sharedPreferences;
-
-	@Override
+	private static boolean isInForeground = true;
+	
+	
+	// When activities pause or get destroyed, they call this method, to prevent mqtt auto reconnects during inactivity
+	public static void activityPaused() {
+		Log.v(getInstance().toString(), "Activity paused");
+		isInForeground = false;
+	}
+	
+	// When activities resume or start mqtt connectivity is checked and auto reconnects are enabled
+	public static void activityActivated() {
+		isInForeground = true;
+		// this just a state changed notification with the same state.
+		// The observer then checks if there is a connection and if not, triggers a reconnect loop until a connection is established or isInForeground is false
+		Log.v("getInstance().toString()", "Activity resumed");
+		Intent i = new Intent(App.MQTT_RECONNECT_MIGHT_BE_REQUIRED); // Recalling bootstrapAndConnect has to be decoupled from the connectionLost in order to prevent out of stack exceptions
+		getInstance().sendBroadcast(i);
+	}
+	
+	
+	
+	
+	
 	public void onCreate() {
 		super.onCreate();
 
 		instance = this;
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		showRecordingNotification();
 		devices = new HashMap<String, Device>();
 		roomsAdapter = new RoomsHashMapAdapter(this);
 		uiThreadHandler = new Handler();
-		establishObservers();
 		bootstrapAndConnectMqtt();
 	}
 
@@ -55,40 +86,58 @@ public class App extends Application implements MqttCallback {
 		return instance;
 	}
 
+	
 	public static void bootstrapAndConnectMqtt() {
-		bootstrapAndConnectMqtt(false);
+		bootstrapAndConnectMqtt(false, false);
 	}
 
-	public static void bootstrapAndConnectMqtt(final boolean clear) {
+	public static void bootstrapAndConnectMqtt(final boolean clear, final boolean throttle) {
 		try {
 			// Ensures that this method is not called on the main thread
 			if (Thread.currentThread().getName().equals("main")) { 
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						bootstrapAndConnectMqtt(clear);
+						bootstrapAndConnectMqtt(clear, throttle);
 					}
 				}).start();
 				return;
 			}
 
+			
+			
+			
 			disconnect();
 
+			
+			
 			if (clear) {
-				Log.v("bootstrapAndConnectMqtt", "Clearing all rooms");
+				Log.v(getInstance().toString(), "Clearing all rooms");
 				removeAllRooms();
-				Log.v("bootstrapAndConnectMqtt", "Clearing all devices");
+				Log.v(getInstance().toString(), "Clearing all devices");
 				devices.clear();
 			}
 
-			disconnect();
-
-			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTING);
 
 			mqttClient = new MqttClient("tcp://" + sharedPreferences.getString("serverAddress", "") + ":" + sharedPreferences.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
-
 			mqttClient.setCallback(getInstance());
+			
+			
+
+				
+			
+			if (throttle) {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+				}
+			}
+			
+			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTING);
+
 			connectMqtt();
+
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -98,40 +147,37 @@ public class App extends Application implements MqttCallback {
 
 	private static void connectMqtt() {
 		try {
-			Log.v("Application", "Connecting to MQTT broker");
+			Log.v(getInstance().toString(), "Connecting to MQTT broker");
 			mqttClient.connect();
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTED);
 
+			if (mqttReconnectReceiver == null) {
+				establishReconnectObserver();
+			}
+			
 			mqttClient.subscribe("/devices/+/controls/+/type", 0);
 			mqttClient.subscribe("/devices/+/controls/+", 0);
 			mqttClient.subscribe("/devices/+/meta/#", 0);
 
 		} catch (MqttException e) {
-			Log.e("Application", "MqttException during connect: " + e.getMessage());
+			Log.e(getInstance().toString(), "MqttException: " + e.getMessage() + ". Reason code: " + e.getReasonCode());
 
 			if (e.getReasonCode() == MqttException.REASON_CODE_SERVER_CONNECT_ERROR) {
-				getInstance().connectionLost(e.getCause());
+				getInstance().connectionLost(e.getCause()); 			
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-	// When the connection is lost after a connection has been established
-	// successfully, this will retry to reconnect
+	
+	
 	@Override
 	public void connectionLost(Throwable cause) {
-		Log.e(toString(), "Mqtt connection lost. Cause: " + cause);
+		Log.e(toString(), "Lost conection to the mqtt server. Sending MQTT_RECONNECT_MIGHT_BE_REQUIRED broadcast");
 		updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
-
-		while (!mqttClient.isConnected()) {
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-			}
-			bootstrapAndConnectMqtt();
-		}
+		Intent i = new Intent(App.MQTT_RECONNECT_MIGHT_BE_REQUIRED); // Recalling bootstrapAndConnect has to be decoupled from the connectionLost in order to prevent out of stack exceptions
+		getInstance().sendBroadcast(i);
 	}
 
 	@Override
@@ -186,18 +232,16 @@ public class App extends Application implements MqttCallback {
 
 	public static void disconnect() throws MqttException {
 		if ((mqttClient != null) && mqttClient.isConnected()) {
-			Log.v("disconnect", "Disconnecting");
+			Log.v(getInstance().toString(), "Disconnecting");
 
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTING);
 			mqttClient.disconnect();
 			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
-			Log.v("disconnect", "Disconnected");
+			Log.v(getInstance().toString(), "Disconnected");
 		} else {
-			Log.v("disconnect", "Not connected");
+			Log.v(getInstance().toString(), "Not connected");
 
 		}
-		Log.v("disconnect", "Done");
-
 	}
 
 	public static void addDevice(Device device) {
@@ -240,7 +284,11 @@ public class App extends Application implements MqttCallback {
 
 		MqttMessage message = new MqttMessage(value.getBytes());
 		message.setQos(0);
-
+		if(!mqttClient.isConnected()) {
+			Log.e(getInstance().toString(), "Unable to publish while not connected to a server");
+			return;
+		}
+		
 		try {
 			mqttClient.getTopic(topicStr + "/on").publish(message);
 		} catch (MqttPersistenceException e) {
@@ -264,48 +312,64 @@ public class App extends Application implements MqttCallback {
 		return (mqttClient != null) && mqttClient.isConnected();
 	}
 
-	// private static void showRecordingNotification(){
-	// NotificationCompat.Builder mBuilder =
-	// new NotificationCompat.Builder(this)
-	// .setSmallIcon(R.drawable.homamonochrome)
-	// .setContentTitle("HomA")
-	// .setContentText("Connected to broker!");
-	// // Creates an explicit intent for an Activity in your app
-	// Intent resultIntent = new Intent(this, RoomListActivity.class);
-	//
-	// // The stack builder object will contain an artificial back stack for the
-	// // started Activity.
-	// // This ensures that navigating backward from the Activity leads out of
-	// // your application to the Home screen.
-	// TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-	// // Adds the back stack for the Intent (but not the Intent itself)
-	// stackBuilder.addParentStack(RoomListActivity.class);
-	// // Adds the Intent that starts the Activity to the top of the stack
-	// stackBuilder.addNextIntent(resultIntent);
-	// PendingIntent resultPendingIntent =
-	// stackBuilder.getPendingIntent(
-	// 0,
-	// PendingIntent.FLAG_UPDATE_CURRENT
-	// );
-	// mBuilder.setContentIntent(resultPendingIntent);
-	// NotificationManager mNotificationManager =
-	// (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-	// // mId allows you to update the notification later on.
-	// mNotificationManager.notify(1, mBuilder.build());
-	//
-	// }
+	
+	// Show a notification to prevent the app from beeing killed and to give the user quicker access
+	 private void showRecordingNotification(){
+	 NotificationCompat.Builder mBuilder =
+	 new NotificationCompat.Builder(this)
+	 .setSmallIcon(R.drawable.homamonochrome)
+	 .setContentTitle("HomA")
+	 .setContentText("Connected to broker");
+	 // Creates an explicit intent for an Activity in your app
+	 Intent resultIntent = new Intent(this, RoomListActivity.class);
+	
+	 // The stack builder object will contain an artificial back stack for the
+	 // started Activity.
+	 // This ensures that navigating backward from the Activity leads out of
+	 // your application to the Home screen.
+	 TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+	 // Adds the back stack for the Intent (but not the Intent itself)
+	 stackBuilder.addParentStack(RoomListActivity.class);
+	 // Adds the Intent that starts the Activity to the top of the stack
+	 stackBuilder.addNextIntent(resultIntent);
+	 PendingIntent resultPendingIntent =
+	 stackBuilder.getPendingIntent(
+	 0,
+	 PendingIntent.FLAG_UPDATE_CURRENT
+	 );
+	 mBuilder.setContentIntent(resultPendingIntent);
+	 NotificationManager mNotificationManager =
+	 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	 // mId allows you to update the notification later on.
+	 
+	 mBuilder.setOngoing(true).setPriority(Notification.PRIORITY_MIN);
+	 Notification note = mBuilder.build();
+//	 //note.flags |= Notification.FLAG_ONGOING_EVENT;
+//	 note.flags |= Notification.PRIORITY_MIN;
+////	 note.flags |= Notification.FLAG_FOREGROUND_SERVICE;
 
-	private void establishObservers() {
-		// serverAdressChanged = new BroadcastReceiver() {
-		// @Override
-		// public void onReceive(Context context, Intent intent) {
-		// bootstrapAndConnectMqtt(true);
-		//
-		// }
-		// };
-		//
-		// IntentFilter filter = new IntentFilter();
-		// filter.addAction(App.SERVER_SETTINGS_CHANGED);
-		// registerReceiver(serverAdressChanged, filter);
+	 mNotificationManager.notify(1, note);
+	
+	 
+	 
+	 
+	 }
+
+	private static void establishReconnectObserver() {
+		mqttReconnectReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				Log.v(toString(), "broadcast received");
+				if (((mqttConnectivity == MQTT_CONNECTIVITY_DISCONNECTED) ) && isInForeground) {
+					Log.v(toString(), "reconnect seems to be a good idea");
+					
+					bootstrapAndConnectMqtt(false, true);
+				}	
+			}
+		};
+		
+		 IntentFilter filter = new IntentFilter();
+		 filter.addAction(App.MQTT_RECONNECT_MIGHT_BE_REQUIRED);
+		 getInstance().registerReceiver(mqttReconnectReceiver, filter);
 	}
 }

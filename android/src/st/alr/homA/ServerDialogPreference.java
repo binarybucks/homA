@@ -68,11 +68,11 @@ public class ServerDialogPreference extends DialogPreference {
 					Log.v(toString(), "Server address changed");
 					Intent i = new Intent(App.SERVER_SETTINGS_CHANGED);
 					context.sendBroadcast(i);
-					App.bootstrapAndConnectMqtt(true); // Server changed, clean
+					App.bootstrapAndConnectMqtt(true, false); // Server changed, clean
 														// up everything from
 														// old server
 				} else {
-					App.bootstrapAndConnectMqtt(false); // Connect to same
+					App.bootstrapAndConnectMqtt(false, false); // Connect to same
 														// server, no cleanup
 														// needed
 				}

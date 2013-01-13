@@ -30,6 +30,18 @@ public class SettingsActivity extends PreferenceActivity {
 	}
 
 	@Override
+	protected void onPause() {
+	    App.activityPaused();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+	    App.activityActivated();
+		super.onResume();
+	}
+	
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,14 +37,27 @@ public class RoomDetailActivity extends Activity {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		clearObservers();
+		super.onDestroy();
 	}
 
 	@Override
+	protected void onPause() {
+	    App.activityPaused();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+	    App.activityActivated();
+		super.onResume();
+	}
+	
+	
+	
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		inflater = getLayoutInflater();
 
 		ScrollView sw = new ScrollView(this);
@@ -53,9 +67,17 @@ public class RoomDetailActivity extends Activity {
 		ll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 		if (getIntent().getStringExtra("id") != null) {
-			room = App.getRoom(getIntent().getStringExtra("id"));
+			room = App.getRoom(getIntent().getStringExtra("id"));	
+			
+			
+			// when the app has been terminated due to inactivity, the intent is started without extras, thus without a room id. 
+			// In that case go back to the secure room list activity 
+			if (room == null) {
+				Intent listIntent = new Intent(this, RoomListActivity.class);
+				startActivity(listIntent);
+			}
+			
 			setTitle(room.getId());
-
 			establishObservers();
 
 			for (Device device : room.getDevices().values()) {
@@ -286,12 +308,11 @@ public class RoomDetailActivity extends Activity {
 		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				// Log.e(this.toString(), "disabling");
-				// boolean enabled = App.getState() ==
-				// App.MQTT_CONNECTIVITY_CONNECTED;
-				// for (View view : deviceViews.values()) {
-				// //SetDisabled = enabled
-				// }
+				 Log.v(this.toString(), "Setting controls enabled accoring to new connectivity state");
+				 boolean enabled = App.getState() == App.MQTT_CONNECTIVITY_CONNECTED;
+				 for (View view : deviceViews.values()) {
+					view.setEnabled(enabled);
+				 }
 			}
 		};
 		IntentFilter filter = new IntentFilter();
