@@ -1,22 +1,13 @@
 
 #include "RCSwitch.h"
 #include <SPI.h>
-#include "Etherlight.h"
+#include <Ethernet.h>
 #include "PubSubClient.h"
 
-#define WIFIPIN 9     
-#define DEBUG 1
+#define WIFIPIN 9
+char CLIENT_ID[20] = "1582-433MhzBridge";
+char SWITCH_ID[20] = "1593-433MhzSwitch";
 
-#ifdef DEBUG
-#define L(t) Serial.println(t)
-#else
-#define L(t) 
-#endif
-
-char CLIENT_ID[20] = "158293-433MhzBridge";
-char SWITCH_ID[20] = "158293-433MhzSwitch";
-int CLIENT_ID_LENGTH = sizeof(CLIENT_ID)/sizeof(char)-1;  
-int SWITCH_ID_LENGTH= sizeof(SWITCH_ID)/sizeof(char)-1;  
 
 struct _Ws{int number; char group[5+1]; struct _Ws* next;};
 typedef struct _Ws Ws ;
@@ -34,9 +25,9 @@ Ws* findSwitch(int id);
 
 // Settings 
 byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFF };
+byte ip[]     = { 192, 168, 8, 4 };
 byte mqttServer[] = { 192, 168, 8, 2 };
 Ws* firstSwitch = NULL;
-
 
 RCSwitch wifiTransmitter = RCSwitch();
 EthernetClient ethClient;
@@ -46,21 +37,19 @@ unsigned int connCtr = 0;
 
 
 void setup() {
-  #ifdef DEBUG
-    Serial.begin(9600);
-  #endif
-  L("starting");
+  Serial.begin(9600);
+  Serial.println("starting");
   pinMode(WIFIPIN, OUTPUT);
   wifiTransmitter.enableTransmit(WIFIPIN);
 
   //Ethernet.begin(mac, ip);
-   Etherlight.begin(mac, CLIENT_ID);
+   Ethernet.begin(mac);
    connectToMqttServer();
 }
 
 
 void connectToMqttServer() {
-  L("Connecting to MQTT server");
+  Serial.println("Connecting to mqtt server");
     // clear switches
       Ws *next = firstSwitch;
       Ws *tmp;
@@ -72,12 +61,11 @@ void connectToMqttServer() {
        firstSwitch = NULL;
    
   
+  
     if (client.connect(CLIENT_ID)) {
-    int s = 5+CLIENT_ID_LENGTH+2+1;
+    int s = sizeof(CLIENT_ID)/sizeof(char)+5+2;
     char sys[s];
-   
     snprintf(sys, s, "/sys/%s/#",CLIENT_ID);
-     L(sys);
     client.subscribe(sys);
   }
 }
@@ -87,8 +75,8 @@ void loop() {
   client.loop();  // Mqtt loop
   if (connCtr % 65000 == 0) {
     if (!client.connected()) {
-      L("not connected");
-      connectToMqttServer();
+      Serial.println("not connected");
+connectToMqttServer();
 }
     
     connCtr = 0;
@@ -98,10 +86,6 @@ void loop() {
 }
 
 void publishRetained(char* topic, char* payload) {
-    L("Publishing to:");
-    L(topic);
-
-
   client.publish(topic, (uint8_t*)payload, strlen((const char*)payload), true);
 }
 
@@ -112,9 +96,9 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
   payload[length] = '\0';
   
   //char * splitTopic = strtok(topic, "/");
-  L("Received something"); 
-  L(topic); 
-  L(payload); 
+  Serial.println("Received something"); 
+  Serial.println(topic); 
+  Serial.println(payload); 
 
   if (strncmp(topic,"/sys", 4) == 0) { // Cheap parsing here since there is just one function for /sys on this device
   
@@ -126,20 +110,23 @@ void mqttReceive(char* topic, byte* rawPayload, unsigned int length) {
     addWifiSwitch(topic, payload);
     return;  
   } 
-    
-   //The received topic in question has the format: /devices/158282-433MhzSwitch-01/controls/Power/on
-  if (strncmp(topic+9+SWITCH_ID_LENGTH+1+2,"/controls/Power/on", 18) == 0) { 
+
+  if (strncmp(topic+9+sizeof(SWITCH_ID)/sizeof(char)-1+1+2,"/controls/Power/on", 18) == 0) { 
    int switchNumber;
-   sscanf(topic+9+SWITCH_ID_LENGTH, "-%d/controls/Power/on", &switchNumber);
+   sscanf(topic+9+sizeof(SWITCH_ID)/sizeof(char)-1, "-%d/controls/Power/on", &switchNumber);
   
     if (switchNumber && switchNumber < 100) {
       Ws* wifiSwitch = findSwitch(switchNumber);
       setWifi(wifiSwitch, payload);
       
-     int buffersize = 9+SWITCH_ID_LENGTH+1+2+15+1;
-     char t[buffersize];
-     snprintf(t, buffersize,"/devices/%s-%02d/controls/Power", SWITCH_ID, switchNumber);
+      
+     char t[48+1];
+     snprintf(t, 48,"/devices/%s-%02d/controls/Power", SWITCH_ID, switchNumber);
+     t[48]= '\0';
+     
      publishRetained(t, payload);
+
+
     }
   }
   
@@ -149,32 +136,30 @@ void removeWifiSwitch(char* topic, char* payload) {
   int switchNumber = switchNumberFromTopic(topic);
   Ws *targetSwitch = findSwitch(switchNumber);
 
-  L("Removing switch with id:");
-  L(switchNumber);
+  Serial.println("Removing switch with id:");
+  Serial.println(switchNumber);
 
   if (targetSwitch != NULL) {
-        //The topic with maximum length has the format: /devices/158282-433MhzSwitch-01/controls/power/type
-                                                                                                
-
-    
-     char t[9+SWITCH_ID_LENGTH+1+19+1];
-     snprintf(t, 9+SWITCH_ID_LENGTH+1+19+1+3,"/devices/%s-%02d/controls/Power/type", SWITCH_ID, switchNumber);
+     
+     char t[52];
+     snprintf(t, 51,"/devices/%s-%02d/controls/Power/type", SWITCH_ID, switchNumber);
      publishRetained(t, "");
 
-     memset(t, 0, 9+SWITCH_ID_LENGTH+1+19+1);
+     memset(t, NULL, 52);
 
-     snprintf(t, 9+SWITCH_ID_LENGTH+1+14+1+3,"/devices/%s-%02d/controls/Power", SWITCH_ID, switchNumber);
+     snprintf(t, 51,"/devices/%s-%02d/controls/Power", SWITCH_ID, switchNumber);
      publishRetained(t, "");
 
-     memset(t, 0, 9+SWITCH_ID_LENGTH+1+19+1);
+     memset(t, NULL, 52);
   
-     snprintf(t, 9+SWITCH_ID_LENGTH+1+9+1+3,"/devices/%s-%02d/meta/room", SWITCH_ID, switchNumber);
+     snprintf(t, 51,"/devices/%s-%02d/meta/room", SWITCH_ID, switchNumber);
      publishRetained(t, "");
 
-     memset(t, 0, 9+SWITCH_ID_LENGTH+1+19+1);
+     memset(t, NULL, 52);
 
-     snprintf(t, 9+SWITCH_ID_LENGTH+1+9+1+3,"/devices/%s-%02d/meta/name", SWITCH_ID, switchNumber);
+     snprintf(t, 51,"/devices/%s-%02d/meta/name", SWITCH_ID, switchNumber);
      publishRetained(t, "");
+
 
     if (targetSwitch == firstSwitch) {
       firstSwitch = targetSwitch->next;      
@@ -192,20 +177,14 @@ void removeWifiSwitch(char* topic, char* payload) {
 
 int switchNumberFromTopic(char* topic) {
    int switchNumber;
- // /sys/158293-433MhzBridge/devices/Switch-01
-   sscanf(topic+5+CLIENT_ID_LENGTH+9+7, "%2d", &switchNumber);
-   L("switch number is");
-   L("for topic");
-   L(topic);
-   
-   L(switchNumber);
+   sscanf(topic+sizeof(CLIENT_ID)/sizeof(char)+5+15, "%d", &switchNumber);
    return switchNumber;
 }
 
 void addWifiSwitch(char* topic, char* payload) {
-   //L("Adding new device"); 
-   //L(topic); 
-   //L(payload); 
+   //Serial.println("Adding new device"); 
+   //Serial.println(topic); 
+   //Serial.println(payload); 
    
    // Strip /sys/158293-433MhzBridge/devices/Switch- from string to obtain switch number   
    int switchNumber = switchNumberFromTopic(topic);
@@ -242,7 +221,7 @@ void addWifiSwitch(char* topic, char* payload) {
 
      char sub[50+1];  
      snprintf(sub, 50,"/devices/%s-%02d/controls/Power/on", SWITCH_ID, switchNumber);
-     //L(sub);
+     //Serial.println(sub);
      sub[50]= '\0';
   
      client.subscribe(sub);
@@ -270,9 +249,9 @@ void listSwitches() {
      Ws* ptr = firstSwitch;
     while(ptr != NULL)
     {
-        //L("Switch:");
-        //L(ptr->number);
-        //L(ptr->group);
+        //Serial.println("Switch:");
+        //Serial.println(ptr->number);
+        //Serial.println(ptr->group);
         ptr = ptr->next;
 
     } 

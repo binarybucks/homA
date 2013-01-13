@@ -54,6 +54,7 @@ st.alr.homA.R$drawable: int homamonochrome
 st.alr.homA.R$drawable: int room_detail_group_item_divider
 st.alr.homA.R$id: int MyListItem
 st.alr.homA.R$id: int container
+st.alr.homA.R$id: int content
 st.alr.homA.R$id: int controlName_range
 st.alr.homA.R$id: int controlName_switch
 st.alr.homA.R$id: int controlName_text
@@ -62,6 +63,7 @@ st.alr.homA.R$id: int controlValue_range
 st.alr.homA.R$id: int controlValue_switch
 st.alr.homA.R$id: int controlValue_text
 st.alr.homA.R$id: int device_heading_textview
+st.alr.homA.R$id: int handle
 st.alr.homA.R$id: int list_divider
 st.alr.homA.R$id: int menu_settings
 st.alr.homA.R$id: int room_device_count
@@ -71,6 +73,7 @@ st.alr.homA.R$id: int serverAddress
 st.alr.homA.R$id: int serverAddressLabel
 st.alr.homA.R$id: int serverPort
 st.alr.homA.R$id: int serverPortLabel
+st.alr.homA.R$id: int slidingDrawer1
 st.alr.homA.R$layout: int room_detail_child_item_range
 st.alr.homA.R$layout: int room_detail_child_item_switch
 st.alr.homA.R$layout: int room_detail_child_item_text

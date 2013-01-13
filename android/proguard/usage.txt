@@ -244,21 +244,63 @@ android.support.v4.app.NavUtilsJB:
     25:25:public static android.content.Intent getParentActivityIntent(android.app.Activity)
     29:29:public static boolean shouldUpRecreateTask(android.app.Activity,android.content.Intent)
     37:37:public static java.lang.String getParentActivityName(android.content.pm.ActivityInfo)
-android.support.v4.app.NotificationCompat
-android.support.v4.app.NotificationCompat$Action
-android.support.v4.app.NotificationCompat$BigPictureStyle
-android.support.v4.app.NotificationCompat$BigTextStyle
-android.support.v4.app.NotificationCompat$Builder
-android.support.v4.app.NotificationCompat$InboxStyle
-android.support.v4.app.NotificationCompat$NotificationCompatImpl
-android.support.v4.app.NotificationCompat$NotificationCompatImplBase
-android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb
-android.support.v4.app.NotificationCompat$NotificationCompatImplIceCreamSandwich
-android.support.v4.app.NotificationCompat$NotificationCompatImplJellybean
-android.support.v4.app.NotificationCompat$Style
-android.support.v4.app.NotificationCompatHoneycomb
-android.support.v4.app.NotificationCompatIceCreamSandwich
-android.support.v4.app.NotificationCompatJellybean
+android.support.v4.app.NotificationCompat:
+    public static final int FLAG_HIGH_PRIORITY
+    public static final int PRIORITY_DEFAULT
+    public static final int PRIORITY_LOW
+    public static final int PRIORITY_MIN
+    public static final int PRIORITY_HIGH
+    public static final int PRIORITY_MAX
+    34:761:public NotificationCompat()
+android.support.v4.app.NotificationCompat$Action:
+    766:770:public NotificationCompat$Action(int,java.lang.CharSequence,android.app.PendingIntent)
+android.support.v4.app.NotificationCompat$BigPictureStyle:
+    618:620:public NotificationCompat$BigPictureStyle(android.support.v4.app.NotificationCompat$Builder)
+    627:628:public android.support.v4.app.NotificationCompat$BigPictureStyle setBigContentTitle(java.lang.CharSequence)
+    635:637:public android.support.v4.app.NotificationCompat$BigPictureStyle setSummaryText(java.lang.CharSequence)
+    644:645:public android.support.v4.app.NotificationCompat$BigPictureStyle bigPicture(android.graphics.Bitmap)
+android.support.v4.app.NotificationCompat$BigTextStyle:
+    672:674:public NotificationCompat$BigTextStyle(android.support.v4.app.NotificationCompat$Builder)
+    681:682:public android.support.v4.app.NotificationCompat$BigTextStyle setBigContentTitle(java.lang.CharSequence)
+    689:691:public android.support.v4.app.NotificationCompat$BigTextStyle setSummaryText(java.lang.CharSequence)
+    699:700:public android.support.v4.app.NotificationCompat$BigTextStyle bigText(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$Builder:
+    213:214:public android.support.v4.app.NotificationCompat$Builder setWhen(long)
+    229:230:public android.support.v4.app.NotificationCompat$Builder setUsesChronometer(boolean)
+    256:258:public android.support.v4.app.NotificationCompat$Builder setSmallIcon(int,int)
+    283:284:public android.support.v4.app.NotificationCompat$Builder setSubText(java.lang.CharSequence)
+    293:294:public android.support.v4.app.NotificationCompat$Builder setNumber(int)
+    301:302:public android.support.v4.app.NotificationCompat$Builder setContentInfo(java.lang.CharSequence)
+    310:313:public android.support.v4.app.NotificationCompat$Builder setProgress(int,int,boolean)
+    320:321:public android.support.v4.app.NotificationCompat$Builder setContent(android.widget.RemoteViews)
+    345:346:public android.support.v4.app.NotificationCompat$Builder setDeleteIntent(android.app.PendingIntent)
+    363:365:public android.support.v4.app.NotificationCompat$Builder setFullScreenIntent(android.app.PendingIntent,boolean)
+    373:374:public android.support.v4.app.NotificationCompat$Builder setTicker(java.lang.CharSequence)
+    383:385:public android.support.v4.app.NotificationCompat$Builder setTicker(java.lang.CharSequence,android.widget.RemoteViews)
+    392:393:public android.support.v4.app.NotificationCompat$Builder setLargeIcon(android.graphics.Bitmap)
+    400:402:public android.support.v4.app.NotificationCompat$Builder setSound(android.net.Uri)
+    412:414:public android.support.v4.app.NotificationCompat$Builder setSound(android.net.Uri,int)
+    424:425:public android.support.v4.app.NotificationCompat$Builder setVibrate(long[])
+    434:440:public android.support.v4.app.NotificationCompat$Builder setLights(int,int,int)
+    464:465:public android.support.v4.app.NotificationCompat$Builder setOnlyAlertOnce(boolean)
+    475:476:public android.support.v4.app.NotificationCompat$Builder setAutoCancel(boolean)
+    490:494:public android.support.v4.app.NotificationCompat$Builder setDefaults(int)
+    530:531:public android.support.v4.app.NotificationCompat$Builder addAction(int,java.lang.CharSequence,android.app.PendingIntent)
+    540:546:public android.support.v4.app.NotificationCompat$Builder setStyle(android.support.v4.app.NotificationCompat$Style)
+    554:554:public android.app.Notification getNotification()
+android.support.v4.app.NotificationCompat$InboxStyle:
+    730:732:public NotificationCompat$InboxStyle(android.support.v4.app.NotificationCompat$Builder)
+    739:740:public android.support.v4.app.NotificationCompat$InboxStyle setBigContentTitle(java.lang.CharSequence)
+    747:749:public android.support.v4.app.NotificationCompat$InboxStyle setSummaryText(java.lang.CharSequence)
+    756:757:public android.support.v4.app.NotificationCompat$InboxStyle addLine(java.lang.CharSequence)
+android.support.v4.app.NotificationCompat$Style:
+    android.support.v4.app.NotificationCompat$Builder mBuilder
+    578:584:public void setBuilder(android.support.v4.app.NotificationCompat$Builder)
+    587:591:public android.app.Notification build()
+android.support.v4.app.NotificationCompatHoneycomb:
+    25:25:NotificationCompatHoneycomb()
+android.support.v4.app.NotificationCompatIceCreamSandwich:
+    25:25:NotificationCompatIceCreamSandwich()
 android.support.v4.app.ServiceCompat
 android.support.v4.app.ShareCompat
 android.support.v4.app.ShareCompat$IntentBuilder
@@ -918,9 +960,10 @@ st.alr.homA.App:
     public static final java.lang.String DEVICE_ADDED_TO_ROOM
     public static final java.lang.String DEVICE_REMOVED_FROM_ROOM
     public static final java.lang.String SERVER_SETTINGS_CHANGED
-    208:209:public static void removeDevice(st.alr.homA.Device)
-    236:236:public static android.os.Handler getUiThreadHandler()
-    264:264:public static boolean isConnected()
+    public static final java.lang.String MQTT_RECONNECT_MIGHT_BE_REQUIRED
+    252:253:public static void removeDevice(st.alr.homA.Device)
+    280:280:public static android.os.Handler getUiThreadHandler()
+    312:312:public static boolean isConnected()
 st.alr.homA.BuildConfig
 st.alr.homA.Device:
     15:15:public st.alr.homA.Room getRoom()
@@ -937,7 +980,7 @@ st.alr.homA.R$xml
 st.alr.homA.Room:
     29:29:public st.alr.homA.Device getDeviceWithId(java.lang.String)
 st.alr.homA.RoomListActivity:
-    34:35:public void setActivateOnItemClick(boolean)
+    52:53:public void setActivateOnItemClick(boolean)
 st.alr.homA.RoomsHashMapAdapter:
     54:61:public void notifyDataSetChangedOnMainThread()
 st.alr.homA.RoomsHashMapAdapter$1
