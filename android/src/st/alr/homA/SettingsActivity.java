@@ -112,28 +112,7 @@ public class SettingsActivity extends PreferenceActivity {
 		if (stringValue == null || stringValue.equals("") ) {
 			serverPreference.setSummary("No server set");
 		} else {
-			
-			switch (getConnectivity()) {
-				case App.MQTT_CONNECTIVITY_CONNECTING:
-					serverPreference.setSummary("Connecting to " + stringValue);
-					break;
-				case App.MQTT_CONNECTIVITY_CONNECTED:
-					serverPreference.setSummary("Connected to " + stringValue);
-					break;
-				case App.MQTT_CONNECTIVITY_DISCONNECTING:
-					serverPreference.setSummary("Disconnecting from " + stringValue);
-					break;
-				case App.MQTT_CONNECTIVITY_DISCONNECTED:
-					serverPreference.setSummary("Disconnected from " + stringValue);
-					break;
-				default:
-					break;
-			}
-			
+			serverPreference.setSummary(Monitor.getConnectionStateText());			
 		}
-	}
-
-	private static short getConnectivity() {
-		return App.getState();
 	}
 }

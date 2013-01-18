@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include "Etherlight.h"
 #include "PubSubClient.h"
+#include "EthernetBonjour.h"
 
 #define WIFIPIN 9     
 #define DEBUG 1
@@ -11,6 +12,12 @@
 #define L(t) Serial.println(t)
 #else
 #define L(t) 
+#endif
+
+#ifdef DEBUG
+#define LP(t) Serial.print(t)
+#else
+#define LP(t) 
 #endif
 
 char CLIENT_ID[20] = "158293-433MhzBridge";
@@ -29,6 +36,10 @@ void addWifiSwitch(char* topic, char* payload);
 void listSwitches();
 int switchNumberFromTopic(char* topic);
 void connectToMqttServer();
+void serviceFound(const char* type, MDNSServiceProtocol proto,
+                  const char* name, const byte ipAddr[4], unsigned short port,
+                  const char* txtContent);
+const char* ip_to_str(const uint8_t* ipAddr);
 
 Ws* findSwitch(int id);
 
@@ -55,7 +66,75 @@ void setup() {
 
   //Ethernet.begin(mac, ip);
    Etherlight.begin(mac, CLIENT_ID);
-   connectToMqttServer();
+   
+   
+   
+   
+     EthernetBonjour.begin("Arduino");
+
+  // We specify the function that the Bonjour library will call when it
+  // discovers a service instance. In this case, we will call the function
+  // named "serviceFound".
+  EthernetBonjour.setServiceFoundCallback(serviceFound);
+
+      EthernetBonjour.startDiscoveringService("_ssh",
+                                              MDNSServiceTCP,
+                                              5000);
+
+
+//   connectToMqttServer();
+}
+
+
+// This function is called when a name is resolved via MDNS/Bonjour. We set
+// this up in the setup() function above. The name you give to this callback
+// function does not matter at all, but it must take exactly these arguments
+// as below.
+// If a service is discovered, name, ipAddr, port and (if available) txtContent
+// will be set.
+// If your specified discovery timeout is reached, the function will be called
+// with name (and all successive arguments) being set to NULL.
+void serviceFound(const char* type, MDNSServiceProtocol proto,
+                  const char* name, const byte ipAddr[4],
+                  unsigned short port,
+                  const char* txtContent)
+{
+  if (NULL == name) {
+	L("Finished discovering services of type ");
+	L(type);
+  } else {
+    L("Found: '");
+    L(name);
+    L("' at ");
+    L(ip_to_str(ipAddr));
+    L(", port ");
+    L(port);
+    L(" (TCP)");
+
+    // Check out http://www.zeroconf.org/Rendezvous/txtrecords.html for a
+    // primer on the structure of TXT records. Note that the Bonjour
+    // library will always return the txt content as a zero-terminated
+    // string, even if the specification does not require this.
+    if (txtContent) {
+      L("\ttxt record: ");
+      
+      char buf[256];
+      char len = *txtContent++, i=0;;
+      while (len) {
+        i = 0;
+        while (len--)
+          buf[i++] = *txtContent++;
+        buf[i] = '\0';
+        LP(buf);
+        len = *txtContent++;
+        
+        if (len)
+          LP(", ");
+        else
+          L();
+      }
+    }
+  }
 }
 
 
@@ -84,11 +163,12 @@ void connectToMqttServer() {
 
 
 void loop() {
-  client.loop();  // Mqtt loop
+  EthernetBonjour.run();
+  //client.loop();  // Mqtt loop
   if (connCtr % 65000 == 0) {
     if (!client.connected()) {
-      L("not connected");
-      connectToMqttServer();
+      //L("not connected");
+      //connectToMqttServer();
 }
     
     connCtr = 0;
@@ -288,6 +368,14 @@ void setWifi(Ws* s, char* state) {
   } else if (strcmp(state, "0") == 0)  {  
     wifiTransmitter.switchOff(s->group, s->number); 
   } 
+}
+
+// This is just a little utility function to format an IP address as a string.
+const char* ip_to_str(const uint8_t* ipAddr)
+{
+  static char buf[16];
+  sprintf(buf, "%d.%d.%d.%d\0", ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
+  return buf;
 }
 
 
