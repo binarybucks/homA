@@ -1,14 +1,9 @@
 package st.alr.homA;
 
-import java.util.List;
+import de.greenrobot.event.EventBus;
 
-import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -19,31 +14,35 @@ import android.view.Menu;
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
 	private static SharedPreferences sharedPreferences;
-	private BroadcastReceiver mqttConnectivityChangedReceiver;
 	private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
 
 	@Override
 	protected void onDestroy() {
-		unregisterReceiver(mqttConnectivityChangedReceiver);
 		sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferencesChangedListener);
 		super.onDestroy();
 	}
 
 	@Override
 	protected void onPause() {
-	    App.activityPaused();
+		App.activityPaused();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-	    App.activityActivated();
+		App.activityActivated();
 		super.onResume();
 	}
-	
+
+	public void onEvent(Events.MqttConnectivityChanged event) {
+		setServerPreferenceSummaryManually();
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		EventBus.getDefault().register(this);
+
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
@@ -51,26 +50,10 @@ public class SettingsActivity extends PreferenceActivity {
 		preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
-				String stringValue = sharedPreference.getString(key, "");
-
-				if (key.equals("serverAddress")) {
-					setServerPreferenceSummary(stringValue);
-				}
-
+				if (key.equals("serverAddress"))
+					setServerPreferenceSummary(sharedPreference.getString(key, ""));
 			}
 		};
-
-		sharedPreferences.registerOnSharedPreferenceChangeListener(preferencesChangedListener);
-
-		mqttConnectivityChangedReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				setServerPreferenceSummaryManually();
-			}
-		};
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(App.MQTT_CONNECTIVITY_CHANGED);
-		registerReceiver(mqttConnectivityChangedReceiver, filter);
 
 	}
 
@@ -98,21 +81,15 @@ public class SettingsActivity extends PreferenceActivity {
 		return false;
 	}
 
-	@Override
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public void onBuildHeaders(List<Header> target) {
-		loadHeadersFromResource(R.xml.preferences_headers, target);
-	}
-
 	private static void setServerPreferenceSummaryManually() {
 		setServerPreferenceSummary(sharedPreferences.getString("serverAddress", ""));
 	}
 
 	private static void setServerPreferenceSummary(String stringValue) {
-		if (stringValue == null || stringValue.equals("") ) {
+		if (stringValue == null || stringValue.equals("")) {
 			serverPreference.setSummary("No server set");
 		} else {
-			serverPreference.setSummary(Monitor.getConnectionStateText());			
+			serverPreference.setSummary(App.getConnectionStateText());
 		}
 	}
 }

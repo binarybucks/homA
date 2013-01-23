@@ -1,5 +1,8 @@
 package st.alr.homA;
 
+import de.greenrobot.event.EventBus;
+import st.alr.homA.*;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -65,16 +68,9 @@ public class ServerDialogPreference extends DialogPreference {
 				editor.apply();
 
 				if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
-					Log.v(toString(), "Server address changed");
-					Intent i = new Intent(App.SERVER_SETTINGS_CHANGED);
-					context.sendBroadcast(i);
-					App.bootstrapAndConnectMqtt(true, false); // Server changed, clean
-														// up everything from
-														// old server
+					App.bootstrapAndConnectMqtt(true, false); // Server changed, clean up everything from old server
 				} else {
-					App.bootstrapAndConnectMqtt(false, false); // Connect to same
-														// server, no cleanup
-														// needed
+					App.bootstrapAndConnectMqtt(false, false); // Connect to same server, no cleanup needed
 				}
 
 				break;

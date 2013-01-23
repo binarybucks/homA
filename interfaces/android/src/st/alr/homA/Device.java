@@ -2,10 +2,14 @@ package st.alr.homA;
 
 import java.util.HashMap;
 
+import de.greenrobot.event.EventBus;
+
+import st.alr.homA.*;
+
 import android.content.Context;
 import android.util.Log;
 
-public class Device {
+public class Device implements Comparable<Device>{
 	private String id;
 	private String name;
 	private Room room;
@@ -32,7 +36,6 @@ public class Device {
 
 		if (room != null) {
 			room.removeDevice(this);
-
 			if (room.getDevices().size() == 0) {
 				Log.v(toString(), "Room " + room.getId() + " is empty, removing it");
 				App.removeRoom(room);
@@ -53,6 +56,7 @@ public class Device {
 
 		removeFromCurrentRoom();
 		newRoom.addDevice(this);
+		
 		room = newRoom;
 	}
 
@@ -85,5 +89,9 @@ public class Device {
 	public String toString() {
 		return (name != null) && !name.equals("") ? name : id;
 	}
-
+	@Override
+	public int compareTo(Device another) {	
+		return this.toString().compareTo(another.toString());
+	}
+	
 }

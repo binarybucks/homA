@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="st.alr.homA"
     android:versionCode="112"
-    android:versionName="1.12" >
+    android:versionName="1.12" 
+ >
 
     <uses-sdk
         android:minSdkVersion="16"
@@ -10,35 +11,26 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application
+   <application
         android:name="st.alr.homA.App"
         android:allowBackup="true"
         android:icon="@drawable/homa"
 	    android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
+        
         <activity
             android:name="st.alr.homA.SettingsActivity"
-            android:label="Settings" 
-            android:configChanges="orientation">            
+            android:configChanges="orientation"
+            android:label="Settings" >
         </activity>
+
         <activity
-            android:name="st.alr.homA.RoomListActivity"
-               android:label="HomA" 
-            >
-            
-            <intent-filter android:label="@string/app_name" >
+            android:name="st.alr.homA.MainActivity"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="st.alr.homA.RoomDetailActivity"
-            android:label="Room detaile"
-            android:parentActivityName=".RoomListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".RoomListActivity" />
         </activity>
     </application>
 

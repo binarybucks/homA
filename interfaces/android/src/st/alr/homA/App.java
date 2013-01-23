@@ -1,6 +1,7 @@
 package st.alr.homA;
 
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -10,6 +11,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
+import de.greenrobot.event.EventBus;
+
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -18,7 +21,6 @@ import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -28,86 +30,85 @@ import android.util.Log;
 public class App extends Application implements MqttCallback {
 	private static App instance;
 
-	public static final String MQTT_CONNECTIVITY_CHANGED = "st.alr.homA.mqttConnectivityChanged";
 	public static final short MQTT_CONNECTIVITY_DISCONNECTED = 0x01;
 	public static final short MQTT_CONNECTIVITY_CONNECTING = 0x02;
 	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
 	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
+	
 	public static final String DEVICE_ATTRIBUTE_TYPE_CHANGED = "st.alr.homA.deviceAttributeTypeChanged";
 	public static final String DEVICE_ADDED_TO_ROOM = "st.alr.homA.deviceAddedToRoom";
 	public static final String DEVICE_REMOVED_FROM_ROOM = "st.alr.homA.deviceRemovedFromRoom";
-	public static final String SERVER_SETTINGS_CHANGED = "st.alr.homA.serverSettingsChanged";
-	public static final String MQTT_RECONNECT_MIGHT_BE_REQUIRED = "st.alr.homA.reconnectMightBeRequired";
 
-	
 	private static MqttClient mqttClient;
-	private static HashMap<String, Device> devices;
+	
+	private static TreeMap<String, Device> devices;
+	private static TreeMap<String, Room> rooms;
+
 	private static Handler uiThreadHandler;
 	private static short mqttConnectivity;
-	private static BroadcastReceiver mqttReconnectReceiver;
-	private static RoomsHashMapAdapter roomsAdapter;
 	private static SharedPreferences sharedPreferences;
 	private static boolean isAnyActivityRunning = true;
-	private static Monitor monitor;
-	
-	// When activities pause or get destroyed, they call this method, to prevent mqtt auto reconnects during inactivity
+	private static int nofiticationID = 1337;
+	private static NotificationCompat.Builder notificationBuilder;
+
+
 	public static void activityPaused() {
 		Log.v(getInstance().toString(), "Activity paused");
 		isAnyActivityRunning = false;
 	}
-	
-	// When activities resume or start mqtt connectivity is checked and auto reconnects are enabled
+
 	public static void activityActivated() {
+
 		isAnyActivityRunning = true;
-		// this just a state changed notification with the same state.
-		// The observer then checks if there is a connection and if not, triggers a reconnect loop until a connection is established or isInForeground is false
 		Log.v(getInstance().toString(), "Activity resumed");
-		Intent i = new Intent(App.MQTT_RECONNECT_MIGHT_BE_REQUIRED); // Recalling bootstrapAndConnect has to be decoupled from the connectionLost in order to prevent out of stack exceptions
-		getInstance().sendBroadcast(i);
+
+		EventBus.getDefault().post(new Events.MqttReconnectMightBeRequired());
+
 	}
-	
-	
-	
-	
-	
+
+
+
+	@Override
 	public void onCreate() {
 		super.onCreate();
 
 		instance = this;
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		monitor = Monitor.getInstance();
-		devices = new HashMap<String, Device>();
-		roomsAdapter = new RoomsHashMapAdapter(this);
+		devices = new TreeMap<String, Device>();
+		rooms = new TreeMap<String, Room>();
+		notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+
 		uiThreadHandler = new Handler();
 		bootstrapAndConnectMqtt();
+		notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+		EventBus.getDefault().register(this);
+
 	}
 
 	public static App getInstance() {
 		return instance;
 	}
 
-	
 	public static void bootstrapAndConnectMqtt() {
 		bootstrapAndConnectMqtt(false, false);
 	}
 
-	
 	public static void bootstrapAndConnectMqtt(final boolean clear, final boolean throttle) {
 		try {
 			// Ensures that this method is not called on the main thread
-			if (Thread.currentThread().getName().equals("main")) { 
-				
+			if (Thread.currentThread().getName().equals("main")) {
+
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						bootstrapAndConnectMqtt(clear, throttle);
 					}
 				}).start();
-				return; 	
+				return;
 			}
 
 			disconnect();
-	
+
 			if (clear) {
 				Log.v(getInstance().toString(), "Clearing all rooms");
 				removeAllRooms();
@@ -117,23 +118,17 @@ public class App extends Application implements MqttCallback {
 
 			mqttClient = new MqttClient("tcp://" + sharedPreferences.getString("serverAddress", "") + ":" + sharedPreferences.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
 			mqttClient.setCallback(getInstance());
-			
-			
 
-				
-			
 			if (throttle) {
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
 				}
 			}
-		
-			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTING);
+
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_CONNECTING));
 
 			connectMqtt();
-
-			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -145,7 +140,8 @@ public class App extends Application implements MqttCallback {
 		try {
 			Log.v(getInstance().toString(), "Connecting to MQTT broker");
 			mqttClient.connect();
-			updateMqttConnectivity(App.MQTT_CONNECTIVITY_CONNECTED);			
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_CONNECTED));
+
 			mqttClient.subscribe("/devices/+/controls/+/type", 0);
 			mqttClient.subscribe("/devices/+/controls/+", 0);
 			mqttClient.subscribe("/devices/+/meta/#", 0);
@@ -154,21 +150,20 @@ public class App extends Application implements MqttCallback {
 			Log.e(getInstance().toString(), "MqttException: " + e.getMessage() + ". Reason code: " + e.getReasonCode());
 
 			if (e.getReasonCode() == MqttException.REASON_CODE_SERVER_CONNECT_ERROR) {
-				getInstance().connectionLost(e.getCause()); 			
+				getInstance().connectionLost(e.getCause());
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	@Override
 	public void connectionLost(Throwable cause) {
-		Log.e(toString(), "Lost conection to the mqtt server. Sending MQTT_RECONNECT_MIGHT_BE_REQUIRED broadcast");
-		updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
-		Intent i = new Intent(App.MQTT_RECONNECT_MIGHT_BE_REQUIRED); // Recalling bootstrapAndConnect has to be decoupled from the connectionLost in order to prevent out of stack exceptions
-		getInstance().sendBroadcast(i);
+		Log.e(toString(), "Lost connection to the MQTT server. Sending MQTT_RECONNECT_MIGHT_BE_REQUIRED broadcast");
+
+		EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTED));
+		EventBus.getDefault().post(new Events.MqttReconnectMightBeRequired());
 	}
 
 	@Override
@@ -192,8 +187,12 @@ public class App extends Application implements MqttCallback {
 		Device device = devices.get(deviceId);
 		if (device == null) {
 			device = new Device(deviceId, this);
-			addDevice(device);
-			device.moveToRoom(this.getString(R.string.defaultRoomName));
+			
+			devices.put(device.getId(), device);
+			EventBus.getDefault().post(new Events.DeviceAdded(device));
+
+			// TODO: move to strings.xml
+			device.moveToRoom("unassigned");
 
 		}
 
@@ -225,61 +224,26 @@ public class App extends Application implements MqttCallback {
 		if ((mqttClient != null) && mqttClient.isConnected()) {
 			Log.v(getInstance().toString(), "Disconnecting");
 
-			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTING);
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTING));
+
 			mqttClient.disconnect();
-			updateMqttConnectivity(App.MQTT_CONNECTIVITY_DISCONNECTED);
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTED));
+
 			Log.v(getInstance().toString(), "Disconnected");
 		} else {
 			Log.v(getInstance().toString(), "Not connected");
 
 		}
 	}
-
-	public static void addDevice(Device device) {
-		devices.put(device.getId(), device);
-	}
-
-	public static void removeDevice(Device device) {
-		devices.remove(device.getId());
-	}
-
-	public static void addRoom(Room room) {
-		roomsAdapter.addOnMainThread(room);
-	}
-
-	public static void removeAllRooms() {
-		roomsAdapter.clearOnMainThread();
-	}
-
-	public static void removeRoom(Room room) {
-		roomsAdapter.removeOnMainThread(room);
-	}
-
-	public static Room getRoom(String id) {
-		return (Room) roomsAdapter.getRoom(id);
-	}
-
-	public static Device getDevice(String id) {
-		return devices.get(id);
-	}
-
-	public static RoomsHashMapAdapter getRoomsAdapter() {
-		return roomsAdapter;
-	}
-
-	public static Handler getUiThreadHandler() {
-		return uiThreadHandler;
-	}
-
 	public static void publishMqtt(String topicStr, String value) {
 
 		MqttMessage message = new MqttMessage(value.getBytes());
 		message.setQos(0);
-		if(!mqttClient.isConnected()) {
+		if (!mqttClient.isConnected()) {
 			Log.e(getInstance().toString(), "Unable to publish while not connected to a server");
 			return;
 		}
-		
+
 		try {
 			mqttClient.getTopic(topicStr + "/on").publish(message);
 		} catch (MqttPersistenceException e) {
@@ -288,16 +252,55 @@ public class App extends Application implements MqttCallback {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
 
-	private static void updateMqttConnectivity(short state) {
-		mqttConnectivity = state;
-		Intent i = new Intent(App.MQTT_CONNECTIVITY_CHANGED);
-		getInstance().sendBroadcast(i);
+	public static void removeAllRooms() {
+		rooms.clear();
 	}
 
+	public static void removeRoom(Room room)  {
+		rooms.remove(room.getId());
+		EventBus.getDefault().post(new Events.RoomRemoved(room));
+	}
+
+	public static Room getRoom(String id) {
+		return rooms.get(id);
+	}
 	
-	
-	
+	public static void addRoom(Room room) {
+		rooms.put(room.getId(), room);
+		Log.v(getInstance().toString(), "Room added: " + rooms);
+		EventBus.getDefault().post(new Events.RoomAdded(room));
+	}
+
+	public static void addDevice(Device device) {
+		devices.put(device.getId(), device);
+		EventBus.getDefault().post(new Events.DeviceAdded(device));
+	}
+
+	public static Room getRoomAtPosition(Integer position) {
+		Log.v(getInstance().toString(), "room at position requested" + position);
+
+		if (rooms.size() > position)
+			return getRoom((String)rooms.keySet().toArray()[position]);
+		else
+			return null;
+	}
+
+	public static Integer getRoomCount() {
+		return rooms.size();
+	}
+
+	public static Device getDevice(String id) {
+		return devices.get(id);
+	}
+
+	public static Handler getUiThreadHandler() {
+		return uiThreadHandler;
+	}
+
 	public static short getState() {
 		return mqttConnectivity;
 	}
@@ -305,7 +308,59 @@ public class App extends Application implements MqttCallback {
 	public static boolean isConnected() {
 		return (mqttClient != null) && mqttClient.isConnected();
 	}
-	public static boolean isAnyActivityRunning(){
+
+	public static boolean isAnyActivityRunning() {
 		return isAnyActivityRunning;
+	}
+
+	public static String getConnectionStateText() {
+		switch (App.getState()) {
+			case App.MQTT_CONNECTIVITY_CONNECTED:
+				return "Connected";
+			case App.MQTT_CONNECTIVITY_CONNECTING:
+				return "Connecting";
+			case App.MQTT_CONNECTIVITY_DISCONNECTING:
+				return "Disconnecting";
+			default:
+				return "Disconnected";
+		}
+	}
+	
+	public void onEvent(Events.MqttConnectivityChanged event) {
+		mqttConnectivity = event.getConnectivity();
+		updateNotification();
+	}
+
+	public void onEvent(Events.MqttReconnectMightBeRequired event) {
+		if (App.getState() == App.MQTT_CONNECTIVITY_DISCONNECTED && App.isAnyActivityRunning()) {
+
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					App.bootstrapAndConnectMqtt(false, true);
+				}
+			}).start();
+
+		}
+	}
+
+
+
+	private static void createNotification() {
+		Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(App.getInstance());
+		stackBuilder.addParentStack(MainActivity.class);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		notificationBuilder.setContentIntent(resultPendingIntent);
+		updateNotification();
+	}
+
+	public static void updateNotification() {
+		final NotificationManager mNotificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle("HomA");
+		notificationBuilder.setOngoing(true).setContentText(getConnectionStateText()).setPriority(Notification.PRIORITY_MIN);
+		final Notification note = notificationBuilder.build();
+		mNotificationManager.notify(nofiticationID, note);
 	}
 }

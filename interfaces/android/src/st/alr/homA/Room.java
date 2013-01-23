@@ -2,11 +2,13 @@ package st.alr.homA;
 
 import java.util.HashMap;
 
+import de.greenrobot.event.EventBus;
+
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class Room {
+public class Room implements Comparable<Room>{
 	private String id;
 	private HashMap<String, Device> devices;
 	private Context context;
@@ -31,23 +33,26 @@ public class Room {
 
 	@Override
 	public String toString() {
-		return id;
+		return getId();
 	}
 
 	public void addDevice(Device device) {
 		devices.put(device.getId(), device);
-		Intent i = new Intent(App.DEVICE_ADDED_TO_ROOM);
-		i.putExtra("roomID", id);
-		i.putExtra("deviceID", device.getId());
-		context.sendBroadcast(i);
+		EventBus.getDefault().post(new Events.DeviceAddedToRoom(device, this));
 		Log.v(toString(), "Device '" + device.getId() + "' added to room '" + id + "' , new count is: " + devices.size());
+		
 	}
 
 	public void removeDevice(Device device) {
-		devices.remove(device.getId());
-		Intent i = new Intent(App.DEVICE_REMOVED_FROM_ROOM).putExtra("roomID", id).putExtra("deviceID", device.getId());
-		context.sendBroadcast(i);
+		devices.remove(device.getId());		
+		EventBus.getDefault().post(new Events.DeviceRemovedFromRoom(device, this));
 		Log.v(toString(), "Device '" + device.getId() + "'  removed from room '" + id + "', new count is: " + devices.size());
 	}
+
+	@Override
+	public int compareTo(Room another) {	
+		return this.toString().compareTo(another.toString());
+	}
+	
 
 }
