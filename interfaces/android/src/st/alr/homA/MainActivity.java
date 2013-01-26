@@ -1,43 +1,156 @@
 package st.alr.homA;
 
 import de.greenrobot.event.EventBus;
-import st.alr.homA.*;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
 public class MainActivity extends FragmentActivity {
 	private RoomsFragmentPagerAdapter roomsFragmentPagerAdapter;
-	private ViewPager mViewPager;
+	private static ViewPager mViewPager;
+	private static Room currentRoom;
+	
+
+    
+	// Handle click events
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_settings:
+				Intent intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	
+	public void onPageSelected(int arg0)
+	{
+	}
+
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+
+		setContentView(R.layout.activity_main);
+		roomsFragmentPagerAdapter = new RoomsFragmentPagerAdapter(getSupportFragmentManager());
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+
+		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
+		    @Override
+		    public void onPageSelected(int index) {
+				Log.v(this.toString(), "onPageSelected");
+				currentRoom = App.getRoomAtPosition(index);
+		    }
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+		});
+		mViewPager.setAdapter(roomsFragmentPagerAdapter);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {		
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+	
+	
+	public void onEventMainThread(Events.RoomAdded event) {
+		Log.v(this.toString(), "Room added");
+		int currentItem = mViewPager.getCurrentItem();
+		mViewPager.getAdapter().notifyDataSetChanged();
+		
+		if(currentRoom != null && currentRoom.compareTo(App.getRoomAtPosition(currentItem)) > 0) {
+			Log.v(this.toString(), "Shifting index ");
+
+			mViewPager.setCurrentItem(currentItem+1, false);
+		}
+		
+	}
+	
+	public void onEventMainThread(Events.RoomRemoved event) {
+		Log.v(this.toString(), "Room removed");
+		mViewPager.getAdapter().notifyDataSetChanged();
+		//mViewPager.setCurrentItem(mViewPager.getc)
+	}
 
 	
-    public static class RoomFragment extends Fragment {
-        int mNum;
+    public static class RoomsFragmentPagerAdapter extends FragmentStatePagerAdapter {
+    	
+    	public RoomsFragmentPagerAdapter(FragmentManager fm) {
+            super(fm);
+            Log.v(this.toString(), "RoomsFragmentPagerAdapter instantiated ");
+        }
+        
+    	public int getItemPosition(Object object) {
+    		return POSITION_NONE;
+    	}
+    	
+        @Override
+        public int getCount() {
+            return App.getRoomCount();
+        }
 
-        /**
-         * Create a new instance of CountingFragment, providing "num"
-         * as an argument.
-         */
-        static RoomFragment newInstance(int num) {
+        @Override
+        public Fragment getItem(int position) {
+            return MainActivity.RoomFragment.newInstance(App.getRoomAtPosition(position).getId());
+        }         
+        
+        @Override
+        public CharSequence getPageTitle(int position) {
+        	return App.getRoomAtPosition(position).getId()	;
+        }
+        
+//        @Override
+//        public void destroyItem(ViewGroup container, int position, Object object) {
+//        	Log.v(toString(), "destroyItem");
+//
+//            	FragmentManager manager = ((Fragment) object).getFragmentManager();
+//                FragmentTransaction trans = manager.beginTransaction();
+//                trans.remove((Fragment) object);
+//                trans.commit();
+//        }
+        
+        
+    }
+    
+    public static class RoomFragment extends ListFragment {
+        Room room;
+
+        static RoomFragment newInstance(String id) {
         	RoomFragment f = new RoomFragment();
 
             // Supply num input as an argument.
             Bundle args = new Bundle();
-            args.putInt("num", num);
+            args.putString("id", id);
             f.setArguments(args);
 
             return f;
@@ -49,7 +162,7 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+            room = getArguments() != null ? App.getRoom(getArguments().getString("id")) : null;
         }
 
         /**
@@ -61,7 +174,8 @@ public class MainActivity extends FragmentActivity {
                 Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_room, container, false);
             View tv = v.findViewById(R.id.roomname);
-            ((TextView)tv).setText("Fragment #" + App.getRoomAtPosition(mNum).getId());
+            
+            ((TextView)tv).setText("Room #" + room.getId());
             return v;
         }
 
@@ -77,75 +191,4 @@ public class MainActivity extends FragmentActivity {
 //            Log.v(this.toString(), "Item clicked: " + id);
 //        }
     }
-    
-	// Handle click events
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.menu_settings:
-				Intent intent = new Intent(this, SettingsActivity.class);
-				startActivity(intent);
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
-		}
-	}
-
-
-
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		roomsFragmentPagerAdapter = new RoomsFragmentPagerAdapter(getSupportFragmentManager());
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mViewPager.setAdapter(roomsFragmentPagerAdapter);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {		
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
-	}
-	
-	
-	
-    public static class RoomsFragmentPagerAdapter extends FragmentPagerAdapter {
-        public RoomsFragmentPagerAdapter(FragmentManager fm) {
-            super(fm);
-            Log.v(this.toString(), "RoomsFragmentPagerAdapter instantiated");
-            EventBus.getDefault().register(this);
-        }
-        
-    	public void onEventMainThread(Events.RoomAdded event) {
-    		Log.v(this.toString(), "Room added");
-    		this.notifyDataSetChanged();
-    	}
-    	public void onEventMainThread(Events.RoomRemoved event) {
-    		Log.v(this.toString(), "Room removed");
-    		this.notifyDataSetChanged();
-    	}
-
-        @Override
-        public int getCount() {
-            return App.getRoomCount();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return MainActivity.RoomFragment.newInstance(position);
-        }
-        
-        @Override
-        public int getItemPosition(Object object){
-        	return POSITION_NONE;
-        }
-    }
-
-    
-
-
-
-
 }

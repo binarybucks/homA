@@ -1,10 +1,6 @@
 package st.alr.homA;
 
-import java.util.HashMap;
-
-import de.greenrobot.event.EventBus;
-
-import st.alr.homA.*;
+import java.util.TreeMap;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,7 +9,7 @@ public class Device implements Comparable<Device>{
 	private String id;
 	private String name;
 	private Room room;
-	private HashMap<String, Control> controls;
+	private TreeMap<String, Control> controls;
 
 	public Room getRoom() {
 		return room;
@@ -28,7 +24,7 @@ public class Device implements Comparable<Device>{
 	public Device(String id, String name, Context context) {
 		this.id = id;
 		this.name = name;
-		controls = new HashMap<String, Control>();
+		controls = new TreeMap<String, Control>();
 		this.context = context;
 	}
 
@@ -45,6 +41,9 @@ public class Device implements Comparable<Device>{
 	}
 
 	void moveToRoom(String roomname) {
+		if (room != null && room.getId().equals(roomname))
+			return;
+					
 		String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultRoomName);
 
 		Room newRoom = App.getRoom(cleanedName);
@@ -81,7 +80,7 @@ public class Device implements Comparable<Device>{
 		// TODO: Update view to reflect newly added device
 	}
 
-	public HashMap<String, Control> getControls() {
+	public TreeMap<String, Control> getControls() {
 		return controls;
 	}
 

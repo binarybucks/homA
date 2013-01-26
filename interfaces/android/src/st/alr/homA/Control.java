@@ -37,11 +37,7 @@ public class Control {
 	}
 
 	public void setType(String type) {
-		this.type = type;
-		// TODO: Add listeners in RoomDetailActivity
-		Intent i = new Intent(App.DEVICE_ATTRIBUTE_TYPE_CHANGED).putExtra("deviceID", id);
-		context.sendBroadcast(i);
-
+		this.type = type;		
 	}
 
 	public String getTopic() {

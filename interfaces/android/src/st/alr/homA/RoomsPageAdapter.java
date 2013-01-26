@@ -1,6 +1,7 @@
 package st.alr.homA;
 
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -16,7 +17,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 public class RoomsPageAdapter extends FragmentPagerAdapter {
-	private HashMap<String, Room> map;
+	private TreeMap<String, Room> map;
 	final Handler uiThreadHandler = new Handler();
 
 //	public RoomsPageAdapter(Context context) {

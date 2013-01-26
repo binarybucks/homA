@@ -29,43 +29,22 @@ import android.util.Log;
 
 public class App extends Application implements MqttCallback {
 	private static App instance;
+	private static MqttClient mqttClient;
+	private static Handler uiThreadHandler;
+	private static SharedPreferences sharedPreferences;
+	private static NotificationCompat.Builder notificationBuilder;
+
+	private static HashMap<String, Device> devices;
+	private static TreeMap<String, Room> rooms;
 
 	public static final short MQTT_CONNECTIVITY_DISCONNECTED = 0x01;
 	public static final short MQTT_CONNECTIVITY_CONNECTING = 0x02;
 	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
 	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
-	
-	public static final String DEVICE_ATTRIBUTE_TYPE_CHANGED = "st.alr.homA.deviceAttributeTypeChanged";
-	public static final String DEVICE_ADDED_TO_ROOM = "st.alr.homA.deviceAddedToRoom";
-	public static final String DEVICE_REMOVED_FROM_ROOM = "st.alr.homA.deviceRemovedFromRoom";
 
-	private static MqttClient mqttClient;
-	
-	private static TreeMap<String, Device> devices;
-	private static TreeMap<String, Room> rooms;
-
-	private static Handler uiThreadHandler;
-	private static short mqttConnectivity;
-	private static SharedPreferences sharedPreferences;
 	private static boolean isAnyActivityRunning = true;
 	private static int nofiticationID = 1337;
-	private static NotificationCompat.Builder notificationBuilder;
-
-
-	public static void activityPaused() {
-		Log.v(getInstance().toString(), "Activity paused");
-		isAnyActivityRunning = false;
-	}
-
-	public static void activityActivated() {
-
-		isAnyActivityRunning = true;
-		Log.v(getInstance().toString(), "Activity resumed");
-
-		EventBus.getDefault().post(new Events.MqttReconnectMightBeRequired());
-
-	}
-
+	private static short mqttConnectivity = MQTT_CONNECTIVITY_DISCONNECTED;
 
 
 	@Override
@@ -74,26 +53,21 @@ public class App extends Application implements MqttCallback {
 
 		instance = this;
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		devices = new TreeMap<String, Device>();
+		devices = new HashMap<String, Device>();
 		rooms = new TreeMap<String, Room>();
 		notificationBuilder = new NotificationCompat.Builder(App.getInstance());
-
 		uiThreadHandler = new Handler();
-		bootstrapAndConnectMqtt();
-		notificationBuilder = new NotificationCompat.Builder(App.getInstance());
 		EventBus.getDefault().register(this);
-
+		createNotification();		
+		bootstrapAndConnectMqtt();
 	}
 
-	public static App getInstance() {
-		return instance;
-	}
 
 	public static void bootstrapAndConnectMqtt() {
 		bootstrapAndConnectMqtt(false, false);
 	}
 
-	public static void bootstrapAndConnectMqtt(final boolean clear, final boolean throttle) {
+	public static void bootstrapAndConnectMqtt(final boolean clear, final boolean throttle) 	{
 		try {
 			// Ensures that this method is not called on the main thread
 			if (Thread.currentThread().getName().equals("main")) {
@@ -120,10 +94,7 @@ public class App extends Application implements MqttCallback {
 			mqttClient.setCallback(getInstance());
 
 			if (throttle) {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-				}
+				Thread.sleep(5000);
 			}
 
 			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_CONNECTING));
@@ -168,7 +139,6 @@ public class App extends Application implements MqttCallback {
 
 	@Override
 	public void deliveryComplete(MqttDeliveryToken token) {
-		// Log.v(toString(), "Mqtt QOS delivery complete. Token: " + token);
 	}
 
 	@Override
@@ -288,6 +258,8 @@ public class App extends Application implements MqttCallback {
 		else
 			return null;
 	}
+	
+
 
 	public static Integer getRoomCount() {
 		return rooms.size();
@@ -297,21 +269,7 @@ public class App extends Application implements MqttCallback {
 		return devices.get(id);
 	}
 
-	public static Handler getUiThreadHandler() {
-		return uiThreadHandler;
-	}
 
-	public static short getState() {
-		return mqttConnectivity;
-	}
-
-	public static boolean isConnected() {
-		return (mqttClient != null) && mqttClient.isConnected();
-	}
-
-	public static boolean isAnyActivityRunning() {
-		return isAnyActivityRunning;
-	}
 
 	public static String getConnectionStateText() {
 		switch (App.getState()) {
@@ -333,18 +291,9 @@ public class App extends Application implements MqttCallback {
 
 	public void onEvent(Events.MqttReconnectMightBeRequired event) {
 		if (App.getState() == App.MQTT_CONNECTIVITY_DISCONNECTED && App.isAnyActivityRunning()) {
-
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					App.bootstrapAndConnectMqtt(false, true);
-				}
-			}).start();
-
+			App.bootstrapAndConnectMqtt(false, true);
 		}
 	}
-
-
 
 	private static void createNotification() {
 		Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
@@ -356,11 +305,43 @@ public class App extends Application implements MqttCallback {
 		updateNotification();
 	}
 
-	public static void updateNotification() {
+	private static void updateNotification() {
 		final NotificationManager mNotificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle("HomA");
 		notificationBuilder.setOngoing(true).setContentText(getConnectionStateText()).setPriority(Notification.PRIORITY_MIN);
 		final Notification note = notificationBuilder.build();
 		mNotificationManager.notify(nofiticationID, note);
+	}
+	
+	/* Some helpers */
+	
+	public static void activityPaused() {
+		Log.v(getInstance().toString(), "Activity paused");
+		isAnyActivityRunning = false;
+	}
+
+	public static void activityActivated() {
+		isAnyActivityRunning = true;
+		Log.v(getInstance().toString(), "Activity resumed");
+		EventBus.getDefault().post(new Events.MqttReconnectMightBeRequired());
+	}
+	public static Handler getUiThreadHandler() {
+		return uiThreadHandler;
+	}
+
+	public static short getState() {
+		return mqttConnectivity;
+	}
+
+	public static boolean isConnected() {
+		return (mqttClient != null) && mqttClient.isConnected();
+	}
+
+	public static boolean isAnyActivityRunning() {
+		return isAnyActivityRunning;
+	}
+
+	public static App getInstance() {
+		return instance;
 	}
 }
