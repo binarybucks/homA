@@ -70,19 +70,19 @@ void setup() {
    
    
    
-     EthernetBonjour.begin("Arduino");
+     //EthernetBonjour.begin("Arduino");
 
   // We specify the function that the Bonjour library will call when it
   // discovers a service instance. In this case, we will call the function
   // named "serviceFound".
-  EthernetBonjour.setServiceFoundCallback(serviceFound);
+ // EthernetBonjour.setServiceFoundCallback(serviceFound);
 
-      EthernetBonjour.startDiscoveringService("_ssh",
-                                              MDNSServiceTCP,
-                                              5000);
+   //   EthernetBonjour.startDiscoveringService("_ssh",
+    //                                          MDNSServiceTCP,
+      //                                        5000);
 
 
-//   connectToMqttServer();
+   connectToMqttServer();
 }
 
 
@@ -163,13 +163,13 @@ void connectToMqttServer() {
 
 
 void loop() {
-  EthernetBonjour.run();
-  //client.loop();  // Mqtt loop
+  //EthernetBonjour.run();
+  client.loop();  // Mqtt loop
   if (connCtr % 65000 == 0) {
     if (!client.connected()) {
-      //L("not connected");
-      //connectToMqttServer();
-}
+       L("not connected");
+      connectToMqttServer();
+  }
     
     connCtr = 0;
   }

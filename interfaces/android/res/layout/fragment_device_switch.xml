@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:minHeight="58dip" >
+
+    <TextView
+        android:id="@+id/controlName_switch"
+        android:layout_width="100dip"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="8dip"
+        android:gravity="left|center_vertical"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp" />
+
+    <Switch
+        android:id="@+id/controlValue_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dip"
+        android:layout_toRightOf="@+id/controlName_switch" />
+
+</RelativeLayout>

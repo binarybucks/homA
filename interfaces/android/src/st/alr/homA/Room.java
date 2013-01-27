@@ -39,16 +39,16 @@ public class Room implements Comparable<Room>{
 	}
 
 	public void addDevice(Device device) {
-		devices.put(device.getId(), device);
+		devices.put(device.toString(), device);
 		EventBus.getDefault().post(new Events.DeviceAddedToRoom(device, this));
-		Log.v(toString(), "Device '" + device.getId() + "' added to room '" + id + "' , new count is: " + devices.size());
+		Log.v(toString(), "Device '" + device.toString() + "' added to room '" + id + "' , new count is: " + devices.size());
 		
 	}
 
 	public void removeDevice(Device device) {
-		devices.remove(device.getId());		
+		devices.remove(device.toString());		
 		EventBus.getDefault().post(new Events.DeviceRemovedFromRoom(device, this));
-		Log.v(toString(), "Device '" + device.getId() + "'  removed from room '" + id + "', new count is: " + devices.size());
+		Log.v(toString(), "Device '" + device.toString() + "'  removed from room '" + id + "', new count is: " + devices.size());
 	}
 
 	@Override

@@ -155,7 +155,7 @@ public class App extends Application implements MqttCallback {
 		if (device == null) {
 			device = new Device(deviceId, this);
 			
-			devices.put(device.getId(), device);
+			devices.put(device.toString(), device);
 			EventBus.getDefault().post(new Events.DeviceAdded(device));
 
 			device.moveToRoom(getString(R.string.defaultsRoomName));
@@ -243,7 +243,7 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public static void addDevice(Device device) {
-		devices.put(device.getId(), device);
+		devices.put(device.toString(), device);
 		EventBus.getDefault().post(new Events.DeviceAdded(device));
 	}
 
@@ -251,7 +251,7 @@ public class App extends Application implements MqttCallback {
 //		Log.v(getInstance().toString(), "room at position requested" + position);
 
 		// (rooms.size() > position)
-			return getRoom((String)rooms.keySet().toArray()[position]);
+			return (Room)rooms.values().toArray()[position];
 		//else
 			//return null;
 	}

@@ -37,7 +37,7 @@ public abstract class TreeMapAdapter<T> extends BaseAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		return this.map.keySet().toArray()[position];
+		return this.map.values().toArray()[position];
 	}
 
 	@Override

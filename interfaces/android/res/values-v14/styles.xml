@@ -1,13 +1,42 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme for API 14+. This theme completely replaces
         AppBaseTheme from BOTH res/values/styles.xml and
         res/values-v11/styles.xml on API 14+ devices.
-    -->
     <style name="darkTheme" parent="android:Theme.Holo">
-            <item name="android:windowContentOverlay">@null</item>
-            <item name="android:windowBackground">@color/windowBackground</item>
+              <item name="android:actionBarStyle">@style/homaActionBar</item>
+            
     </style>
+    -->
+
+    <style name="Theme.homa" parent="@android:style/Theme.Holo">
+        <item name="android:actionBarStyle">@style/homa_solid_ActionBar</item>
+        <item name="android:windowBackground">@color/windowBackground</item>
+    </style>
+
+    
+    
+    
+    <style name="homa_solid_pager" >
+        <item name="android:textColor">#FFFFFF	</item>
+        <item name="android:background">@drawable/homa_pager</item>    
+    </style>
+   
+    
+    <style name="homa_solid_ActionBar" parent="@android:style/Widget.Holo.ActionBar.Solid">
+        <item name="android:background">@drawable/homa_actionbar</item>
+    </style>
+
+
+<style name="homa_listview" parent="@android:style/Widget.ListView">
+    <item name="android:fadingEdge">none</item>
+    <item name="android:dividerHeight">3px</item>
+	<item name="android:divider">@drawable/homa_divider</item>
+	
+    </style>
+
+
+
 
 </resources>

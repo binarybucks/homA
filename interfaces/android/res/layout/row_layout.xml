@@ -1,14 +1,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_item"
     android:layout_width="fill_parent"
-    android:layout_height="120dip"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="10dip" >
+    android:paddingLeft="15dip" >
     <TextView
         android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="12dip"
+        android:paddingTop="20dip"
+        android:paddingBottom="20dip"
         android:textSize="18sp" >
     </TextView>
 </LinearLayout>

@@ -59,12 +59,8 @@ public class Device implements Comparable<Device>{
 		room = newRoom;
 	}
 
-	public String getId() {
-		return id;
-	}
-
 	public String getName() {
-		return name;
+		return (name != null) && !name.equals("") ? name : id;
 	}
 
 	public void setName(String name) {
@@ -76,7 +72,7 @@ public class Device implements Comparable<Device>{
 	}
 
 	public void addControl(Control control) {
-		controls.put(control.getId(), control);
+		controls.put(control.toString(), control);
 		// TODO: Update view to reflect newly added device
 	}
 
@@ -86,8 +82,9 @@ public class Device implements Comparable<Device>{
 
 	@Override
 	public String toString() {
-		return (name != null) && !name.equals("") ? name : id;
+		return id;
 	}
+	
 	@Override
 	public int compareTo(Device another) {	
 		return this.toString().compareTo(another.toString());
