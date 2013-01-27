@@ -223,6 +223,7 @@ public class App extends Application implements MqttCallback {
 	
 
 	public static void removeAllRooms() {
+		// TODO: Send notification to clean in interface
 		rooms.clear();
 	}
 

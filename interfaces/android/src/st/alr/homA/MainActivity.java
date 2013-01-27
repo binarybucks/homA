@@ -3,9 +3,8 @@ package st.alr.homA;
 import java.util.HashMap;
 
 import st.alr.homA.support.Events;
-import st.alr.homA.support.TreeMapAdapter;
-
 import de.greenrobot.event.EventBus;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -41,11 +40,7 @@ public class MainActivity extends FragmentActivity {
 				return super.onOptionsItemSelected(item);
 		}
 	}
-	
-	
-	public void onPageSelected(int arg0)
-	{
-	}
+
 
 
 
@@ -61,7 +56,6 @@ public class MainActivity extends FragmentActivity {
 		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 		    @Override
 		    public void onPageSelected(int index) {
-				Log.v(this.toString(), "onPageSelected");
 				currentRoom = App.getRoomAtPosition(index);
 		    }
 
@@ -76,6 +70,15 @@ public class MainActivity extends FragmentActivity {
 		mViewPager.setAdapter(roomsFragmentPagerAdapter);
 	}
 
+    @Override
+    public void onSaveInstanceState (Bundle outState) {
+    	super.onSaveInstanceState(outState);
+    	//outState.putString("id", room.getId());
+
+    }
+
+
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {		
 		getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -86,7 +89,8 @@ public class MainActivity extends FragmentActivity {
 	public void onEventMainThread(Events.RoomAdded event) {
 		Log.v(this.toString(), "Room added");
 		int currentItem = mViewPager.getCurrentItem();
-		deviceMapAdapter.put(event.getRoom().getId(), new DeviceMapAdapter(this, event.getRoom().getDevices()));
+		mViewPager.getAdapter().notifyDataSetChanged();
+		lazyloadDeviceMapAdapter(this, event.getRoom());
 			
 		if(currentRoom != null && currentRoom.compareTo(App.getRoomAtPosition(currentItem)) > 0) {
 			Log.v(this.toString(), "Shifting index ");
@@ -97,23 +101,29 @@ public class MainActivity extends FragmentActivity {
 	
 	public void onEventMainThread(Events.RoomRemoved event) {
 		Log.v(this.toString(), "Room removed");
-		deviceMapAdapter.get(event.getRoom().getId()).clearItems();
-		
+		mViewPager.getAdapter().notifyDataSetChanged();
+		lazyloadDeviceMapAdapter(this, event.getRoom()).clearItems();
+
 		
 	}
 	
 	public void onEventMainThread(Events.DeviceAddedToRoom event) {
 		Log.v(this.toString(), "DeviceAddedToRoom");
-		
-		DeviceMapAdapter a = deviceMapAdapter.get(event.getRoom().getId());
-		a.addItem(event.getDevice());
+		lazyloadDeviceMapAdapter(this, event.getRoom()).addItem(event.getDevice());
 	}
 	
 	public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
 		Log.v(this.toString(), "DeviceRemovedFromRoom");
-		
-		DeviceMapAdapter a = deviceMapAdapter.get(event.getRoom().getId());
-		a.removeItem(event.getDevice());
+		lazyloadDeviceMapAdapter(this, event.getRoom()).removeItem(event.getDevice());
+	}
+	
+	public static DeviceMapAdapter lazyloadDeviceMapAdapter(Context context, Room room) {
+		DeviceMapAdapter m = deviceMapAdapter.get(room.getId());
+		if (m == null) {
+			m = new DeviceMapAdapter(context, room.getDevices());
+			deviceMapAdapter.put(room.getId(), m);
+		}
+		return m;
 	}
 	
     public static class RoomsFragmentPagerAdapter extends FragmentStatePagerAdapter {
@@ -167,7 +177,6 @@ public class MainActivity extends FragmentActivity {
             Bundle args = new Bundle();
             args.putString("id", id);
             f.setArguments(args);
-
             return f;
         }
 
@@ -179,11 +188,20 @@ public class MainActivity extends FragmentActivity {
         }
 
         @Override
+        public void onSaveInstanceState (Bundle outState) {
+        	super.onSaveInstanceState(outState);
+        	outState.putString("id", room.getId());
+ 
+        }
+
+
+        
+        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_room, container, false);
             ListView lv = (ListView)v.findViewById(R.id.devices_list);
-            lv.setAdapter(MainActivity.deviceMapAdapter.get(room.getId()));
+            lv.setAdapter(MainActivity.lazyloadDeviceMapAdapter(getActivity(), room));
             return v;
         }
     }

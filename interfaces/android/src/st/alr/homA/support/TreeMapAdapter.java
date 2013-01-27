@@ -3,8 +3,6 @@ package st.alr.homA.support;
 import java.util.TreeMap;
 
 import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 public abstract class TreeMapAdapter<T> extends BaseAdapter {
@@ -44,7 +42,6 @@ public abstract class TreeMapAdapter<T> extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 }

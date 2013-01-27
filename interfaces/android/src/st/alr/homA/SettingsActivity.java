@@ -3,7 +3,6 @@ package st.alr.homA;
 import st.alr.homA.support.Events;
 import de.greenrobot.event.EventBus;
 
-import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;

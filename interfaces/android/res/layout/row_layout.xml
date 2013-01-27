@@ -1,27 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_item"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="120dip"
     android:orientation="vertical"
-    android:paddingBottom="3dip"
     android:paddingLeft="10dip" >
-
     <TextView
         android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="12dip"
-        android:textColor="#FFF"
         android:textSize="18sp" >
     </TextView>
-
-    <TextView
-        android:id="@+id/subtitle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="12dip"
-        android:textColor="#FFF"
-        android:textSize="12sp" >
-    </TextView>
-
 </LinearLayout>
