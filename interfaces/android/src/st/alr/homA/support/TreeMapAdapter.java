@@ -19,10 +19,17 @@ public abstract class TreeMapAdapter<T> extends BaseAdapter {
 
 	public void addItem(T object) {
 		this.map.put(object.toString(), object);
+		this.notifyDataSetChanged();
 	}
 	
 	public void removeItem(T object) { 
 		this.map.remove(object.toString());
+		this.notifyDataSetChanged();
+	}
+	
+	public void clearItems() {
+		this.map.clear();
+		this.notifyDataSetChanged();
 	}
 	
 	@Override

@@ -10,7 +10,7 @@
         android:id="@+id/serverAddressLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Server address" />
+        android:text="@string/preferencesServerAddress" />
 
     <EditText
         android:id="@+id/serverAddress"
@@ -28,7 +28,7 @@
         android:id="@+id/serverPortLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Server port" />
+        android:text="@string/preferencesServerPort" />
 
     <EditText
                 android:id="@+id/serverPort"

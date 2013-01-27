@@ -1,16 +1,11 @@
 package st.alr.homA;
 
-import de.greenrobot.event.EventBus;
-import st.alr.homA.*;
-
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.DialogPreference;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -23,7 +18,7 @@ public class ServerDialogPreference extends DialogPreference {
 		super(context, attrs);
 		this.context = context;
 
-		setDialogLayoutResource(R.layout.server_dialog_preferences);
+		setDialogLayoutResource(R.layout.preferences_server);
 
 	}
 
@@ -44,8 +39,8 @@ public class ServerDialogPreference extends DialogPreference {
 	@Override
 	protected void onBindDialogView(View view) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		address.setText(prefs.getString("serverAddress", "192.168.8.2"));
-		port.setText(prefs.getString("serverPort", "1883"));
+		address.setText(prefs.getString("serverAddress", context.getString(R.string.defaultsServerAddress)));
+		port.setText(prefs.getString("serverPort", context.getString(R.string.defaultsServerPort)));
 	}
 
 	@Override
@@ -56,8 +51,8 @@ public class ServerDialogPreference extends DialogPreference {
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 				SharedPreferences.Editor editor = prefs.edit();
 
-				String oldAddress = prefs.getString("serverAddress", "192.168.8.2");
-				String oldPort = prefs.getString("serverPort", "1883");
+				String oldAddress = prefs.getString("serverAddress", context.getString(R.string.defaultsServerAddress));
+				String oldPort = prefs.getString("serverPort", context.getString(R.string.defaultsServerPort));
 
 				String newAdress = address.getText().toString();
 				String newPort = port.getText().toString();

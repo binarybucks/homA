@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="title_activity_main">HomA</string>
-    <string name="app_name">HomA</string>
-    <string name="menu_settings">Settings</string>
-    <string name="defaultRoomName">"unassigned"</string>
-    <string name="preferences_server_title">"Server"</string>
-    
-    
+    <string name="titleActivityMain">HomA</string>
+    <string name="appName">HomA</string>
+    <string name="menuSettings">Settings</string>
+    <string name="preferencesSystem">"System"</string>
+    <string name="preferencesServerTitle">"Server"</string>
+    <string name="preferencesServerAddress">"Server address"</string>
+    <string name="preferencesServerPort">"Server port"</string>
+    <string name="preferencesServerCancel">"Cancel"</string>
+    <string name="preferencesServerConnect">"Connect"</string>
+    <string name="connectivityConnecting">"Connecting"</string>
+    <string name="connectivityConnected">"Connected"</string>
+    <string name="connectivityDisconnecting">"Disconnecting"</string>
+    <string name="connectivityDisconnected">"Disconnected"</string>
+	<string name="defaultsRoomName">"unassigned"</string>
+    <string name="defaultsServerAddress">"192.168.8.2"</string>
+    <string name="defaultsServerPort">"1883"</string>    
 </resources>

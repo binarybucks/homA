@@ -2,7 +2,6 @@ package st.alr.homA;
 
 import java.util.HashMap;
 import java.util.TreeMap;
-
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
@@ -10,17 +9,13 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
-
 import st.alr.homA.support.Events;
-
 import de.greenrobot.event.EventBus;
-
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -92,7 +87,7 @@ public class App extends Application implements MqttCallback {
 				devices.clear();
 			}
 
-			mqttClient = new MqttClient("tcp://" + sharedPreferences.getString("serverAddress", "") + ":" + sharedPreferences.getString("serverPort", "1883"), MqttClient.generateClientId(), null);
+			mqttClient = new MqttClient("tcp://" + sharedPreferences.getString("serverAddress", getInstance().getString(R.string.defaultsServerAddress)) + ":" + sharedPreferences.getString("serverPort", getInstance().getString(R.string.defaultsServerPort)), MqttClient.generateClientId(), null);
 			mqttClient.setCallback(getInstance());
 
 			if (throttle) {
@@ -163,8 +158,7 @@ public class App extends Application implements MqttCallback {
 			devices.put(device.getId(), device);
 			EventBus.getDefault().post(new Events.DeviceAdded(device));
 
-			// TODO: move to strings.xml
-			device.moveToRoom("unassigned");
+			device.moveToRoom(getString(R.string.defaultsRoomName));
 
 		}
 
@@ -276,13 +270,13 @@ public class App extends Application implements MqttCallback {
 	public static String getConnectionStateText() {
 		switch (App.getState()) {
 			case App.MQTT_CONNECTIVITY_CONNECTED:
-				return "Connected";
+				return  App.getInstance().getString(R.string.connectivityConnected);
 			case App.MQTT_CONNECTIVITY_CONNECTING:
-				return "Connecting";
+				return App.getInstance().getString(R.string.connectivityConnecting);
 			case App.MQTT_CONNECTIVITY_DISCONNECTING:
-				return "Disconnecting";
+				return App.getInstance().getString(R.string.connectivityDisconnected);
 			default:
-				return "Disconnected";
+				return App.getInstance().getString(R.string.connectivityDisconnecting);
 		}
 	}
 	
@@ -346,4 +340,5 @@ public class App extends Application implements MqttCallback {
 	public static App getInstance() {
 		return instance;
 	}
+
 }

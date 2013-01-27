@@ -44,7 +44,7 @@ public class Device implements Comparable<Device>{
 		if (room != null && room.getId().equals(roomname))
 			return;
 					
-		String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultRoomName);
+		String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultsRoomName);
 
 		Room newRoom = App.getRoom(cleanedName);
 

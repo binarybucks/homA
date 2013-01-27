@@ -1,8 +1,5 @@
 package st.alr.homA;
 
-import java.util.HashMap;
-
-
 import java.util.TreeMap;
 
 import st.alr.homA.support.Events;
@@ -10,7 +7,6 @@ import st.alr.homA.support.Events;
 import de.greenrobot.event.EventBus;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 

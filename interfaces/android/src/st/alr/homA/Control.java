@@ -1,7 +1,6 @@
 package st.alr.homA;
 
 import android.content.Context;
-import android.content.Intent;
 
 interface ValueChangedObserver {
 	void onValueChange(String value);

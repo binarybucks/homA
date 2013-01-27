@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity" 
-            android:background="#2d2d2d"
     >
 
     <!--
@@ -13,11 +12,11 @@
     -->
 
     <android.support.v4.view.PagerTitleStrip
-        android:id="@+id/pager_title_strip"
+        android:id="@+id/pagerTitleStrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:background="#252525"
+        android:background="#2d2d2d"
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
         android:textColor="#FFF" />
