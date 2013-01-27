@@ -11,6 +11,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
+import st.alr.homA.support.Events;
+
 import de.greenrobot.event.EventBus;
 
 import android.app.Application;
@@ -251,12 +253,12 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public static Room getRoomAtPosition(Integer position) {
-		Log.v(getInstance().toString(), "room at position requested" + position);
+//		Log.v(getInstance().toString(), "room at position requested" + position);
 
-		if (rooms.size() > position)
+		// (rooms.size() > position)
 			return getRoom((String)rooms.keySet().toArray()[position]);
-		else
-			return null;
+		//else
+			//return null;
 	}
 	
 

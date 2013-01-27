@@ -1,7 +1,11 @@
 package st.alr.homA;
 
 import java.util.HashMap;
+
+
 import java.util.TreeMap;
+
+import st.alr.homA.support.Events;
 
 import de.greenrobot.event.EventBus;
 
@@ -9,10 +13,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+
+
 public class Room implements Comparable<Room>{
 	private String id;
 	private TreeMap<String, Device> devices;
-
+	
+	
 	public Room(Context context, String id) {
 		this.id = id;
 		devices = new TreeMap<String, Device>();

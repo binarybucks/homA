@@ -1,4 +1,7 @@
-package st.alr.homA;
+package st.alr.homA.support;
+
+import st.alr.homA.Device;
+import st.alr.homA.Room;
 
 public class Events {
 	public static class MqttReconnectMightBeRequired {
