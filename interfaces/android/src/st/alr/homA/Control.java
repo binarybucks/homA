@@ -2,12 +2,12 @@ package st.alr.homA;
 
 import android.content.Context;
 
-//interface ValueChangedObserver {
-//	void onValueChange(String value);
-//}
+interface ValueChangedObserver {
+	void onValueChange(String value);
+}
 
 public class Control {
-//	ValueChangedObserver observer;
+	ValueChangedObserver observer;
 	Context context;
 	String value = "0";
 	String type = "undefined";
@@ -28,7 +28,7 @@ public class Control {
 
 	public void setValue(String value) {
 		this.value = value;
-//		valueChanged();
+		valueChanged();
 	}
 
 	public String getType() {
@@ -53,18 +53,18 @@ public class Control {
 		return id;
 	}
 
-//	public void setValueChangedObserver(ValueChangedObserver observer) {
-//		this.observer = observer;
-//	}
-//
-//	public void removeValueChangedObserver() {
-//		observer = null;
-//	}
-//
-//	private void valueChanged() {
-//		if (observer != null) {
-//			observer.onValueChange(value);
-//		}
-//	}
+	public void setValueChangedObserver(ValueChangedObserver observer) {
+		this.observer = observer;
+	}
+
+	public void removeValueChangedObserver() {
+		observer = null;
+	}
+
+	private void valueChanged() {
+		if (observer != null) {
+			observer.onValueChange(value);
+		}
+	}
 
 }

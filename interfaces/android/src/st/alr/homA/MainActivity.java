@@ -214,6 +214,8 @@ public class MainActivity extends FragmentActivity {
             
             lv.setAdapter(new ControllsMapAdapter(getActivity(), device.getControls()));
             
+
+            
             builder.setView(v);
 
 

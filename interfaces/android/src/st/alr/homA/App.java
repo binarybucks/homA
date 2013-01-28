@@ -275,9 +275,9 @@ public class App extends Application implements MqttCallback {
 			case App.MQTT_CONNECTIVITY_CONNECTING:
 				return App.getInstance().getString(R.string.connectivityConnecting);
 			case App.MQTT_CONNECTIVITY_DISCONNECTING:
-				return App.getInstance().getString(R.string.connectivityDisconnected);
-			default:
 				return App.getInstance().getString(R.string.connectivityDisconnecting);
+			default:
+				return App.getInstance().getString(R.string.connectivityDisconnected);
 		}
 	}
 	
