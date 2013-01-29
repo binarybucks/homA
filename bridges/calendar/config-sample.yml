@@ -1,8 +1,0 @@
-mqtt: 
-  server: 192.168.8.2
-
-googlecalendar:
-  calendarID: "yourcalendar"
-  apiKey: "yourapikey"
-  apiSecret: "yourapisekret"
-  refreshToken: ""
