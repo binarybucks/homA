@@ -86,8 +86,8 @@ public class Device implements Comparable<Device>{
 	}
 	
 	@Override
-	public int compareTo(Device another) {	
-		return this.toString().compareTo(another.toString());
+	public int compareTo(Device another) {
+		return this.getName().compareTo(another.getName());
 	}
 	
 }

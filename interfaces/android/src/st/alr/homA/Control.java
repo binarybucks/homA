@@ -1,6 +1,7 @@
 package st.alr.homA;
 
 import android.content.Context;
+import android.widget.Switch;
 
 interface ValueChangedObserver {
 	void onValueChange(String value);

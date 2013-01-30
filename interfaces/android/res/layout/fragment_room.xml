@@ -6,7 +6,7 @@
         <ListView
 			android:id="@+id/devices_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="fill_parent"
             android:layout_weight="1" 
             style="@style/homa_listview">
         </ListView>

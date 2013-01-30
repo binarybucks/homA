@@ -39,6 +39,11 @@ public class App extends Application implements MqttCallback {
 	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
 	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
 
+	public static final short APP_CONTROL_TYPE_SWITCH = 0x05;
+	public static final short APP_CONTROL_TYPE_RANGE = 0x06;
+	public static final short APP_CONTROL_TYPE_TEXT = 0x06;
+
+	
 	private static boolean isAnyActivityRunning = true;
 	private static int nofiticationID = 1337;
 	private static short mqttConnectivity = MQTT_CONNECTIVITY_DISCONNECTED;
