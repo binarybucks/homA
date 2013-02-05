@@ -50,9 +50,10 @@ public final class R {
         public static final int connectivityConnecting=0x7f060009;
         public static final int connectivityDisconnected=0x7f06000c;
         public static final int connectivityDisconnecting=0x7f06000b;
+        public static final int defaultsPresenceID=0x7f06000e;
         public static final int defaultsRoomName=0x7f06000d;
-        public static final int defaultsServerAddress=0x7f06000e;
-        public static final int defaultsServerPort=0x7f06000f;
+        public static final int defaultsServerAddress=0x7f06000f;
+        public static final int defaultsServerPort=0x7f060010;
         public static final int menuSettings=0x7f060002;
         public static final int preferencesServerAddress=0x7f060005;
         public static final int preferencesServerCancel=0x7f060007;

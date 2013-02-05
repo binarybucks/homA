@@ -210,48 +210,15 @@ public class MainActivity extends FragmentActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(device.getName());
             
-            
-//            View v = getActivity().getLayoutInflater().inflate(R.layout.fragment_device, (ViewGroup) this.getView(), false);
-//            ListView lv = (ListView)v.findViewById(R.id.controls_list);
-            
     		LinearLayout ll = new LinearLayout(this.getActivity());
     		ll.setOrientation(LinearLayout.VERTICAL);
     		ll.setPadding(16, 0, 16, 0);
-    		//view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-    		
-//            final ControllsMapAdapter adapter = new ControllsMapAdapter(getActivity(), device.getControls());
-//            lv.setAdapter(adapter);
-            
         	for (Control control : device.getControls().values()) {
-				addControlForDevice(ll, control);
-			}
-//            
-//            
-//            
-//            // This is really ugly, as it redraws all controls of a device when a single value changes. 
-//            // TODO: See how this performs with rapidly changing values like sliders
-//            // TODO: Add observers for newly added controls
-//            ValueChangedObserver valueChangedObserver = new ValueChangedObserver() {
-//				@Override
-//				public void onValueChange(Object sender, Object value) {
-//					App.getUiThreadHandler().post(new Runnable() {
-//						@Override
-//						public void run() {
-//							adapter.notifyDataSetChanged();							
-//						}
-//					});
-//				}
-//			};
-//            for (Control control : device.getControls().values()) {
-//				control.setValueChangedObserver(valueChangedObserver);
-//			}
-            
+        		ll.addView(getControlView(control)._layout);
+       		}
             
             builder.setView(ll);
-
-
-            // Create the AlertDialog object and return it
             return builder.create();
         }
         
@@ -315,11 +282,10 @@ public class MainActivity extends FragmentActivity {
         
         
 
-    	public void addControlForDevice(LinearLayout parent, Control control) {
+    	public ControlView getControlView(Control control) {
 
     		ControlView v;
-    		View inflated;
-    		
+
 			switch (control.getType()) {
 				case App.APP_CONTROL_TYPE_SWITCH:
 					v = new SwitchControlView();		
@@ -330,19 +296,17 @@ public class MainActivity extends FragmentActivity {
 					break;
 			}
 			v.attachToControl(control);
-
 			
-    		parent.addView(v._layout);
+    		return v;
     	}
 
         
         
         @Override
         public void onDestroyView() {
-        	// TODO Auto-generated method stub
         	super.onDestroyView();
             for (Control control : device.getControls().values()) {
-     				control.removeValueChangedObserver();
+     			control.removeValueChangedObserver();
      		}
         }
     }

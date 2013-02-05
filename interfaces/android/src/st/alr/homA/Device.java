@@ -75,7 +75,6 @@ public class Device implements Comparable<Device>{
 	public void addControl(Control control) {
 		controls.put(control.toString(), control);
 		if (controlAddedObserver != null) {
-			Log.v(this.toString(), "Notifying observer of newly added control");
 			controlAddedObserver.onValueChange(this, control);
 		}	
 	}

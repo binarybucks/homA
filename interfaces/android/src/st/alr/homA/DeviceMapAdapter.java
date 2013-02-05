@@ -23,28 +23,20 @@ public class DeviceMapAdapter extends TreeMapAdapter<Device> {
 	  
 	  @Override
 	  public View getView(int position, View convertView, ViewGroup parent) {
-//	    View rowView = convertView;
-//	    if (rowView == null) {
-//	    	LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//	        rowView = inflater.inflate(R.layout.row_layout, parent, false);
-//	        TextView textView = (TextView) rowView.findViewById(R.id.title);
-//	        Device d =(Device)getItem(position);
-//	        textView.setText(d.getName());
-//
-//	    }
-//	    return rowView;
-		  
-		  Log.v("DeviceMapAdapter", "Map:  " + map);
 		   View rowView = convertView;
+		   ViewHolder holder;
+		   
 		    if (rowView == null) {
 		      LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		      rowView = inflater.inflate(R.layout.row_layout, null);
-		      ViewHolder viewHolder = new ViewHolder();
-		      viewHolder.title = (TextView) rowView.findViewById(R.id.title);
-		      rowView.setTag(viewHolder);
+		      
+		      holder = new ViewHolder();
+		      holder.title = (TextView) rowView.findViewById(R.id.title);
+		      rowView.setTag(holder);
+		    } else {
+		      holder = (ViewHolder) rowView.getTag();
 		    }
 
-		    ViewHolder holder = (ViewHolder) rowView.getTag();
 		    holder.title.setText(((Device)getItem(position)).getName());
 
 		    return rowView;

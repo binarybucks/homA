@@ -31,7 +31,6 @@ public class Control {
 	public void setValue(String value) {
 		this.value = value;
 		if (observer != null) {
-			Log.v(this.toString(), "notifying observer of changed control value");
 			observer.onValueChange(this, value);
 		}
 	}

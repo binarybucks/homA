@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -30,7 +31,8 @@ public class App extends Application implements MqttCallback {
 	private static Handler uiThreadHandler;
 	private static SharedPreferences sharedPreferences;
 	private static NotificationCompat.Builder notificationBuilder;
-
+	private static MqttTopic presence;
+	
 	private static HashMap<String, Device> devices;
 	private static TreeMap<String, Room> rooms;
 
@@ -64,8 +66,8 @@ public class App extends Application implements MqttCallback {
 		createNotification();		
 		bootstrapAndConnectMqtt();
 	}
-
-
+	
+	
 	public static void bootstrapAndConnectMqtt() {
 		bootstrapAndConnectMqtt(false, false);
 	}
@@ -112,7 +114,7 @@ public class App extends Application implements MqttCallback {
 
 	private static void connectMqtt() {
 		try {
-			Log.v(getInstance().toString(), "Connecting to MQTT broker");
+			Log.v(getInstance().toString(), "Connecting to MQTT broker");			
 			mqttClient.connect();
 			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_CONNECTED));
 
