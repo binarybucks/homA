@@ -1,17 +1,18 @@
 package st.alr.homA;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Switch;
 
 interface ValueChangedObserver {
-	void onValueChange(String value);
+	void onValueChange(Object sender, Object value);
 }
 
 public class Control {
 	ValueChangedObserver observer;
 	Context context;
 	String value = "0";
-	String type = "undefined";
+	short type = App.APP_CONTROL_TYPE_UNDEFINED;
 	String topic = null;
 	String id;
 	Device device;
@@ -29,15 +30,26 @@ public class Control {
 
 	public void setValue(String value) {
 		this.value = value;
-		valueChanged();
+		if (observer != null) {
+			Log.v(this.toString(), "notifying observer of changed control value");
+			observer.onValueChange(this, value);
+		}
 	}
 
-	public String getType() {
+	public short getType() {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;		
+	public void setType(String typeStr) {
+		if(typeStr.equals("switch")) {
+			this.type = App.APP_CONTROL_TYPE_SWITCH;
+		} else if (typeStr.equals("range")) {
+			this.type = App.APP_CONTROL_TYPE_RANGE;
+		} else if (typeStr.equals("text")) {
+			this.type = App.APP_CONTROL_TYPE_TEXT;			
+		} else {
+			this.type = App.APP_CONTROL_TYPE_UNDEFINED;
+		}
 	}
 
 	public String getTopic() {
@@ -62,10 +74,5 @@ public class Control {
 		observer = null;
 	}
 
-	private void valueChanged() {
-		if (observer != null) {
-			observer.onValueChange(value);
-		}
-	}
-
+	
 }

@@ -21,27 +21,25 @@ public final class R {
         public static final int homamonochrome=0x7f020004;
     }
     public static final class id {
-        public static final int controlName_switch=0x7f090003;
-        public static final int controlValue_switch=0x7f090004;
-        public static final int controls_list=0x7f090002;
-        public static final int devices_list=0x7f090005;
-        public static final int list_item=0x7f09000a;
-        public static final int menu_settings=0x7f09000c;
+        public static final int controlName_switch=0x7f090002;
+        public static final int controlValue_switch=0x7f090003;
+        public static final int devices_list=0x7f090004;
+        public static final int list_item=0x7f090009;
+        public static final int menu_settings=0x7f09000b;
         public static final int pager=0x7f090000;
         public static final int pager_title_strip=0x7f090001;
-        public static final int serverAddress=0x7f090007;
-        public static final int serverAddressLabel=0x7f090006;
-        public static final int serverPort=0x7f090009;
-        public static final int serverPortLabel=0x7f090008;
-        public static final int title=0x7f09000b;
+        public static final int serverAddress=0x7f090006;
+        public static final int serverAddressLabel=0x7f090005;
+        public static final int serverPort=0x7f090008;
+        public static final int serverPortLabel=0x7f090007;
+        public static final int title=0x7f09000a;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int fragment_device=0x7f030001;
-        public static final int fragment_device_switch=0x7f030002;
-        public static final int fragment_room=0x7f030003;
-        public static final int preferences_server=0x7f030004;
-        public static final int row_layout=0x7f030005;
+        public static final int fragment_device_switch=0x7f030001;
+        public static final int fragment_room=0x7f030002;
+        public static final int preferences_server=0x7f030003;
+        public static final int row_layout=0x7f030004;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;
@@ -76,6 +74,7 @@ public final class R {
     
          */
         public static final int Theme_homa=0x7f070000;
+        public static final int homa_dialog_listview=0x7f070004;
         public static final int homa_listview=0x7f070003;
         public static final int homa_solid_ActionBar=0x7f070002;
         public static final int homa_solid_pager=0x7f070001;

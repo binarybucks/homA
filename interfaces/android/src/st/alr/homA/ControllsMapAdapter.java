@@ -15,121 +15,107 @@ import android.widget.TextView;
 
 public class ControllsMapAdapter extends TreeMapAdapter<Control> {
 	private final LayoutInflater inflater;
-	private final ArrayList<Row>rows = new ArrayList<Row>();
-
+	
+	
+	
 	
 	public ControllsMapAdapter(Context context, TreeMap<String, Control> map) {
 		super(context, map);		
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 	}
 
 	
-	interface Row {
-	    public View getView(View convertView);
-	    public int getViewType();
+	
+	private abstract class ViewHolder {
+		public TextView _name;
+		public View _value;
+		
+		abstract public void setContent(String name, String value);
+		
+		public void setContent(Control c) {
+			setContent(c.getName(), c.getValue());
+		}
+	}
+	
+	private class SwitchViewHolder extends ViewHolder{
+		public void setContent(String name, String value) {
+			_name.setText(name);
+			((Switch)_value).setChecked(value.equals("1"));
+		}
 	}
 
-    public View getView(int position, View convertView, ViewGroup parent) {
-        return rows.get(position).getView(convertView);
-    }
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-//	  @Override
-//	  public View getView(int position, View convertView, ViewGroup parent) {
+//    public View getView(int position, View convertView, ViewGroup parent) {
+//        return rows.get(position).getView(convertView);
+//    }
 //
-//		  
-//			ViewHolder holder;
-//
-//			int type = getItemViewType(position);
-//			Control control = (Control) getItem(position);
-//			Log.d("Adapter test","setting type:"+type);
-//			if (convertView == null) {
-//				Log.d("Adapter test", "new holder ");
-//
-//				holder = new ViewHolder();
-//				if (type == 0) {
-//					convertView = inflater.inflate(R.layout.fragment_device_switch, null);
-//					holder._switch = (Switch) convertView.findViewById(R.id.controlValue_switch);
-//					holder._name = (TextView) convertView.findViewById(R.id.controlName_switch);
-//
-//				}else if(type ==1){
-//				}
-//				else {
-//				}
-//				holder.type = type;
-//				convertView.setTag(holder);
-//			} else {
-//				holder = (ViewHolder) convertView.getTag();
-//				Log.d("Adapter test", " holder ::" + holder);
-//			}
-//            
-//				if (type == 0) {
-//					holder._name.setText(control.getName());
-//					holder._switch.setChecked(control.getValue().equals("1")?true:false);
-//
-//				} else if(type ==1 ) {
-//				}else{
-//				}
-//			return convertView;
-//
-//	  }
+//    private void updateView(Control control, String value){
+//    	int position = control.device.getControls().values().toArray().
+//    	
+//        int visiblePosition = yourListView.getFirstVisiblePosition();
+//        View v = yourListView.getChildAt(itemIndex - visiblePosition);
+//        // Do something fancy with your listitem view
+//        TextView someTextView = (TextView) v.findViewById(R.id.sometextview);
+//        someTextView.setText(&quot;Hi! I updated you manually!&quot;);
+//    }
+//	
+	
+	
+	
+	  @Override
+	  public View getView(int position, View convertView, ViewGroup parent) {
+
+		  	Log.v(this.toString(), "getView");
+			ViewHolder holder;
+
+			Control control = (Control) getItem(position);
+			if (convertView == null) {
+				switch (control.getType()) {
+					case App.APP_CONTROL_TYPE_SWITCH:
+						holder = new SwitchViewHolder();						
+						convertView = inflater.inflate(R.layout.fragment_device_switch, null);
+						holder._value = convertView.findViewById(R.id.controlValue_switch);
+						holder._name = (TextView) convertView.findViewById(R.id.controlName_switch);
+						break;
+					//TODO: Add other types here
+					default:
+						holder = new SwitchViewHolder();						
+						convertView = inflater.inflate(R.layout.fragment_device_switch, null);
+						holder._value = convertView.findViewById(R.id.controlValue_switch);
+						holder._name = (TextView) convertView.findViewById(R.id.controlName_switch);
+						
+						break;
+				}
+				
+
+				holder.setContent(control);
+				convertView.setTag(holder);				
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+				holder.setContent(control);
+			}
+
+
+			return convertView;
+
+	  }
 //	  
 //	  
-//		@Override
-//		public int getItemViewType(int position) {
-//			String type = ((Control)getItem(position)).getType();
-//            if(type.equals("switch")) 
-//            	return 0;
-//			else if(type.equals("text")) 
-//				return 1;
-//			else 
-//				return 2;
-//		}
-//
-//		@Override
-//		public int getViewTypeCount() {
-//			return 3;
-//		}
+		@Override
+		public int getItemViewType(int position) {
+			return ((Control)getItem(position)).getType();
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return 3;
+		}
 //		
 //	  
 //	  
+
+		
 //	  public View getControlView(Control control, ViewGroup parent) {
 //			//if (control.getType().equals("switch")) {
 //				return switchView(control, parent);

@@ -23,11 +23,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -209,18 +211,139 @@ public class MainActivity extends FragmentActivity {
             builder.setTitle(device.getName());
             
             
-            View v = getActivity().getLayoutInflater().inflate(R.layout.fragment_device, (ViewGroup) this.getView(), false);
-            ListView lv = (ListView)v.findViewById(R.id.controls_list);
+//            View v = getActivity().getLayoutInflater().inflate(R.layout.fragment_device, (ViewGroup) this.getView(), false);
+//            ListView lv = (ListView)v.findViewById(R.id.controls_list);
             
-            lv.setAdapter(new ControllsMapAdapter(getActivity(), device.getControls()));
-            
+    		LinearLayout ll = new LinearLayout(this.getActivity());
+    		ll.setOrientation(LinearLayout.VERTICAL);
+    		ll.setPadding(16, 0, 16, 0);
+    		//view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
+    		
+//            final ControllsMapAdapter adapter = new ControllsMapAdapter(getActivity(), device.getControls());
+//            lv.setAdapter(adapter);
             
-            builder.setView(v);
+        	for (Control control : device.getControls().values()) {
+				addControlForDevice(ll, control);
+			}
+//            
+//            
+//            
+//            // This is really ugly, as it redraws all controls of a device when a single value changes. 
+//            // TODO: See how this performs with rapidly changing values like sliders
+//            // TODO: Add observers for newly added controls
+//            ValueChangedObserver valueChangedObserver = new ValueChangedObserver() {
+//				@Override
+//				public void onValueChange(Object sender, Object value) {
+//					App.getUiThreadHandler().post(new Runnable() {
+//						@Override
+//						public void run() {
+//							adapter.notifyDataSetChanged();							
+//						}
+//					});
+//				}
+//			};
+//            for (Control control : device.getControls().values()) {
+//				control.setValueChangedObserver(valueChangedObserver);
+//			}
+            
+            
+            builder.setView(ll);
 
 
             // Create the AlertDialog object and return it
             return builder.create();
+        }
+        
+        
+    	
+    	private abstract class ControlView {
+    		public TextView _name;
+    		public View _value;
+    		public View _layout;
+    		protected Control _control;
+    		
+    		abstract public void setContent(String name, String value);
+    		abstract protected void setInteractionListener();
+    		public void setContent(Control c) {setContent(c.getName(), c.getValue());}
+    		public void attachToControl(Control control) {
+    			_control = control;
+    			control.setValueChangedObserver(new ValueChangedObserver() {
+					@Override
+					public void onValueChange(final Object sender, Object value) {
+						getActivity().runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								setContent((Control)sender);
+								
+							};
+						});
+
+					}
+				});
+    			setInteractionListener();
+    			setContent(control);
+    		}
+    	}
+    	
+    	private class SwitchControlView extends ControlView{
+    		public SwitchControlView() {
+				_layout = getActivity().getLayoutInflater().inflate(R.layout.fragment_device_switch, null);
+				_value = _layout.findViewById(R.id.controlValue_switch);
+				_name = (TextView) _layout.findViewById(R.id.controlName_switch);
+    		}
+    		
+    		public void setContent(String name, String value) {
+    			_name.setText(name);
+    			((Switch)_value).setChecked(value.equals("1"));
+    		}
+
+			@Override
+			protected void setInteractionListener() {
+	
+				((Switch)_value).setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						String payload = _control.getValue().equals("1") ? "0" : "1";
+						App.publishMqtt(_control.getTopic(), payload);
+					}
+				});
+				
+			}
+    	}
+        
+        
+        
+
+    	public void addControlForDevice(LinearLayout parent, Control control) {
+
+    		ControlView v;
+    		View inflated;
+    		
+			switch (control.getType()) {
+				case App.APP_CONTROL_TYPE_SWITCH:
+					v = new SwitchControlView();		
+					break;
+				//TODO: Add other types here
+				default:
+					v = new SwitchControlView();		
+					break;
+			}
+			v.attachToControl(control);
+
+			
+    		parent.addView(v._layout);
+    	}
+
+        
+        
+        @Override
+        public void onDestroyView() {
+        	// TODO Auto-generated method stub
+        	super.onDestroyView();
+            for (Control control : device.getControls().values()) {
+     				control.removeValueChangedObserver();
+     		}
         }
     }
     

@@ -39,9 +39,10 @@ public class App extends Application implements MqttCallback {
 	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
 	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
 
-	public static final short APP_CONTROL_TYPE_SWITCH = 0x05;
-	public static final short APP_CONTROL_TYPE_RANGE = 0x06;
-	public static final short APP_CONTROL_TYPE_TEXT = 0x06;
+	public static final short APP_CONTROL_TYPE_UNDEFINED = 0x0;
+	public static final short APP_CONTROL_TYPE_SWITCH = 0x01;
+	public static final short APP_CONTROL_TYPE_RANGE = 0x02;
+	public static final short APP_CONTROL_TYPE_TEXT = 0x03;
 
 	
 	private static boolean isAnyActivityRunning = true;
@@ -133,7 +134,7 @@ public class App extends Application implements MqttCallback {
 
 	@Override
 	public void connectionLost(Throwable cause) {
-		Log.e(toString(), "Lost connection to the MQTT server. Sending MQTT_RECONNECT_MIGHT_BE_REQUIRED broadcast");
+		Log.e(toString(), "Lost connection to the MQTT server. Sending MQTT_RECONNECT_MIGHT_BE_REQUIRED broadcast. Cause: " + cause);
 
 		EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTED));
 		EventBus.getDefault().post(new Events.MqttReconnectMightBeRequired());

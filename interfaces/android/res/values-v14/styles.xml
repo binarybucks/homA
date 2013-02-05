@@ -36,6 +36,11 @@
 	
     </style>
 
+<style name="homa_dialog_listview" parent="@android:style/Widget.ListView">
+    <item name="android:fadingEdge">none</item>
+    <item name="android:dividerHeight">0dp</item>
+	
+    </style>
 
 
 

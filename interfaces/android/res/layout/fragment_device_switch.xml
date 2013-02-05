@@ -2,14 +2,14 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" 
+    android:layout_height="wrap_content" 
         android:layout_alignParentTop="true"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/controlName_switch"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="18dip"
             android:gravity="left|center_vertical"
             android:textColor="?android:attr/textColorPrimary"
@@ -19,8 +19,8 @@
 
         <Switch
             android:id="@+id/controlValue_switch"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="14dip" 
             android:layout_marginBottom="18dip" />
 

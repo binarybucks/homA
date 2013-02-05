@@ -10,7 +10,8 @@ public class Device implements Comparable<Device>{
 	private String name;
 	private Room room;
 	private TreeMap<String, Control> controls;
-
+	private ValueChangedObserver controlAddedObserver;
+	
 	public Room getRoom() {
 		return room;
 	}
@@ -73,8 +74,20 @@ public class Device implements Comparable<Device>{
 
 	public void addControl(Control control) {
 		controls.put(control.toString(), control);
-		// TODO: Update view to reflect newly added device
+		if (controlAddedObserver != null) {
+			Log.v(this.toString(), "Notifying observer of newly added control");
+			controlAddedObserver.onValueChange(this, control);
+		}	
 	}
+
+	public void setControlAddedObserver(ValueChangedObserver observer) {
+		this.controlAddedObserver = observer;
+	}
+
+	public void removeControlAddedObserver() {
+		controlAddedObserver = null;
+	}
+
 
 	public TreeMap<String, Control> getControls() {
 		return controls;

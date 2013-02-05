@@ -42,7 +42,7 @@ public class DeviceMapAdapter extends TreeMapAdapter<Device> {
 		      ViewHolder viewHolder = new ViewHolder();
 		      viewHolder.title = (TextView) rowView.findViewById(R.id.title);
 		      rowView.setTag(viewHolder);
-		    } // TODO: Fix holder pattern here
+		    }
 
 		    ViewHolder holder = (ViewHolder) rowView.getTag();
 		    holder.title.setText(((Device)getItem(position)).getName());
