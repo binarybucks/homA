@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="System" >
+    <PreferenceCategory android:title="@string/preferencesSystem" >
   
         <st.alr.homA.ServerDialogPreference
             android:key="serverPreference"
-            android:negativeButtonText="Cancel"
-            android:positiveButtonText="Connect"
-            android:title="Server"  >
+            android:negativeButtonText="@string/preferencesServerCancel"
+            android:positiveButtonText="@string/preferencesServerConnect"
+            android:title="@string/preferencesServerTitle"  >
         </st.alr.homA.ServerDialogPreference>
         
     </PreferenceCategory>

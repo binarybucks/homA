@@ -1,27 +1,31 @@
 package st.alr.homA;
 
-import java.util.HashMap;
+import java.util.TreeMap;
+
+import st.alr.homA.support.Events;
+
+import de.greenrobot.event.EventBus;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
-public class Room {
-	private String id;
-	private HashMap<String, Device> devices;
-	private Context context;
 
+
+public class Room implements Comparable<Room>{
+	private String id;
+	private TreeMap<String, Device> devices;
+	
+	
 	public Room(Context context, String id) {
 		this.id = id;
-		this.context = context;
-		devices = new HashMap<String, Device>();
+		devices = new TreeMap<String, Device>();
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public HashMap<String, Device> getDevices() {
+	public TreeMap<String, Device> getDevices() {
 		return devices;
 	}
 
@@ -31,23 +35,26 @@ public class Room {
 
 	@Override
 	public String toString() {
-		return id;
+		return getId();
 	}
 
 	public void addDevice(Device device) {
-		devices.put(device.getId(), device);
-		Intent i = new Intent(App.DEVICE_ADDED_TO_ROOM);
-		i.putExtra("roomID", id);
-		i.putExtra("deviceID", device.getId());
-		context.sendBroadcast(i);
-		Log.v(toString(), "Device '" + device.getId() + "' added to room '" + id + "' , new count is: " + devices.size());
+		devices.put(device.toString(), device);
+		EventBus.getDefault().post(new Events.DeviceAddedToRoom(device, this));
+		Log.v(toString(), "Device '" + device.toString() + "' added to room '" + id + "' , new count is: " + devices.size());
+		
 	}
 
 	public void removeDevice(Device device) {
-		devices.remove(device.getId());
-		Intent i = new Intent(App.DEVICE_REMOVED_FROM_ROOM).putExtra("roomID", id).putExtra("deviceID", device.getId());
-		context.sendBroadcast(i);
-		Log.v(toString(), "Device '" + device.getId() + "'  removed from room '" + id + "', new count is: " + devices.size());
+		devices.remove(device.toString());		
+		EventBus.getDefault().post(new Events.DeviceRemovedFromRoom(device, this));
+		Log.v(toString(), "Device '" + device.toString() + "'  removed from room '" + id + "', new count is: " + devices.size());
 	}
+
+	@Override
+	public int compareTo(Room another) {	
+		return this.toString().compareTo(another.toString());
+	}
+	
 
 }

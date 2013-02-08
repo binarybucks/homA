@@ -1,16 +1,17 @@
 package st.alr.homA;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 
 import android.content.Context;
 import android.util.Log;
 
-public class Device {
+public class Device implements Comparable<Device>{
 	private String id;
 	private String name;
 	private Room room;
-	private HashMap<String, Control> controls;
-
+	private TreeMap<String, Control> controls;
+	private ValueChangedObserver controlAddedObserver;
+	
 	public Room getRoom() {
 		return room;
 	}
@@ -24,7 +25,7 @@ public class Device {
 	public Device(String id, String name, Context context) {
 		this.id = id;
 		this.name = name;
-		controls = new HashMap<String, Control>();
+		controls = new TreeMap<String, Control>();
 		this.context = context;
 	}
 
@@ -32,7 +33,6 @@ public class Device {
 
 		if (room != null) {
 			room.removeDevice(this);
-
 			if (room.getDevices().size() == 0) {
 				Log.v(toString(), "Room " + room.getId() + " is empty, removing it");
 				App.removeRoom(room);
@@ -42,7 +42,10 @@ public class Device {
 	}
 
 	void moveToRoom(String roomname) {
-		String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultRoomName);
+		if (room != null && room.getId().equals(roomname))
+			return;
+					
+		String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultsRoomName);
 
 		Room newRoom = App.getRoom(cleanedName);
 
@@ -53,15 +56,12 @@ public class Device {
 
 		removeFromCurrentRoom();
 		newRoom.addDevice(this);
+		
 		room = newRoom;
 	}
 
-	public String getId() {
-		return id;
-	}
-
 	public String getName() {
-		return name;
+		return (name != null) && !name.equals("") ? name : id;
 	}
 
 	public void setName(String name) {
@@ -73,17 +73,33 @@ public class Device {
 	}
 
 	public void addControl(Control control) {
-		controls.put(control.getId(), control);
-		// TODO: Update view to reflect newly added device
+		controls.put(control.toString(), control);
+		if (controlAddedObserver != null) {
+			controlAddedObserver.onValueChange(this, control);
+		}	
 	}
 
-	public HashMap<String, Control> getControls() {
+	public void setControlAddedObserver(ValueChangedObserver observer) {
+		this.controlAddedObserver = observer;
+	}
+
+	public void removeControlAddedObserver() {
+		controlAddedObserver = null;
+	}
+
+
+	public TreeMap<String, Control> getControls() {
 		return controls;
 	}
 
 	@Override
 	public String toString() {
-		return (name != null) && !name.equals("") ? name : id;
+		return id;
 	}
-
+	
+	@Override
+	public int compareTo(Device another) {
+		return this.getName().compareTo(another.getName());
+	}
+	
 }
