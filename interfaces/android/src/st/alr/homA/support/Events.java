@@ -1,5 +1,6 @@
 package st.alr.homA.support;
 
+import st.alr.homA.App;
 import st.alr.homA.Device;
 import st.alr.homA.Room;
 
@@ -8,11 +9,11 @@ public class Events {
 		
 	}
 	public static class MqttConnectivityChanged {
-		private short connectivity;
-		public MqttConnectivityChanged(short connectivity) {
+		private App.MQTT_CONNECTIVITY connectivity;
+		public MqttConnectivityChanged(App.MQTT_CONNECTIVITY connectivity) {
 			this.connectivity = connectivity;
 		}
-		public short getConnectivity() {
+		public App.MQTT_CONNECTIVITY getConnectivity() {
 			return connectivity;
 		}
 	}

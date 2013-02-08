@@ -16,13 +16,13 @@ import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 public class App extends Application implements MqttCallback {
@@ -35,11 +35,24 @@ public class App extends Application implements MqttCallback {
 	private static HashMap<String, Device> devices;
 	private static TreeMap<String, Room> rooms;
 
-	public static final short MQTT_CONNECTIVITY_DISCONNECTED = 0x01;
-	public static final short MQTT_CONNECTIVITY_CONNECTING = 0x02;
-	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
-	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
+	public static enum MQTT_CONNECTIVITY 
+    {
+		INITIAL,
+		CONNECTING,
+		CONNECTED,
+		DISCONNECTING,
+		DISCONNECTED_WAITINGFORINTERNET,  
+		DISCONNECTED_USERDISCONNECT, 
+		DISCONNECTED_DATADISABLED,        
+		DISCONNECTED     
+    }
 
+	
+//	public static final short MQTT_CONNECTIVITY_DISCONNECTED = 0x01;
+//	public static final short MQTT_CONNECTIVITY_CONNECTING = 0x02;
+//	public static final short MQTT_CONNECTIVITY_CONNECTED = 0x03;
+//	public static final short MQTT_CONNECTIVITY_DISCONNECTING = 0x04;
+//
 	public static final short APP_CONTROL_TYPE_UNDEFINED = 0x0;
 	public static final short APP_CONTROL_TYPE_SWITCH = 0x01;
 	public static final short APP_CONTROL_TYPE_RANGE = 0x02;
@@ -48,7 +61,7 @@ public class App extends Application implements MqttCallback {
 	
 	private static boolean isAnyActivityRunning = true;
 	private static int nofiticationID = 1337;
-	private static short mqttConnectivity = MQTT_CONNECTIVITY_DISCONNECTED;
+	private static MQTT_CONNECTIVITY mqttConnectivity = MQTT_CONNECTIVITY.INITIAL;
 
 
 	@Override
@@ -101,7 +114,7 @@ public class App extends Application implements MqttCallback {
 				Thread.sleep(5000);
 			}
 
-			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_CONNECTING));
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY.CONNECTING));
 
 			connectMqtt();
 
@@ -115,7 +128,7 @@ public class App extends Application implements MqttCallback {
 		try {
 			Log.v(getInstance().toString(), "Connecting to MQTT broker");			
 			mqttClient.connect();
-			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_CONNECTED));
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY.CONNECTED));
 
 			mqttClient.subscribe("/devices/+/controls/+/type", 0);
 			mqttClient.subscribe("/devices/+/controls/+", 0);
@@ -137,7 +150,7 @@ public class App extends Application implements MqttCallback {
 	public void connectionLost(Throwable cause) {
 		Log.e(toString(), "Lost connection to the MQTT server. Sending MQTT_RECONNECT_MIGHT_BE_REQUIRED broadcast. Cause: " + cause);
 
-		EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTED));
+		EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY.DISCONNECTED));
 		EventBus.getDefault().post(new Events.MqttReconnectMightBeRequired());
 	}
 
@@ -197,10 +210,10 @@ public class App extends Application implements MqttCallback {
 		if ((mqttClient != null) && mqttClient.isConnected()) {
 			Log.v(getInstance().toString(), "Disconnecting");
 
-			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTING));
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY.DISCONNECTING));
 
 			mqttClient.disconnect();
-			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY_DISCONNECTED));
+			EventBus.getDefault().post(new Events.MqttConnectivityChanged(MQTT_CONNECTIVITY.DISCONNECTED));
 
 			Log.v(getInstance().toString(), "Disconnected");
 		} else {
@@ -277,11 +290,11 @@ public class App extends Application implements MqttCallback {
 
 	public static String getConnectionStateText() {
 		switch (App.getState()) {
-			case App.MQTT_CONNECTIVITY_CONNECTED:
+			case CONNECTED:
 				return  App.getInstance().getString(R.string.connectivityConnected);
-			case App.MQTT_CONNECTIVITY_CONNECTING:
+			case CONNECTING:
 				return App.getInstance().getString(R.string.connectivityConnecting);
-			case App.MQTT_CONNECTIVITY_DISCONNECTING:
+			case DISCONNECTING:
 				return App.getInstance().getString(R.string.connectivityDisconnecting);
 			default:
 				return App.getInstance().getString(R.string.connectivityDisconnected);
@@ -294,14 +307,14 @@ public class App extends Application implements MqttCallback {
 	}
 
 	public void onEvent(Events.MqttReconnectMightBeRequired event) {
-		if (App.getState() == App.MQTT_CONNECTIVITY_DISCONNECTED && App.isAnyActivityRunning()) {
+		if (App.getState() == MQTT_CONNECTIVITY.DISCONNECTED && App.isAnyActivityRunning()) {
 			App.bootstrapAndConnectMqtt(false, true);
 		}
 	}
 
 	private static void createNotification() {
 		Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(App.getInstance());
+		android.support.v4.app.TaskStackBuilder stackBuilder = TaskStackBuilder.create(App.getInstance());
 		stackBuilder.addParentStack(MainActivity.class);
 		stackBuilder.addNextIntent(resultIntent);
 		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -333,7 +346,7 @@ public class App extends Application implements MqttCallback {
 		return uiThreadHandler;
 	}
 
-	public static short getState() {
+	public static MQTT_CONNECTIVITY getState() {
 		return mqttConnectivity;
 	}
 
