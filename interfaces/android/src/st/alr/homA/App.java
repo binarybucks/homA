@@ -31,7 +31,6 @@ public class App extends Application implements MqttCallback {
 	private static Handler uiThreadHandler;
 	private static SharedPreferences sharedPreferences;
 	private static NotificationCompat.Builder notificationBuilder;
-	private static MqttTopic presence;
 	
 	private static HashMap<String, Device> devices;
 	private static TreeMap<String, Room> rooms;
