@@ -1,7 +1,10 @@
+process.env.TZ = 'Europe/Amsterdam'
+
 var express = require('express');
 var oauth = require('oauth');
 var mqtt = require('mqttjs')
 var os = require("os");
+var schedule = require('node-schedule');
 
 
 var accessToken;
@@ -14,7 +17,8 @@ var mqttBrokerHost = "192.168.8.2";
 var mqttBrokerPort = 1883;
 var mqttClient;
 var calendarQueryInterval = 3600*2;
-
+var calendarId = "alr.st_t4do0ippogfurs00brmpgfhre0@group.calendar.google.com"
+var events = [];
 
 function mqttBootstrap() {
 	mqtt.createClient(mqttBrokerPort, mqttBrokerHost, function(err, client) {
@@ -100,18 +104,72 @@ function calendarScheduleQuery(){
 function calendarQuery() {
 	// oa._headers['GData-Version'] = '3.0'; 
 
-	oa.getProtectedResource(
-		"https://www.google.com/calendar/feeds/default/allcalendars/full?alt=jsonc", 
-		"GET", 
-		accessToken, 
-		refreshToken,
-		function (error, data, response) {
+// exports.OAuth2.prototype.get= function(url, access_token, callback) {
 
-			var feed = JSON.parse(data);
-			console.log("Received: " + feed);
-	});
+	var starttime = encodeURIComponent(new Date().toISOString());
+
+	var query = "https://www.googleapis.com/calendar/v3/calendars/"+calendarId+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+starttime	
+	console.log("Query " + query);
+
+	oa.get( query, accessToken, function (error, result, response) {
+		if(error) {
+			console.log("Error: " + error);
+		} else {
+			try {
+				var items = JSON.parse(result).items
+			} catch (e) {
+				return;
+			}
 
 
+			// Unschedule all events
+			for (var i=0; i<events.length; i++) {
+				events[i].cancel();
+			}
+
+
+			// Schedule events
+
+			for(i=0;i<items.length;i++){
+  			var item = items[i];
+  		//	console.log(item)
+  		console.log("Time now: " + new Date().toISOString());
+  			try {
+					var payload = JSON.parse('{'+item.description+'}');
+				//	console.log(payload);
+
+
+
+
+					for(key in payload.start){
+						console.log("Scheduling: " + key + ":" + payload.start[key] + " at " + item.start.dateTime);
+						var date = new Date(item.start.dateTime);
+						console.log(date);
+						var job = schedule.scheduleJob(item.start.dateTime, function(){
+								console.log("publishing something");
+								mqttClient.publish({ topic: key, payload: payload.start[key], qos: 0, retain: true});
+						});
+					}
+
+					
+					for(key in payload.end){
+						console.log("Scheduling: " + key + ":" + payload.end[key] + " at " + item.end.dateTime);
+
+						var job = schedule.scheduleJob(item.end.dateTime, function(){
+								mqttClient.publish({ topic: key, payload: payload.end[key], qos: 0, retain: true});
+						});
+					}
+
+
+
+				} catch (e) {
+					console.log(e)
+					continue;
+				}
+    	}
+
+		}
+	});	
 }
 
 mqttBootstrap();
