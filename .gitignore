@@ -16,6 +16,6 @@ tmp
 .yardoc
 _yardoc
 doc/
-
+node_modules
 # Config
 config.yml
