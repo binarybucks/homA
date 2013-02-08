@@ -1,3 +1,6 @@
 [submodule "webinterface/websocketServer"]
 	path = interfaces/webinterface/websocketServer
 	url = https://github.com/stylpen/WSS.git
+[submodule "bridges/http"]
+	path = bridges/http
+	url = git@github.com:njh/mqtt-http-bridge.git
