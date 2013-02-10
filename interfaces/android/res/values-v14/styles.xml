@@ -33,6 +33,8 @@
     <item name="android:fadingEdge">none</item>
     <item name="android:dividerHeight">3px</item>
 	<item name="android:divider">@drawable/homa_divider</item>
+		<item name="android:listSelector">@drawable/list_background</item>
+	
 	
     </style>
 

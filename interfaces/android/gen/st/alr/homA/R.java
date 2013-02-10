@@ -19,6 +19,7 @@ public final class R {
         public static final int homa_divider=0x7f020002;
         public static final int homa_pager=0x7f020003;
         public static final int homamonochrome=0x7f020004;
+        public static final int list_background=0x7f020005;
     }
     public static final class id {
         public static final int controlName=0x7f090002;
