@@ -93,13 +93,13 @@ function oauth2getAccessTokenCallback(err, access_token, refresh_token, results)
 	} else {
 	    accessToken = access_token;
 	    accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
-	    settings[MQTT_TOPIC_REFRESH_TOKEN] = !!refresh_token ? refresh_token : refreshToken;
+	    settings[MQTT_TOPIC_REFRESH_TOKEN] = !!refresh_token ? refresh_token : settings[MQTT_TOPIC_REFRESH_TOKEN];
 
-	    mqttPublish(MQTT_TOPIC_REFRESH_TOKEN, refreshToken); // save refresh token on broker for future starts
+	    mqttPublish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN]); // save refresh token on broker for future starts
 
 	    console.log('OAUTH       Access token: ' + accessToken);
 	    console.log('OAUTH       Access token refresh in: ' + accessTokenRefreshIn+"ms");
-	    console.log('OAUTH       Refresh token: ' + refreshToken);
+	    console.log('OAUTH       Refresh token: ' + settings[MQTT_TOPIC_REFRESH_TOKEN]);
 	   	console.log('OAUTH       Token type: ' + results.token_type);
 	   	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
 	   	process.nextTick(calendarQuery);
