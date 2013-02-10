@@ -1,37 +1,44 @@
-process.env.TZ = 'Europe/Amsterdam'
-
 var express = require('express');
 var oauth = require('oauth');
 var mqtt = require('mqttjs')
 var os = require("os");
 var schedule = require('node-schedule');
 
+// Can be edited savely
+var MQTT_CLIENT_ID ='458293-GoogleCalendarBridge'
+var MQTT_BROKER_HOST = 'fermi'
+var MQTT_BROKER_PORT = 1883
+var CALENDAR_QUERY_INTERVALL = 3600*2;
+
+
+// Don't touch these unless you know what they're doing
+var MQTT_TOPIC_CALENDAR_ID = "/sys/" + MQTT_CLIENT_ID + "/calendarId"
+var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + MQTT_CLIENT_ID + "/refreshToken"
+var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
+var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
 
 var accessToken;
 var accessTokenRefreshIn;
-var refreshToken = "1/tWipKs9lwgGI2hKPOWT8Qbnd4ueBFkQ6TcRtTE_dIGw";
 var oa;
-var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";
-var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
-var mqttBrokerHost = "192.168.8.2";
-var mqttBrokerPort = 1883;
 var mqttClient;
-var calendarQueryInterval = 3600*2;
-var calendarId = "alr.st_t4do0ippogfurs00brmpgfhre0@group.calendar.google.com"
 var events = [];
+var settings = {};
+var bootstrapCompleted = false;
+
+
 
 function mqttBootstrap() {
-	mqtt.createClient(mqttBrokerPort, mqttBrokerHost, function(err, client) {
+	mqtt.createClient(MQTT_BROKER_PORT, MQTT_BROKER_HOST, function(err, client) {
 	  if (err) process.exit(1);
 	  client.connect({keepalive: 3000});
 	  mqttClient = client;
 
 	  client.on('connack', function(packet) {
 	    if (packet.returnCode === 0) {
-	    	console.log('MQTT: Connection established');
-
+	    	console.log('MQTT        Connection established');
+	    	client.subscribe({topic: "/sys/" + MQTT_CLIENT_ID + "/#"});
 	    } else {
-	      console.log('MQTT: Connack error %d', packet.returnCode);
+	      console.log('MQTT        Connack error %d', packet.returnCode);
 	      process.exit(-1);
 	    }
 	  });
@@ -41,18 +48,40 @@ function mqttBootstrap() {
 	  });
 
 	  client.on('error', function(e) {
-	    console.log('MQTT Error: %s', e);
+	    console.log('MQTT        Error: %s', e);
 	    process.exit(-1);
 	  });
+
+	 	client.on('publish', function(packet) {
+	 		console.log("MQTT        Received: " + packet.topic + ":" + packet.payload);
+	 		settings[packet.topic] = packet.payload;
+	 		if (bootstrapComplete() && !bootstrapCompleted) {
+	 			bootstrapCompleted = true;
+	 			console.log("Settings    Bootstrap completed. Waiting 5 seconds for refresh token");
+				setTimeout(function () {oauth2expressBotstrap(); oauth2bootstrap();} , 5*1000); // 5 seconds grace period to receive refresh token. Otherwise request authentication from user 
+			}
+		});
 	});
 }
 
 
+function bootstrapComplete() {
+		var pass = true
+		var requiredItems = [MQTT_TOPIC_CALENDAR_ID];
+		for(i=0;i<requiredItems.length;i++){
+			if(settings[requiredItems[i]] == undefined || settings[requiredItems[i]] == ""){
+				console.log("Settings    Not yet received: " + requiredItems[i] )
+				pass = false;
+			}
+		}
+		return pass;
+}
+
 function oauth2bootstrap() {
 	oa = new oauth.OAuth2(clientId, clientSecret, "https://accounts.google.com/o", "/oauth2/auth", "/oauth2/token");
-	if(refreshToken == "") {
-		console.log("Requesting new oauth2 access and refresh token");
-		console.log("No refresh token provided. \nPlease point your browser to: " +os.hostname()+":8553/");
+	if(settings[MQTT_TOPIC_REFRESH_TOKEN] == undefined || settings[MQTT_TOPIC_REFRESH_TOKEN] == "" ) {
+		console.log("OAUTH       Requesting new access- and refresh token");
+		console.log("OAUTH       No refresh token provided. \n            Please point your browser to: " +os.hostname()+":8553/");
 	} else {
 		oauth2refreshAccessToken();
 	}
@@ -60,24 +89,26 @@ function oauth2bootstrap() {
 
 function oauth2getAccessTokenCallback(err, access_token, refresh_token, results){
 	if (err) {
-	    console.log('Error: ' + JSON.stringify(err));
+	    console.log('Error       ' + JSON.stringify(err));
 	} else {
 	    accessToken = access_token;
 	    accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
-	    refreshToken = !!refresh_token ? refresh_token : refreshToken;
-	    console.log('access token: ' + accessToken);
-	    console.log('access token refresh in: ' + accessTokenRefreshIn+"ms");
-	    console.log('refresh token: ' + refreshToken);
-	   	console.log('token type: ' + results.token_type);
-	   	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
-	   			process.nextTick(calendarQuery);
+	    settings[MQTT_TOPIC_REFRESH_TOKEN] = !!refresh_token ? refresh_token : refreshToken;
 
+	    mqttPublish(MQTT_TOPIC_REFRESH_TOKEN, refreshToken); // save refresh token on broker for future starts
+
+	    console.log('OAUTH       Access token: ' + accessToken);
+	    console.log('OAUTH       Access token refresh in: ' + accessTokenRefreshIn+"ms");
+	    console.log('OAUTH       Refresh token: ' + refreshToken);
+	   	console.log('OAUTH       Token type: ' + results.token_type);
+	   	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
+	   	process.nextTick(calendarQuery);
 	}
 }
 
 function oauth2refreshAccessToken() {
-		console.log("Refreshing oauth2 access token");
-	  	oa.getOAuthAccessToken(refreshToken, {grant_type:'refresh_token'}, oauth2getAccessTokenCallback);
+		console.log("OAUTH       Refreshing access token");
+	  	oa.getOAuthAccessToken(settings[MQTT_TOPIC_REFRESH_TOKEN], {grant_type:'refresh_token'}, oauth2getAccessTokenCallback);
 }
 
 
@@ -86,7 +117,7 @@ function oauth2expressBotstrap() {
 	e.listen(8553);
 	e.get('/callback', function(req, res) {
 	  oa.getOAuthAccessToken(req.query.code, {grant_type:'authorization_code', redirect_uri:'http://localhost:8553/callback'}, oauth2getAccessTokenCallback); 
-		res.send("Ok. To re authenticate, simply point your browser to "+os.hostname()+":8553/");
+		res.send("OAUTH     Ok. To re authenticate, simply point your browser to "+os.hostname()+":8553/");
 
 	});
 
@@ -97,23 +128,24 @@ function oauth2expressBotstrap() {
 }
 
 function calendarScheduleQuery(){
-	setTimeout(calendarQuery, calendarQueryInterval);
+	setTimeout(calendarQuery, CALENDAR_QUERY_INTERVALL);
 	process.nextTick(calendarQuery);
 }
 
+function calendarSchedule(date, topic, payload){
+	console.log("Calendar    At "  + date + " publishing " + topic + ":" + payload );
+	var job = schedule.scheduleJob(date, function(){
+			mqttPublish(topic, payload);
+	});
+}
+
 function calendarQuery() {
-	// oa._headers['GData-Version'] = '3.0'; 
-
-// exports.OAuth2.prototype.get= function(url, access_token, callback) {
-
-	var starttime = encodeURIComponent(new Date().toISOString());
-
-	var query = "https://www.googleapis.com/calendar/v3/calendars/"+calendarId+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+starttime	
-	console.log("Query " + query);
+	var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(new Date().toISOString());	
+	console.log("Calendar    Executing query: " + query);
 
 	oa.get( query, accessToken, function (error, result, response) {
 		if(error) {
-			console.log("Error: " + error);
+			console.log("Error       " + error);
 		} else {
 			try {
 				var items = JSON.parse(result).items
@@ -121,60 +153,40 @@ function calendarQuery() {
 				return;
 			}
 
-
 			// Unschedule all events
 			for (var i=0; i<events.length; i++) {
 				events[i].cancel();
 			}
 
-
 			// Schedule events
-
 			for(i=0;i<items.length;i++){
   			var item = items[i];
-  		//	console.log(item)
-  		console.log("Time now: " + new Date().toISOString());
   			try {
 					var payload = JSON.parse('{'+item.description+'}');
-				//	console.log(payload);
-
-
-
 
 					for(key in payload.start){
-						console.log("Scheduling: " + key + ":" + payload.start[key] + " at " + item.start.dateTime);
-						var date = new Date(item.start.dateTime);
-						console.log(date);
-						var job = schedule.scheduleJob(item.start.dateTime, function(){
-								console.log("publishing something");
-								mqttClient.publish({ topic: key, payload: payload.start[key], qos: 0, retain: true});
-						});
+						calendarSchedule(new Date(item.start.dateTime), key, payload.start[key]);
 					}
 
 					
 					for(key in payload.end){
-						console.log("Scheduling: " + key + ":" + payload.end[key] + " at " + item.end.dateTime);
-
-						var job = schedule.scheduleJob(item.end.dateTime, function(){
-								mqttClient.publish({ topic: key, payload: payload.end[key], qos: 0, retain: true});
-						});
+						calendarSchedule(new Date(item.end.dateTime), key, payload.end[key]);
 					}
-
-
 
 				} catch (e) {
 					console.log(e)
 					continue;
 				}
     	}
-
 		}
 	});	
 }
 
+function mqttPublish(topic, payload) {
+	mqttClient.publish({ topic: topic, payload: payload, qos: 0, retain: true});
+}
+
 mqttBootstrap();
-oauth2expressBotstrap();
-oauth2bootstrap();
 
 
 
