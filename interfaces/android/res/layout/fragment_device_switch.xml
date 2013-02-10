@@ -9,8 +9,8 @@
         android:id="@+id/controlName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dip"
-        android:layout_marginLeft="18dip"
+        android:layout_marginBottom="4dip"
+        android:layout_marginLeft="9dip"
         android:layout_marginTop="10dip"
         android:gravity="left|center_vertical"
         android:textColor="?android:attr/textColorPrimary"
@@ -20,7 +20,7 @@
         android:id="@+id/controlValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="18dip"
-        android:layout_marginLeft="14dip" />
+        android:layout_marginBottom="10dip"
+        android:layout_marginLeft="7dip" />
 
 </LinearLayout>

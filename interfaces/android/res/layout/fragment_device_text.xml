@@ -9,20 +9,23 @@
         android:id="@+id/controlName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dip"
-        android:layout_marginLeft="18dip"
+        android:layout_marginBottom="0dip"
+        android:layout_marginLeft="9dip"
         android:layout_marginTop="10dip"
+
         android:gravity="left|center_vertical"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="14sp" />
+        android:textSize="14sp" 
+        />
 
     <TextView
         android:id="@+id/controlValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="18dip"
-        android:layout_marginLeft="14dip"
+        android:layout_marginBottom="10dip"
         android:gravity="left|center_vertical"
+        android:layout_marginLeft="9dip"
+        
         android:textSize="18sp" />
 
 </LinearLayout>
