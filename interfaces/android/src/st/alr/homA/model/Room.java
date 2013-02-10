@@ -1,4 +1,4 @@
-package st.alr.homA;
+package st.alr.homA.model;
 
 import java.util.TreeMap;
 

@@ -22,18 +22,6 @@ public class SettingsActivity extends PreferenceActivity {
 		super.onDestroy();
 	}
 
-	@Override
-	protected void onPause() {
-		App.activityPaused();
-		super.onPause();
-	}
-
-	@Override
-	protected void onResume() {
-		App.activityActivated();
-		super.onResume();
-	}
-
 	public void onEvent(Events.MqttConnectivityChanged event) {
 		setServerPreferenceSummaryManually();
 	}
@@ -89,7 +77,7 @@ public class SettingsActivity extends PreferenceActivity {
 		if (stringValue == null || stringValue.equals("")) {
 			serverPreference.setSummary("No server set");
 		} else {
-			serverPreference.setSummary(App.getConnectionStateText());
+			serverPreference.setSummary(MqttService.getConnectivityText());
 		}
 	}
 }

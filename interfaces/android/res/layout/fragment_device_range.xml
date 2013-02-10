@@ -16,9 +16,9 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="14sp" />
 
-    <Switch
+    <SeekBar
         android:id="@+id/controlValue"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="18dip"
         android:layout_marginLeft="14dip" />

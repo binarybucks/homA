@@ -21,8 +21,7 @@
         android:key="serverAddress"
         android:maxLines="1"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
- />
+        android:singleLine="true" />
 
     <TextView
         android:id="@+id/serverPortLabel"
@@ -31,17 +30,15 @@
         android:text="@string/preferencesServerPort" />
 
     <EditText
-                android:id="@+id/serverPort"
-        
+        android:id="@+id/serverPort"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:digits="0123456789"        
+        android:digits="0123456789"
         android:inputType="numberDecimal"
         android:key="serverPort"
+        android:maxLength="5"
         android:maxLines="1"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
-android:maxLength="5"
-/>
+        android:singleLine="true" />
 
 </LinearLayout>

@@ -62,11 +62,12 @@ public class ServerDialogPreference extends DialogPreference {
 
 				editor.apply();
 
-				if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
-					App.bootstrapAndConnectMqtt(true, false); // Server changed, clean up everything from old server
-				} else {
-					App.bootstrapAndConnectMqtt(false, false); // Connect to same server, no cleanup needed
-				}
+				// TODO: FIX THIS
+//				if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
+//					App.bootstrapAndConnectMqtt(true, false); // Server changed, clean up everything from old server
+//				} else {
+//					App.bootstrapAndConnectMqtt(false, false); // Connect to same server, no cleanup needed
+//				}
 
 				break;
 		}

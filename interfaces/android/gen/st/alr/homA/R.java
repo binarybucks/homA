@@ -21,8 +21,8 @@ public final class R {
         public static final int homamonochrome=0x7f020004;
     }
     public static final class id {
-        public static final int controlName_switch=0x7f090002;
-        public static final int controlValue_switch=0x7f090003;
+        public static final int controlName=0x7f090002;
+        public static final int controlValue=0x7f090003;
         public static final int devices_list=0x7f090004;
         public static final int list_item=0x7f090009;
         public static final int menu_settings=0x7f09000b;
@@ -36,10 +36,12 @@ public final class R {
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int fragment_device_switch=0x7f030001;
-        public static final int fragment_room=0x7f030002;
-        public static final int preferences_server=0x7f030003;
-        public static final int row_layout=0x7f030004;
+        public static final int fragment_device_range=0x7f030001;
+        public static final int fragment_device_switch=0x7f030002;
+        public static final int fragment_device_text=0x7f030003;
+        public static final int fragment_room=0x7f030004;
+        public static final int preferences_server=0x7f030005;
+        public static final int row_layout=0x7f030006;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;

@@ -4,12 +4,14 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingLeft="15dip" >
+
     <TextView
         android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dip"
         android:paddingBottom="20dip"
+        android:paddingTop="20dip"
         android:textSize="18sp" >
     </TextView>
+
 </LinearLayout>

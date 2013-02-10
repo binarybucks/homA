@@ -3,28 +3,21 @@
     android:id="@+id/pager"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" 
-    
-    >
+    tools:context=".MainActivity" >
 
     <!--
     This title strip will display the currently visible page title, as well as the page
     titles for adjacent pages.
     -->
-
     <android.support.v4.view.PagerTitleStrip
         android:id="@+id/pager_title_strip"
         style="@style/homa_solid_pager"
         android:layout_width="match_parent"
         android:layout_height="35dp"
+        android:paddingBottom="8dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
-        android:paddingBottom="8dp"
-                android:paddingTop="0dp"
-        
+        android:paddingTop="0dp"
         android:textAlignment="center" />
-    
+
 </android.support.v4.view.ViewPager>
-
-
-
