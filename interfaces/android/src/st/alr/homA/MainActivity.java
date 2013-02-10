@@ -10,9 +10,6 @@ import st.alr.homA.model.Room;
 import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
 import st.alr.homA.view.ControlView;
-import st.alr.homA.view.RangeControlView;
-import st.alr.homA.view.SwitchControlView;
-import st.alr.homA.view.TextControlView;
 import de.greenrobot.event.EventBus;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -210,6 +207,8 @@ public class MainActivity extends FragmentActivity {
                 ll.addView(getControlView(control).attachToControl(control).getLayout());
             }
 
+
+            
             builder.setView(ll);
             return builder.create();
         }
@@ -288,7 +287,8 @@ public class MainActivity extends FragmentActivity {
             lv.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long it) {
-                    DeviceFragment.newInstance(room.getId(), room.getDevices().values().toArray()[position].toString()).show(getFragmentManager(), "tag");
+                    DeviceFragment d = DeviceFragment.newInstance(room.getId(), room.getDevices().values().toArray()[position].toString());
+                    d.show(getFragmentManager(), "tag");
                 }
             });
 

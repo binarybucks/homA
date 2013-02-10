@@ -1,7 +1,5 @@
 package st.alr.homA;
 
-import st.alr.homA.support.Events;
-import de.greenrobot.event.EventBus;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -52,9 +50,6 @@ public class ServerDialogPreference extends DialogPreference {
 
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 				SharedPreferences.Editor editor = prefs.edit();
-
-				String oldAddress = prefs.getString("serverAddress", context.getString(R.string.defaultsServerAddress));
-				String oldPort = prefs.getString("serverPort", context.getString(R.string.defaultsServerPort));
 
 				String newAdress = address.getText().toString();
 				String newPort = port.getText().toString();

@@ -279,14 +279,7 @@ public class MqttService extends Service implements MqttCallback
         changeMqttConnectivity(MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT);
     }
 
-    /************************************************************************/
-    /* METHODS - MQTT methods inherited from MQTT classes */
-    /************************************************************************/
-
-    /*
-     * callback - method called when we no longer have a connection to the
-     * message broker server
-     */
+    @SuppressLint("Wakelock") // Lint check derps with the wl.release() call. 
     @Override
     public void connectionLost(Throwable t)
     {
@@ -297,13 +290,12 @@ public class MqttService extends Service implements MqttCallback
         WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
         wl.acquire();
 
-        if (isOnline(true) == false)
+        if (!isOnline(true))
         {
             changeMqttConnectivity(MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET);
         }
         else
         {
-
             changeMqttConnectivity(MQTT_CONNECTIVITY.DISCONNECTED);
             scheduleNextPing(); // Try again in one ping intervall
         }
@@ -747,7 +739,7 @@ public class MqttService extends Service implements MqttCallback
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle("HomA");
         notificationBuilder.setOngoing(true).setContentText(getConnectivityText())
-                .setPriority(Notification.PRIORITY_MIN);
+                .setPriority(Notification.PRIORITY_MIN).setWhen(0);
         final Notification note = notificationBuilder.build();
         mNotificationManager.notify(nofiticationID, note);
     }

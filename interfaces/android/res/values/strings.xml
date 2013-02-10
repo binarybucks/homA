@@ -15,7 +15,6 @@
     <string name="connectivityDisconnecting">"Disconnecting"</string>
     <string name="connectivityDisconnected">"Disconnected"</string>
 	<string name="defaultsRoomName">"unassigned"</string>
-	<string name="defaultsPresenceID">"HomA-Android"</string>
 	
 		
     <string name="defaultsServerAddress">"192.168.8.2"</string>

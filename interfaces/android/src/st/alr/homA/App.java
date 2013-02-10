@@ -2,8 +2,7 @@
 package st.alr.homA;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+
 import java.util.TreeMap;
 
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
@@ -11,7 +10,6 @@ import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
-import st.alr.homA.support.Events.ServerPreferencesSubmitted;
 import de.greenrobot.event.EventBus;
 import android.app.Application;
 

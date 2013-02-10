@@ -5,7 +5,6 @@ import java.util.TreeMap;
 
 import st.alr.homA.App;
 import st.alr.homA.R;
-import st.alr.homA.R.string;
 import st.alr.homA.support.ValueChangedObserver;
 import android.content.Context;
 import android.util.Log;
