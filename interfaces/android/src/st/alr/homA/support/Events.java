@@ -18,6 +18,17 @@ public class Events {
 		}
 	}
 
+	public static class ServerPreferencesSubmitted {
+	    boolean serverHasChanged; 
+	    public ServerPreferencesSubmitted(boolean serverHasChanged) {
+	        this.serverHasChanged = serverHasChanged;
+	    }
+	   
+	    public boolean serverHasChanged() {
+	        return serverHasChanged;
+	    }
+	}
+	
 	public static class RoomAdded {
 		Room room;
 

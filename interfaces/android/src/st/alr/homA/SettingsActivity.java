@@ -3,6 +3,7 @@ package st.alr.homA;
 import st.alr.homA.support.Events;
 import de.greenrobot.event.EventBus;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -22,13 +23,18 @@ public class SettingsActivity extends PreferenceActivity {
 		super.onDestroy();
 	}
 
-	public void onEvent(Events.MqttConnectivityChanged event) {
+	public void onEventMainThread(Events.MqttConnectivityChanged event) {
 		setServerPreferenceSummaryManually();
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        // Start service if it is not already started
+        Intent service = new Intent(this, MqttService.class);
+        startService(service);
+
 		EventBus.getDefault().register(this);
 
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

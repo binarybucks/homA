@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:digits="0123456789."
-        android:inputType="numberDecimal"
+        android:inputType="text"
         android:key="serverAddress"
         android:maxLines="1"
         android:selectAllOnFocus="true"

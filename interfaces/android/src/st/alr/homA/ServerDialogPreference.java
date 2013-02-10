@@ -1,5 +1,7 @@
 package st.alr.homA;
 
+import st.alr.homA.support.Events;
+import de.greenrobot.event.EventBus;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -62,14 +64,10 @@ public class ServerDialogPreference extends DialogPreference {
 
 				editor.apply();
 
-				// TODO: FIX THIS
-//				if (!oldAddress.equals(newAdress) || !oldPort.equals(newPort)) {
-//					App.bootstrapAndConnectMqtt(true, false); // Server changed, clean up everything from old server
-//				} else {
-//					App.bootstrapAndConnectMqtt(false, false); // Connect to same server, no cleanup needed
-//				}
-
+				MqttService.getInstance().reconnect();
 				break;
+			case DialogInterface.BUTTON_NEGATIVE:
+			    MqttService.getInstance().disconnect();
 		}
 		super.onClick(dialog, which);
 	}

@@ -8,7 +8,7 @@
     <string name="preferencesServerTitle">"Server"</string>
     <string name="preferencesServerAddress">"Server address"</string>
     <string name="preferencesServerPort">"Server port"</string>
-    <string name="preferencesServerCancel">"Cancel"</string>
+    <string name="preferencesServerCancel">"Disconnect"</string>
     <string name="preferencesServerConnect">"Connect"</string>
     <string name="connectivityConnecting">"Connecting"</string>
     <string name="connectivityConnected">"Connected"</string>

@@ -2,11 +2,16 @@
 package st.alr.homA;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 
+import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.Events;
+import st.alr.homA.support.Events.MqttConnectivityChanged;
+import st.alr.homA.support.Events.ServerPreferencesSubmitted;
 import de.greenrobot.event.EventBus;
 import android.app.Application;
 
@@ -21,6 +26,7 @@ public class App extends Application {
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new TreeMap<String, Room>();
+        EventBus.getDefault().register(this);
     }
 
     public static Room getRoom(String id) {
@@ -45,10 +51,11 @@ public class App extends Application {
         EventBus.getDefault().post(new Events.RoomRemoved(room));
     }
 
-    public static void removeAllRooms() {
+    public static void removeAllRooms() {        
         for (Room room : rooms.values()) {
-            removeRoom(room);
+            EventBus.getDefault().post(new Events.RoomRemoved(room));
         }
+        rooms.clear();
     }
 
     public static Device getDevice(String id) {
@@ -62,5 +69,13 @@ public class App extends Application {
 
     public static App getInstance() {
         return instance;
+    }
+    
+    public void onEvent(MqttConnectivityChanged event) {
+        
+        if(event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT) {
+            removeAllRooms();
+            devices.clear();
+        }
     }
 }

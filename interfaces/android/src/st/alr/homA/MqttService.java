@@ -17,6 +17,7 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.support.Events;
+import st.alr.homA.support.Events.ServerPreferencesSubmitted;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -130,14 +131,6 @@ public class MqttService extends Service implements MqttCallback
         Log.v(this.toString(), "doStart");
 
         initMqttClient();
-
-        // new Thread(new Runnable() {
-        // @Override
-        // public void run() {
-        // handleStart(intent, startId);
-        // }
-        // }).start();
-
         executor.submit(new Runnable() {
             @Override
             public void run() {
@@ -302,7 +295,7 @@ public class MqttService extends Service implements MqttCallback
         {
 
             changeMqttConnectivity(MQTT_CONNECTIVITY.DISCONNECTED);
-            // TODO: try to reconnect
+            scheduleNextPing(); // Try again in one ping intervall
         }
         wl.release();
     }
@@ -386,6 +379,8 @@ public class MqttService extends Service implements MqttCallback
 
     }
 
+
+    
     private void initMqttClient()
     {
         Log.v(this.toString(), "initMqttClient");
@@ -535,10 +530,8 @@ public class MqttService extends Service implements MqttCallback
     {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        
-        boolean onWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI;
-        
-        return netInfo != null && (!shouldCheckIfOnWifi || onWifi)  && netInfo.isAvailable() && netInfo.isConnected();
+                
+        return netInfo != null && (!shouldCheckIfOnWifi || (netInfo.getType() == ConnectivityManager.TYPE_WIFI))  && netInfo.isAvailable() && netInfo.isConnected();
     }
 
 
@@ -715,6 +708,10 @@ public class MqttService extends Service implements MqttCallback
                 return App.getInstance().getString(R.string.connectivityConnecting);
             case DISCONNECTING:
                 return App.getInstance().getString(R.string.connectivityDisconnecting);
+            case DISCONNECTED_DATADISABLED:
+                return "Disconnected - Data disabled";
+            case DISCONNECTED_USERDISCONNECT:
+                return "Disconnected - User request";
             default:
                 return App.getInstance().getString(R.string.connectivityDisconnected);
         }
@@ -741,6 +738,9 @@ public class MqttService extends Service implements MqttCallback
         final Notification note = notificationBuilder.build();
         mNotificationManager.notify(nofiticationID, note);
     }
-    
- 
+
+    public void reconnect() {
+        disconnect();
+        doStart(null, -1);
+    }
 }
