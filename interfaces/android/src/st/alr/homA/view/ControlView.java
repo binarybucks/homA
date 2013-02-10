@@ -9,18 +9,20 @@ import android.view.View;
 import android.widget.TextView;
 
 public abstract class ControlView {
-    public TextView _name;
-    public View _value;
-    public View _layout;
+    protected TextView _name;
+    protected View _value;
+    protected View _layout;
     protected Control _control;
-    private Activity activity;
+    protected Activity activity;
+
+
 
     public ControlView(Activity activity, int layoutRessource) {
         this.activity = activity;
         _layout = activity.getLayoutInflater().inflate(layoutRessource, null);
         _value = _layout.findViewById(R.id.controlValue);
         _name = (TextView) _layout.findViewById(R.id.controlName);
-
+        
     }
 
     abstract public void setContent(String name, String value);
@@ -31,7 +33,7 @@ public abstract class ControlView {
         setContent(c.getName(), c.getValue());
     }
 
-    public void attachToControl(Control control) {
+    public ControlView attachToControl(Control control) {
         _control = control;
         control.setValueChangedObserver(new ValueChangedObserver() {
             @Override
@@ -48,5 +50,10 @@ public abstract class ControlView {
         });
         setInteractionListener();
         setContent(control);
+        return this; // for easy chaining
+    }
+    
+    public View getLayout() {
+        return _layout;
     }
 }

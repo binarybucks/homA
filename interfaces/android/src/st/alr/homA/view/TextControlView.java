@@ -6,7 +6,7 @@ import android.widget.TextView;
 public class TextControlView extends ControlView {
 
     public TextControlView(Activity activity) {
-        super(activity, R.layout.fragment_device_switch);
+        super(activity, R.layout.fragment_device_text);
     }
 
     @Override

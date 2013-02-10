@@ -8,7 +8,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class RangeControlView extends ControlView {
     public RangeControlView(Activity activity) {
-        super(activity, R.layout.fragment_device_switch);
+        super(activity, R.layout.fragment_device_range);
     }
 
     public void setContent(String name, String value) {

@@ -4,13 +4,11 @@ package st.alr.homA;
 import java.util.HashMap;
 import java.util.Locale;
 
-import st.alr.homA.MqttService.LocalBinder;
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
-import st.alr.homA.support.ValueChangedObserver;
 import st.alr.homA.view.ControlView;
 import st.alr.homA.view.RangeControlView;
 import st.alr.homA.view.SwitchControlView;
@@ -18,12 +16,9 @@ import st.alr.homA.view.TextControlView;
 import de.greenrobot.event.EventBus;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -36,14 +31,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
 
 public class MainActivity extends FragmentActivity {
     private RoomsFragmentPagerAdapter roomsFragmentPagerAdapter;
@@ -201,6 +193,7 @@ public class MainActivity extends FragmentActivity {
             return f;
         }
 
+        @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             room = getArguments() != null ? App.getRoom(getArguments().getString("roomId")) : null;
             device = getArguments() != null ? room.getDevices().get(getArguments().getString("deviceId")) : null;
@@ -214,7 +207,7 @@ public class MainActivity extends FragmentActivity {
             ll.setPadding(16, 0, 16, 0);
 
             for (Control control : device.getControls().values()) {
-                ll.addView(getControlView(control)._layout);
+                ll.addView(getControlView(control).attachToControl(control).getLayout());
             }
 
             builder.setView(ll);
@@ -226,23 +219,29 @@ public class MainActivity extends FragmentActivity {
 
 
         public ControlView getControlView(Control control) {
+            ControlView v = null;
 
-            ControlView v;
-
+                
             switch (control.getType()) {
                 case SWITCH:
-                    v = new SwitchControlView(getActivity());
+                    try {
+
+                    v = new st.alr.homA.view.SwitchControlView(getActivity());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case RANGE:
-                    v = new RangeControlView(getActivity());
+                    v = new  st.alr.homA.view.RangeControlView(getActivity());
                     break;    
                 case TEXT:
-                    v = new TextControlView(getActivity());
+                    v = new  st.alr.homA.view.TextControlView(getActivity());
                     break;    
                 default:
                     // TODO: Add view for unknown types here instead of a textview
-                    v = new TextControlView(getActivity());
+                    v = new  st.alr.homA.view.TextControlView(getActivity());
             }
+   
 
             return v;
         }

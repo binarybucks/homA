@@ -17,7 +17,6 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.support.Events;
-import st.alr.homA.support.Events.ServerPreferencesSubmitted;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -111,9 +110,11 @@ public class MqttService extends Service implements MqttCallback
 
         doStart(intent, startId);
     }
+
     public static MqttService getInstance() {
         return instance;
     }
+
     @Override
     public int onStartCommand(final Intent intent, int flags, final int startId)
     {
@@ -128,13 +129,18 @@ public class MqttService extends Service implements MqttCallback
     }
 
     private void doStart(final Intent intent, final int startId) {
+        doStart(intent, startId, false);
+    }
+
+    private void doStart(final Intent intent, final int startId,
+            final boolean reconnectAfterUserDisconnect) {
         Log.v(this.toString(), "doStart");
 
         initMqttClient();
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                handleStart(intent, startId);
+                handleStart(intent, startId, reconnectAfterUserDisconnect);
             }
         });
     }
@@ -143,7 +149,7 @@ public class MqttService extends Service implements MqttCallback
         subscribeToTopics();
     }
 
-    synchronized void handleStart(Intent intent, int startId)
+    synchronized void handleStart(Intent intent, int startId, boolean reconnectAfterUserDisconnect)
     {
         Log.v(this.toString(), "handleStart");
 
@@ -153,6 +159,11 @@ public class MqttService extends Service implements MqttCallback
             // immediately - there is nothing that we can do
             Log.e(this.toString(), "handleStart: mqttClient == null");
             stopSelf();
+            return;
+        }
+
+        if (!reconnectAfterUserDisconnect
+                && (mqttConnectivity == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT)) {
             return;
         }
 
@@ -233,7 +244,6 @@ public class MqttService extends Service implements MqttCallback
     }
 
     private LocalBinder<MqttService> mBinder;
-
 
     @Override
     public IBinder onBind(Intent intent)
@@ -379,8 +389,6 @@ public class MqttService extends Service implements MqttCallback
 
     }
 
-
-    
     private void initMqttClient()
     {
         Log.v(this.toString(), "initMqttClient");
@@ -390,10 +398,13 @@ public class MqttService extends Service implements MqttCallback
 
         try
         {
-            String brokerAddress = sharedPreferences.getString("serverAddress", getString(R.string.defaultsServerAddress));
-            String brokerPort = sharedPreferences.getString("serverPort", getString(R.string.defaultsServerPort));
+            String brokerAddress = sharedPreferences.getString("serverAddress",
+                    getString(R.string.defaultsServerAddress));
+            String brokerPort = sharedPreferences.getString("serverPort",
+                    getString(R.string.defaultsServerPort));
 
-            mqttClient = new MqttClient("tcp://" +brokerAddress+ ":" + brokerPort , getClientId(),null);
+            mqttClient = new MqttClient("tcp://" + brokerAddress + ":" + brokerPort, getClientId(),
+                    null);
             mqttClient.setCallback(this);
         } catch (MqttException e)
         {
@@ -491,11 +502,11 @@ public class MqttService extends Service implements MqttCallback
         }
     }
 
-
     private void scheduleNextPing()
     {
         Log.v(this.toString(), "scheduleNextPing in " + keepAliveSeconds + " seconds");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(MQTT_PING_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(
+                MQTT_PING_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
 
         Calendar wakeUpTime = Calendar.getInstance();
         wakeUpTime.add(Calendar.SECOND, keepAliveSeconds);
@@ -504,13 +515,10 @@ public class MqttService extends Service implements MqttCallback
         aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
     }
 
-
     private boolean isConnected()
     {
         return ((mqttClient != null) && (mqttClient.isConnected() == true));
     }
-    
-
 
     @SuppressWarnings("deprecation")
     private boolean isBackgroundDataEnabled() {
@@ -530,12 +538,12 @@ public class MqttService extends Service implements MqttCallback
     {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-                
-        return netInfo != null && (!shouldCheckIfOnWifi || (netInfo.getType() == ConnectivityManager.TYPE_WIFI))  && netInfo.isAvailable() && netInfo.isConnected();
+
+        return netInfo != null
+                && (!shouldCheckIfOnWifi || (netInfo.getType() == ConnectivityManager.TYPE_WIFI))
+                && netInfo.isAvailable() && netInfo.isConnected();
     }
 
-
-    
     private String getClientId()
     {
         // generate a unique client id if we haven't done so before, otherwise
@@ -545,7 +553,8 @@ public class MqttService extends Service implements MqttCallback
         {
             mqttClientId = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 
-            // truncate - MQTT spec doesn't allow client ids longer than 23 chars
+            // truncate - MQTT spec doesn't allow client ids longer than 23
+            // chars
             if (mqttClientId.length() > 22) {
                 mqttClientId = mqttClientId.substring(0, 22);
             }
@@ -606,8 +615,8 @@ public class MqttService extends Service implements MqttCallback
             WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
             wl.acquire();
 
-
-            if (isOnline(true) && !isConnected() && getConnectivity() != MQTT_CONNECTIVITY.CONNECTING)
+            if (isOnline(true) && !isConnected()
+                    && getConnectivity() != MQTT_CONNECTIVITY.CONNECTING)
             {
                 Log.v(this.toString(), "Reconnecting");
                 doStart(null, -1);
@@ -619,7 +628,6 @@ public class MqttService extends Service implements MqttCallback
         }
     }
 
-    
     private void ping() throws MqttException {
 
         MqttTopic topic = mqttClient.getTopic("$SYS/KEEPALIVEPING");
@@ -627,7 +635,9 @@ public class MqttService extends Service implements MqttCallback
         MqttMessage message = new MqttMessage();
         message.setRetained(false);
         message.setQos(1);
-        message.setPayload(new byte[] {0});
+        message.setPayload(new byte[] {
+            0
+        });
 
         try
         {
@@ -640,7 +650,7 @@ public class MqttService extends Service implements MqttCallback
             throw new MqttException(e);
         }
     }
-    
+
     public class PingSender extends BroadcastReceiver
     {
         @Override
@@ -657,7 +667,8 @@ public class MqttService extends Service implements MqttCallback
 
             if (isOnline(true) && !isConnected())
             {
-                Log.v(this.toString(), "onReceive: isOnline()=" + isOnline(true) + ", isConnected()="
+                Log.v(this.toString(), "onReceive: isOnline()=" + isOnline(true)
+                        + ", isConnected()="
                         + isConnected());
                 doStart(null, -1);
             }
@@ -671,7 +682,8 @@ public class MqttService extends Service implements MqttCallback
                     ping();
                 } catch (MqttException e)
                 {
-                    // if something goes wrong, it should result in connectionLost
+                    // if something goes wrong, it should result in
+                    // connectionLost
                     // being called, so we will handle it there
                     Log.e(this.toString(), "ping failed - MQTT exception", e);
 
@@ -708,10 +720,7 @@ public class MqttService extends Service implements MqttCallback
                 return App.getInstance().getString(R.string.connectivityConnecting);
             case DISCONNECTING:
                 return App.getInstance().getString(R.string.connectivityDisconnecting);
-            case DISCONNECTED_DATADISABLED:
-                return "Disconnected - Data disabled";
-            case DISCONNECTED_USERDISCONNECT:
-                return "Disconnected - User request";
+            // More verbose disconnect states could be added here. For now any flavour of disconnected is treated the same
             default:
                 return App.getInstance().getString(R.string.connectivityDisconnected);
         }
@@ -723,24 +732,28 @@ public class MqttService extends Service implements MqttCallback
 
     private static void createNotification() {
         Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
-        android.support.v4.app.TaskStackBuilder stackBuilder = TaskStackBuilder.create(App.getInstance());
+        android.support.v4.app.TaskStackBuilder stackBuilder = TaskStackBuilder.create(App
+                .getInstance());
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+                PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(resultPendingIntent);
         updateNotification();
     }
 
     private static void updateNotification() {
-        final NotificationManager mNotificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
+        final NotificationManager mNotificationManager = (NotificationManager) App.getInstance()
+                .getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle("HomA");
-        notificationBuilder.setOngoing(true).setContentText(getConnectivityText()).setPriority(Notification.PRIORITY_MIN);
+        notificationBuilder.setOngoing(true).setContentText(getConnectivityText())
+                .setPriority(Notification.PRIORITY_MIN);
         final Notification note = notificationBuilder.build();
         mNotificationManager.notify(nofiticationID, note);
     }
 
     public void reconnect() {
         disconnect();
-        doStart(null, -1);
+        doStart(null, -1, true);
     }
 }
