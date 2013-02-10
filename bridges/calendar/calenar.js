@@ -183,7 +183,9 @@ function calendarQuery() {
 }
 
 function mqttPublish(topic, payload) {
-	mqttClient.publish({ topic: topic, payload: payload, qos: 0, retain: true});
+			console.log("publishing " + topic + ":" + payload);
+			mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: true});
+	
 }
 
 mqttBootstrap();
