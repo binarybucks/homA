@@ -71,7 +71,13 @@ public class App extends Application {
     
     public void onEvent(MqttConnectivityChanged event) {
         
-        if(event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT) {
+
+
+        
+        if(event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET 
+        || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT
+        || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_DATADISABLED
+        || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
             removeAllRooms();
             devices.clear();
         }
