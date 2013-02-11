@@ -205,23 +205,25 @@ public class MainActivity extends FragmentActivity {
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(device.getName());
+            LinearLayout outerLayout = new LinearLayout(this.getActivity());
+            outerLayout.setOrientation(LinearLayout.VERTICAL);
             
-         //   ScrollView sw = new ScrollView(this.getActivity());
-
+            ScrollView sw = new ScrollView(this.getActivity());
+            
             LinearLayout ll = new LinearLayout(this.getActivity());
             ll.setOrientation(LinearLayout.VERTICAL);
             ll.setPadding(16, 0, 16, 0);
-            
-
             for (Control control : device.getControls().values()) {
                 ll.addView(getControlView(control).attachToControl(control).getLayout());
             }
 
-            //ll.addView(sw);
+            sw.addView(ll);
+            outerLayout.addView(sw);
+
             
 
             
-            builder.setView(ll);
+            builder.setView(outerLayout);
             return builder.create();
         }
 
