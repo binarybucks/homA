@@ -1,19 +1,19 @@
+#!/usr/bin/env node
+
 var express = require('express');
 var oauth = require('oauth');
 var mqtt = require('mqttjs')
 var os = require("os");
 var schedule = require('node-schedule');
+var argv = require('optimist').argv;
+
 
 // Can be edited savely
 var MQTT_CLIENT_ID ='458293-GoogleCalendarBridge'
-var MQTT_BROKER_HOST = 'fermi'
 var MQTT_BROKER_PORT = 1883
+var MQTT_BROKER_HOST = 'localhost'
 var CALENDAR_QUERY_INTERVALL = 3600*2;
 
-
-// Don't touch these unless you know what they're doing
-var MQTT_TOPIC_CALENDAR_ID = "/sys/" + MQTT_CLIENT_ID + "/calendarId"
-var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + MQTT_CLIENT_ID + "/refreshToken"
 var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
 var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
 
@@ -27,9 +27,13 @@ var bootstrapCompleted = false;
 
 
 
+
 function mqttBootstrap() {
 	mqtt.createClient(MQTT_BROKER_PORT, MQTT_BROKER_HOST, function(err, client) {
-	  if (err) process.exit(1);
+	  if (err) {
+	  	console.log('MQTT        %s', err);
+	  	process.exit(1);
+	  }
 	  client.connect({keepalive: 3000});
 	  mqttClient = client;
 
@@ -44,7 +48,8 @@ function mqttBootstrap() {
 	  });
 
 	  client.on('close', function() {
-	    process.exit(0);
+	  	console.log('MQTT        Connection closed');
+	    process.exit(-1);
 	  });
 
 	  client.on('error', function(e) {
@@ -188,7 +193,27 @@ function mqttPublish(topic, payload) {
 	
 }
 
-mqttBootstrap();
+
+
+if (argv.brokerHost != undefined) {
+	MQTT_BROKER_HOST = argv.brokerHost;
+}
+if (argv.brokerPort != undefined) {
+	MQTT_BROKER_PORT = argv.brokerPort;
+}
+if (argv.brokerClientId != undefined) {
+	MQTT_CLIENT_ID = argv.brokerClientId;
+}
+if (argv.queryIntervall != undefined) {
+	CALENDAR_QUERY_INTERVALL = argv.queryIntervall*60;
+}
+console.log(MQTT_CLIENT_ID);
+// Don't touch these unless you know what they're doing
+var MQTT_TOPIC_CALENDAR_ID = "/sys/" + MQTT_CLIENT_ID + "/calendarId";
+var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + MQTT_CLIENT_ID + "/refreshToken";
+
+mqttBootstrap();	
+
 
 
 
