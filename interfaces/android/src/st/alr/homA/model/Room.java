@@ -1,8 +1,9 @@
 package st.alr.homA.model;
 
-import java.util.TreeMap;
+import java.util.Locale;
 
 import st.alr.homA.support.Events;
+import st.alr.homA.support.ValueSortedMap;
 
 import de.greenrobot.event.EventBus;
 
@@ -13,19 +14,19 @@ import android.util.Log;
 
 public class Room implements Comparable<Room>{
 	private String id;
-	private TreeMap<String, Device> devices;
+	private ValueSortedMap<String, Device> devices;
 	
 	
 	public Room(Context context, String id) {
 		this.id = id;
-		devices = new TreeMap<String, Device>();
+		devices = new ValueSortedMap<String, Device>();
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public TreeMap<String, Device> getDevices() {
+	public ValueSortedMap<String, Device> getDevices() {
 		return devices;
 	}
 
@@ -53,8 +54,16 @@ public class Room implements Comparable<Room>{
 
 	@Override
 	public int compareTo(Room another) {	
-		return this.toString().compareTo(another.toString());
+	    return this.toString().compareToIgnoreCase(another.toString());
 	}
-	
+
+//    public void deviceSortOrderChanged() {
+//        TreeMap<String, Device> n = new TreeMap<String, Device>();
+//        n.putAll(devices);
+//        devices = n;
+//        EventBus.getDefault().post(new Events.DeviceSortOrderChanged(devices, this));
+//
+//    }
+//	
 
 }

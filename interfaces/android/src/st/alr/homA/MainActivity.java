@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 
 public class MainActivity extends FragmentActivity {
     private RoomsFragmentPagerAdapter roomsFragmentPagerAdapter;
@@ -56,8 +57,10 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        
         Intent service = new Intent(this, MqttService.class);
         startService(service);
+
     }
 
     @Override
@@ -72,7 +75,7 @@ public class MainActivity extends FragmentActivity {
         mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
             @Override
             public void onPageSelected(int index) {
-                currentRoom = App.getRoomAtPosition(index);
+                currentRoom = App.getRoom(index);
             }
 
             @Override
@@ -106,7 +109,7 @@ public class MainActivity extends FragmentActivity {
         DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
         m.notifyDataSetChanged();
 
-        if (currentRoom != null && currentRoom.compareTo(App.getRoomAtPosition(currentItem)) > 0) {
+        if (currentRoom != null && currentRoom.compareTo(App.getRoom(currentItem)) > 0) {
             Log.v(this.toString(), "Shifting index ");
             mViewPager.setCurrentItem(currentItem + 1, false);
         }
@@ -118,7 +121,6 @@ public class MainActivity extends FragmentActivity {
         mViewPager.getAdapter().notifyDataSetChanged();
         DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
         m.clearItems();
-        m.notifyDataSetChanged();
 
     }
 
@@ -128,15 +130,20 @@ public class MainActivity extends FragmentActivity {
         DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
 
         m.addItem(event.getDevice());
-        m.notifyDataSetChanged();
     }
+    public void onEventMainThread(Events.DeviceRenamed event) {
+        Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
+        DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getDevice().getRoom());
+        m.sortDataset();
+    }
+    
+    
 
     public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
         Log.v(this.toString(), "DeviceRemovedFromRoom: " + event.getDevice().toString() + " "
                 + event.getRoom().toString());
         DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
         m.removeItem(event.getDevice());
-        m.notifyDataSetChanged();
     }
 
     public static DeviceMapAdapter lazyloadDeviceMapAdapter(Context context, Room room) {
@@ -167,12 +174,12 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return MainActivity.RoomFragment.newInstance(App.getRoomAtPosition(position).getId());
+            return MainActivity.RoomFragment.newInstance(App.getRoom(position).getId());
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return App.getRoomAtPosition(position).getId().toUpperCase(Locale.ENGLISH);
+            return App.getRoom(position).getId().toUpperCase(Locale.ENGLISH);
         }
     }
 
@@ -198,15 +205,20 @@ public class MainActivity extends FragmentActivity {
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(device.getName());
+            
+         //   ScrollView sw = new ScrollView(this.getActivity());
 
             LinearLayout ll = new LinearLayout(this.getActivity());
             ll.setOrientation(LinearLayout.VERTICAL);
             ll.setPadding(16, 0, 16, 0);
+            
 
             for (Control control : device.getControls().values()) {
                 ll.addView(getControlView(control).attachToControl(control).getLayout());
             }
 
+            //ll.addView(sw);
+            
 
             
             builder.setView(ll);

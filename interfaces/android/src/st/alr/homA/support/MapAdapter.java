@@ -1,22 +1,22 @@
 package st.alr.homA.support;
 
-import java.util.TreeMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.widget.BaseAdapter;
 
-public abstract class TreeMapAdapter<T> extends BaseAdapter {
-	protected TreeMap<String, T> map;
+public abstract class MapAdapter<K, T> extends BaseAdapter {
+	protected ValueSortedMap<K, T> map;
 	protected Context context; 
 	
-	@SuppressWarnings("unchecked")
-	public TreeMapAdapter(Context c, TreeMap<String, T> map) {
-	    this.map = (TreeMap<String, T>) map.clone();
+	public MapAdapter(Context c, ValueSortedMap<K, T> map) {
+	    this.map = map;
 	    this.context = c;
 	}
 
-	public void addItem(T object) {
-		this.map.put(object.toString(), object);
+	@SuppressWarnings("unchecked")
+    public void addItem(T object) {
+		this.map.put((K) object.toString(), object);
 		this.notifyDataSetChanged();
 	}
 	
@@ -37,11 +37,17 @@ public abstract class TreeMapAdapter<T> extends BaseAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		return this.map.values().toArray()[position];
+		return this.map.get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
 		return 0;
 	}
+    public void sortDataset() {
+        map.sortDataset();
+        this.notifyDataSetChanged();
+
+        
+    }
 }

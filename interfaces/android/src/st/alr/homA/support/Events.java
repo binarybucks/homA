@@ -5,7 +5,19 @@ import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 
 public class Events {
-	public static class MqttConnectivityChanged {
+    public static class DeviceRenamed {
+        Device device;
+
+        public DeviceRenamed(Device device) {
+            this.device = device;
+        }
+
+        public Device getDevice() {
+            return this.device;
+        }
+    }
+
+    public static class MqttConnectivityChanged {
 		private MqttService.MQTT_CONNECTIVITY connectivity;
 
 		public MqttConnectivityChanged(

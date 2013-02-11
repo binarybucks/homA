@@ -3,8 +3,11 @@ package st.alr.homA.model;
 
 import java.util.TreeMap;
 
+import de.greenrobot.event.EventBus;
+
 import st.alr.homA.App;
 import st.alr.homA.R;
+import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueChangedObserver;
 import android.content.Context;
 import android.util.Log;
@@ -22,13 +25,11 @@ public class Device implements Comparable<Device> {
 
     private Context context;
 
-    public Device(String id, Context context) {
-        this(id, null, context);
-    }
 
-    public Device(String id, String name, Context context) {
+
+    public Device(String id, Context context) {
         this.id = id;
-        this.name = name;
+        this.name = null;
         controls = new TreeMap<String, Control>();
         this.context = context;
     }
@@ -69,7 +70,13 @@ public class Device implements Comparable<Device> {
     }
 
     public void setName(String name) {
-        this.name = name;
+        // TODO: handle sort change better, by sending event that triggers map sort and notifiydataset in adapter
+        this.room.removeDevice(this);
+        this.name = name;  
+        this.room.addDevice(this);
+//        EventBus.getDefault().post(new Events.DeviceRenamed(this));
+
+        
     }
 
     public Control getControlWithId(String id) {
@@ -102,7 +109,7 @@ public class Device implements Comparable<Device> {
 
     @Override
     public int compareTo(Device another) {
-        return this.getName().compareTo(another.getName());
+        return this.getName().compareToIgnoreCase(another.getName());
     }
 
 }

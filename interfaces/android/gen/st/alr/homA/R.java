@@ -56,7 +56,9 @@ public final class R {
         public static final int defaultsRoomName=0x7f06000d;
         public static final int defaultsServerAddress=0x7f06000e;
         public static final int defaultsServerPort=0x7f06000f;
+        public static final int hello_world=0x7f060010;
         public static final int menuSettings=0x7f060002;
+        public static final int menu_settings=0x7f060011;
         public static final int preferencesServerAddress=0x7f060005;
         public static final int preferencesServerCancel=0x7f060007;
         public static final int preferencesServerConnect=0x7f060008;
@@ -64,6 +66,7 @@ public final class R {
         public static final int preferencesServerTitle=0x7f060004;
         public static final int preferencesSystem=0x7f060003;
         public static final int titleActivityMain=0x7f060000;
+        public static final int title_activity_disconnected=0x7f060012;
     }
     public static final class style {
         /** 

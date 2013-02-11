@@ -1,7 +1,7 @@
 package st.alr.homA.support;
 
-import java.util.TreeMap;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,16 +9,20 @@ import st.alr.homA.R;
 import st.alr.homA.model.Device;
 import android.widget.TextView;
 
-public class DeviceMapAdapter extends TreeMapAdapter<Device> {
+public class DeviceMapAdapter extends MapAdapter<String, Device> {
 
-	public DeviceMapAdapter(Context context, TreeMap<String, Device> map) {
-		super(context, map);
+	public DeviceMapAdapter(Context context, ValueSortedMap<String, Device> map) {
+	    super(context, new ValueSortedMap<String, Device>(map));
 	}
 
 	static class ViewHolder {
 		public TextView title;
 	}
 
+	public void setMap(ValueSortedMap<String, Device> map) {
+	    this.map = map;
+	}
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View rowView = convertView;
@@ -40,5 +44,7 @@ public class DeviceMapAdapter extends TreeMapAdapter<Device> {
 		return rowView;
 
 	}
+
+
 
 }

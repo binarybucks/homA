@@ -10,20 +10,21 @@ import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
+import st.alr.homA.support.ValueSortedMap;
 import de.greenrobot.event.EventBus;
 import android.app.Application;
 
 public class App extends Application {
     private static App instance;
     private static HashMap<String, Device> devices;
-    private static TreeMap<String, Room> rooms;
+    private static ValueSortedMap<String, Room> rooms;
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
         devices = new HashMap<String, Device>();
-        rooms = new TreeMap<String, Room>();
+        rooms = new ValueSortedMap<String, Room>();
         EventBus.getDefault().register(this);
     }
 
@@ -31,8 +32,8 @@ public class App extends Application {
         return rooms.get(id);
     }
 
-    public static Room getRoomAtPosition(Integer position) {
-        return (Room) rooms.values().toArray()[position];
+    public static Room getRoom(int index) {
+        return (Room) rooms.get(index);
     }
 
     public static Integer getRoomCount() {
@@ -80,6 +81,12 @@ public class App extends Application {
         || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
             removeAllRooms();
             devices.clear();
+
         }
     }
+    
+    
+    
+    
+    
 }
