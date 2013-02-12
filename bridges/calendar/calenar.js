@@ -154,13 +154,14 @@ function calendarQuery() {
 		} else {
 			try {
 				var items = JSON.parse(result).items
-			} catch (e) {
-				return;
-			}
 
 			// Unschedule all events
 			for (var i=0; i<events.length; i++) {
 				events[i].cancel();
+			}
+
+			} catch (e) {
+				return;
 			}
 
 			// Schedule events
@@ -184,6 +185,7 @@ function calendarQuery() {
 				}
     	}
 		}
+
 	});	
 }
 

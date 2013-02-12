@@ -18,22 +18,26 @@ public final class R {
         public static final int homa_actionbar=0x7f020001;
         public static final int homa_divider=0x7f020002;
         public static final int homa_pager=0x7f020003;
-        public static final int homamonochrome=0x7f020004;
-        public static final int list_background=0x7f020005;
+        public static final int homabackground=0x7f020004;
+        public static final int homamonochrome=0x7f020005;
+        public static final int list_background=0x7f020006;
     }
     public static final class id {
-        public static final int controlName=0x7f090002;
-        public static final int controlValue=0x7f090003;
-        public static final int devices_list=0x7f090004;
-        public static final int list_item=0x7f090009;
-        public static final int menu_settings=0x7f09000b;
-        public static final int pager=0x7f090000;
-        public static final int pager_title_strip=0x7f090001;
-        public static final int serverAddress=0x7f090006;
-        public static final int serverAddressLabel=0x7f090005;
-        public static final int serverPort=0x7f090008;
-        public static final int serverPortLabel=0x7f090007;
-        public static final int title=0x7f09000a;
+        public static final int connectedLayout=0x7f090002;
+        public static final int controlName=0x7f090005;
+        public static final int controlValue=0x7f090006;
+        public static final int devices_list=0x7f090007;
+        public static final int disconnectedLayout=0x7f090000;
+        public static final int imageView1=0x7f090001;
+        public static final int list_item=0x7f09000c;
+        public static final int menu_settings=0x7f09000e;
+        public static final int pager=0x7f090003;
+        public static final int pager_title_strip=0x7f090004;
+        public static final int serverAddress=0x7f090009;
+        public static final int serverAddressLabel=0x7f090008;
+        public static final int serverPort=0x7f09000b;
+        public static final int serverPortLabel=0x7f09000a;
+        public static final int title=0x7f09000d;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;

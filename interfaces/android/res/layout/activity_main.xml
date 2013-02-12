@@ -1,28 +1,54 @@
 
 
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/tools">
 
-
-
-<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pager"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity" >
-
-    <!--
-    This title strip will display the currently visible page title, as well as the page
-    titles for adjacent pages.
-    -->
-    <android.support.v4.view.PagerTitleStrip
-        android:id="@+id/pager_title_strip"
-        style="@style/homa_solid_pager"
+    <RelativeLayout
+        android:id="@+id/disconnectedLayout"
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:paddingBottom="8dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:paddingTop="0dp"
-        android:textAlignment="center" />
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
-</android.support.v4.view.ViewPager>
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/homabackground" />
+
+        </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/connectedLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:context=".MainActivity" >
+
+            <android.support.v4.view.PagerTitleStrip
+                android:id="@+id/pager_title_strip"
+                style="@style/homa_solid_pager"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:paddingBottom="8dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="0dp"
+                android:textAlignment="center" >
+            </android.support.v4.view.PagerTitleStrip>
+        </android.support.v4.view.ViewPager>
+
+    </LinearLayout>
+
+</FrameLayout>

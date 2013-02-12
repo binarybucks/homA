@@ -4,17 +4,20 @@ package st.alr.homA;
 import java.util.HashMap;
 import java.util.Locale;
 
+import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
+import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.view.ControlView;
 import de.greenrobot.event.EventBus;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -31,8 +34,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 public class MainActivity extends FragmentActivity {
@@ -40,7 +45,9 @@ public class MainActivity extends FragmentActivity {
     private static ViewPager mViewPager;
     private static Room currentRoom;
     private static HashMap<String, DeviceMapAdapter> deviceMapAdapter = new HashMap<String, DeviceMapAdapter>();
-    
+    RelativeLayout disconnectedLayout;
+    LinearLayout connectedLayout; 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -63,12 +70,43 @@ public class MainActivity extends FragmentActivity {
 
     }
 
+    
+    public void onEventMainThread (MqttConnectivityChanged event) {        
+        updateViewVisibility();
+    }
+    
+    private void updateViewVisibility() {
+        // TODO: execute findViewByID only in onCreate
+                
+        if(MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+            connectedLayout.setVisibility(View.VISIBLE);
+            disconnectedLayout.setVisibility(View.INVISIBLE);
+        } else {
+            connectedLayout.setVisibility(View.INVISIBLE);
+            disconnectedLayout.setVisibility(View.VISIBLE);
+        }        
+    }
+    
+    protected void onResume() {
+        super.onResume();
+        updateViewVisibility();
+
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
-
+        
+        
+        
         setContentView(R.layout.activity_main);
+        
+        disconnectedLayout = (RelativeLayout) findViewById(R.id.disconnectedLayout);
+        connectedLayout = (LinearLayout) findViewById(R.id.connectedLayout);        
+
+        updateViewVisibility();
+        
         roomsFragmentPagerAdapter = new RoomsFragmentPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
 

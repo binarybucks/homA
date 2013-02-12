@@ -19,7 +19,7 @@
     
     
     <style name="homa_solid_pager" >
-        <item name="android:textColor">#FFFFFF	</item>
+        <item name="android:textColor">@android:color/white</item>
         <item name="android:background">@drawable/homa_pager</item>    
     </style>
    
