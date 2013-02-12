@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="st.alr.homA"
     android:configChanges="orientation"
-    android:versionCode="120"
-    android:versionName="1.2" >
+    android:versionCode="130"
+    android:versionName="1.3" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="8"
         android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.INTERNET" />

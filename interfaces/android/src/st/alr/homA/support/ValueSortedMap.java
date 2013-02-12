@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import android.util.Log;
-
 public class ValueSortedMap<K, V> implements Map<K, V>{
     ArrayList<V> dataSorted;
     HashMap<K, V> dataMap;

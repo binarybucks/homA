@@ -1,7 +1,5 @@
 package st.alr.homA.support;
 
-import java.util.Map;
-
 import android.content.Context;
 import android.widget.BaseAdapter;
 

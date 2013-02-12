@@ -2,9 +2,6 @@
 package st.alr.homA;
 
 import java.util.HashMap;
-
-import java.util.TreeMap;
-
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;

@@ -1,7 +1,5 @@
 package st.alr.homA.model;
 
-import java.util.Locale;
-
 import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueSortedMap;
 

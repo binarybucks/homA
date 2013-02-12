@@ -17,7 +17,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -34,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -76,8 +74,6 @@ public class MainActivity extends FragmentActivity {
     }
     
     private void updateViewVisibility() {
-        // TODO: execute findViewByID only in onCreate
-                
         if(MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
             connectedLayout.setVisibility(View.VISIBLE);
             disconnectedLayout.setVisibility(View.INVISIBLE);

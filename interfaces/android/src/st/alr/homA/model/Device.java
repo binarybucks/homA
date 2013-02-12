@@ -2,12 +2,8 @@
 package st.alr.homA.model;
 
 import java.util.TreeMap;
-
-import de.greenrobot.event.EventBus;
-
 import st.alr.homA.App;
 import st.alr.homA.R;
-import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueChangedObserver;
 import android.content.Context;
 import android.util.Log;
