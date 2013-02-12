@@ -24,7 +24,7 @@ public class SettingsActivity extends PreferenceActivity {
 	}
 
 	public void onEventMainThread(Events.MqttConnectivityChanged event) {
-		setServerPreferenceSummaryManually();
+		setServerPreferenceSummary();
 	}
 
 	@Override
@@ -41,13 +41,6 @@ public class SettingsActivity extends PreferenceActivity {
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
 
-		preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-			@Override
-			public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
-				if (key.equals("serverAddress"))
-					setServerPreferenceSummary(sharedPreference.getString(key, ""));
-			}
-		};
 
 	}
 
@@ -59,7 +52,7 @@ public class SettingsActivity extends PreferenceActivity {
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
 			serverPreference = findPreference("serverPreference");
-			setServerPreferenceSummaryManually();
+			setServerPreferenceSummary();
 
 		}
 	}
@@ -75,15 +68,7 @@ public class SettingsActivity extends PreferenceActivity {
 		return false;
 	}
 
-	private static void setServerPreferenceSummaryManually() {
-		setServerPreferenceSummary(sharedPreferences.getString("serverAddress", ""));
-	}
-
-	private static void setServerPreferenceSummary(String stringValue) {
-		if (stringValue == null || stringValue.equals("")) {
-			serverPreference.setSummary("No server set");
-		} else {
-			serverPreference.setSummary(MqttService.getConnectivityText());
-		}
+	private static void setServerPreferenceSummary() {
+	    serverPreference.setSummary(MqttService.getConnectivityText());
 	}
 }
