@@ -12,7 +12,7 @@ var argv = require('optimist').argv;
 var MQTT_CLIENT_ID ='458293-GoogleCalendarBridge'
 var MQTT_BROKER_PORT = 1883
 var MQTT_BROKER_HOST = 'localhost'
-var CALENDAR_QUERY_INTERVALL = 3600*2;
+var CALENDAR_QUERY_INTERVALL = 2*60*1000;
 
 var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
 var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
@@ -145,7 +145,8 @@ function calendarSchedule(date, topic, payload){
 }
 
 function calendarQuery() {
-	var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(new Date().toISOString());	
+	var timeMax = encodeURIComponent(new Date((new Date()).getTime()+ (CALENDAR_QUERY_INTERVALL + (5*60*1000))).toISOString());
+	var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(new Date().toISOString())+"&timeMax="+timeMax;	
 	console.log("Calendar    Executing query: " + query);
 
 	oa.get( query, accessToken, function (error, result, response) {
@@ -210,7 +211,7 @@ if (argv.brokerClientId != undefined) {
 	MQTT_CLIENT_ID = argv.brokerClientId;
 }
 if (argv.queryIntervall != undefined) {
-	CALENDAR_QUERY_INTERVALL = argv.queryIntervall*60;
+	CALENDAR_QUERY_INTERVALL = argv.queryIntervall*60*1000;
 }
 console.log(MQTT_CLIENT_ID);
 // Don't touch these unless you know what they're doing
