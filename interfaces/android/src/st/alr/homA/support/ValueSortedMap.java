@@ -58,7 +58,9 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
     }
 
     public int size() {
-        return dataMap.size();
+        synchronized (dataSorted) {
+            return dataMap.size();
+        }
     }
   
     public Collection<V> values(){
@@ -71,10 +73,12 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
     }
 
     public V remove(Object key) {
-        V v = dataMap.get(key);
-        dataSorted.remove(v);
-        dataMap.remove(key);
-        return v;
+        synchronized (dataSorted) {
+            V v = dataMap.get(key);
+            dataSorted.remove(v);
+            dataMap.remove(key);
+            return v;
+        }
     }
 
   

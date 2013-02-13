@@ -4,6 +4,7 @@
     <string name="titleActivityMain">HomA</string>
     <string name="appName">HomA</string>
     <string name="menuSettings">Settings</string>
+    <string name="menuNfc">Nfc</string>
     <string name="preferencesSystem">"System"</string>
     <string name="preferencesServerTitle">"Server"</string>
     <string name="preferencesServerAddress">"Server address"</string>
@@ -20,5 +21,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_disconnected">DisconnectedActivity</string>
+    <string name="title_activity_nfc">NfcActivity</string>
 
 </resources>

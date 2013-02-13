@@ -24,65 +24,65 @@ public final class R {
     }
     public static final class id {
         public static final int connectedLayout=0x7f090002;
-        public static final int controlName=0x7f090005;
-        public static final int controlValue=0x7f090006;
-        public static final int devices_list=0x7f090007;
+        public static final int controlName=0x7f09000a;
+        public static final int controlValue=0x7f09000b;
+        public static final int devices_list=0x7f09000c;
         public static final int disconnectedLayout=0x7f090000;
         public static final int imageView1=0x7f090001;
-        public static final int list_item=0x7f09000c;
-        public static final int menu_settings=0x7f09000e;
+        public static final int list_item=0x7f090011;
+        public static final int menu_nfc=0x7f090014;
+        public static final int menu_settings=0x7f090013;
         public static final int pager=0x7f090003;
         public static final int pager_title_strip=0x7f090004;
-        public static final int serverAddress=0x7f090009;
-        public static final int serverAddressLabel=0x7f090008;
-        public static final int serverPort=0x7f09000b;
-        public static final int serverPortLabel=0x7f09000a;
-        public static final int title=0x7f09000d;
+        public static final int serverAddress=0x7f09000e;
+        public static final int serverAddressLabel=0x7f09000d;
+        public static final int serverPort=0x7f090010;
+        public static final int serverPortLabel=0x7f09000f;
+        public static final int title=0x7f090012;
+        public static final int topicInput=0x7f090006;
+        public static final int topicLabel=0x7f090005;
+        public static final int valueInput=0x7f090008;
+        public static final int valueLabel=0x7f090007;
+        public static final int writeButton=0x7f090009;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int fragment_device_range=0x7f030001;
-        public static final int fragment_device_switch=0x7f030002;
-        public static final int fragment_device_text=0x7f030003;
-        public static final int fragment_room=0x7f030004;
-        public static final int preferences_server=0x7f030005;
-        public static final int row_layout=0x7f030006;
+        public static final int activity_nfc=0x7f030001;
+        public static final int fragment_device_range=0x7f030002;
+        public static final int fragment_device_switch=0x7f030003;
+        public static final int fragment_device_text=0x7f030004;
+        public static final int fragment_room=0x7f030005;
+        public static final int preferences_server=0x7f030006;
+        public static final int row_layout=0x7f030007;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;
+        public static final int activity_nfc=0x7f080001;
     }
     public static final class string {
         public static final int appName=0x7f060001;
-        public static final int connectivityConnected=0x7f06000a;
-        public static final int connectivityConnecting=0x7f060009;
-        public static final int connectivityDisconnected=0x7f06000c;
-        public static final int connectivityDisconnecting=0x7f06000b;
-        public static final int defaultsRoomName=0x7f06000d;
-        public static final int defaultsServerAddress=0x7f06000e;
-        public static final int defaultsServerPort=0x7f06000f;
-        public static final int hello_world=0x7f060010;
+        public static final int connectivityConnected=0x7f06000b;
+        public static final int connectivityConnecting=0x7f06000a;
+        public static final int connectivityDisconnected=0x7f06000d;
+        public static final int connectivityDisconnecting=0x7f06000c;
+        public static final int defaultsRoomName=0x7f06000e;
+        public static final int defaultsServerAddress=0x7f06000f;
+        public static final int defaultsServerPort=0x7f060010;
+        public static final int hello_world=0x7f060011;
+        public static final int menuNfc=0x7f060003;
         public static final int menuSettings=0x7f060002;
-        public static final int menu_settings=0x7f060011;
-        public static final int preferencesServerAddress=0x7f060005;
-        public static final int preferencesServerCancel=0x7f060007;
-        public static final int preferencesServerConnect=0x7f060008;
-        public static final int preferencesServerPort=0x7f060006;
-        public static final int preferencesServerTitle=0x7f060004;
-        public static final int preferencesSystem=0x7f060003;
+        public static final int menu_settings=0x7f060012;
+        public static final int preferencesServerAddress=0x7f060006;
+        public static final int preferencesServerCancel=0x7f060008;
+        public static final int preferencesServerConnect=0x7f060009;
+        public static final int preferencesServerPort=0x7f060007;
+        public static final int preferencesServerTitle=0x7f060005;
+        public static final int preferencesSystem=0x7f060004;
         public static final int titleActivityMain=0x7f060000;
-        public static final int title_activity_disconnected=0x7f060012;
+        public static final int title_activity_disconnected=0x7f060013;
+        public static final int title_activity_nfc=0x7f060014;
     }
     public static final class style {
-        /** 
-        Base application theme for API 14+. This theme completely replaces
-        AppBaseTheme from BOTH res/values/styles.xml and
-        res/values-v11/styles.xml on API 14+ devices.
-    <style name="darkTheme" parent="android:Theme.Holo">
-              <item name="android:actionBarStyle">@style/homaActionBar</item>
-            
-    </style>
-    
-         */
         public static final int Theme_homa=0x7f070000;
         public static final int homa_dialog_listview=0x7f070004;
         public static final int homa_listview=0x7f070003;
