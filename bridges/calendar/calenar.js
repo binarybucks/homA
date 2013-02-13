@@ -154,6 +154,9 @@ function calendarQuery() {
 		} else {
 			try {
 				var items = JSON.parse(result).items
+				if (items == undefined) {
+					return;
+				}
 
 			// Unschedule all events
 			for (var i=0; i<events.length; i++) {
