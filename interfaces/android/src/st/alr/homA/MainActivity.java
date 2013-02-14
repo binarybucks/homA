@@ -15,9 +15,14 @@ import st.alr.homA.view.ControlView;
 import de.greenrobot.event.EventBus;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -46,6 +51,12 @@ public class MainActivity extends FragmentActivity {
     RelativeLayout disconnectedLayout;
     LinearLayout connectedLayout; 
 
+    
+    
+    
+    
+    
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -69,6 +80,8 @@ public class MainActivity extends FragmentActivity {
         
         Intent service = new Intent(this, MqttService.class);
         startService(service);
+        //enableForegroundDispatch();
+
 
     }
 
@@ -87,10 +100,10 @@ public class MainActivity extends FragmentActivity {
         }        
     }
     
+    
     protected void onResume() {
         super.onResume();
         updateViewVisibility();
-
     }
     
     @Override

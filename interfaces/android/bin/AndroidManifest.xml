@@ -12,9 +12,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-	<uses-permission android:name="android.permission.NFC" />
-	<uses-feature android:name="android.hardware.nfc" android:required="true" />
-    
+    <uses-permission android:name="android.permission.NFC" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+
     <application
         android:name="st.alr.homA.App"
         android:allowBackup="true"
@@ -29,6 +32,7 @@
         <activity
             android:name="st.alr.homA.MainActivity"
             android:label="@string/titleActivityMain" >
+           
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,19 +42,34 @@
 
         <service android:name="st.alr.homA.MqttService" >
         </service>
+        
+                <service android:name="NfcService" >
+        </service>
+        
 
         <activity
             android:name="st.alr.homA.NfcActivity"
             android:label="@string/title_activity_nfc" >
-                        <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
-                <data android:mimeType="application/st.alr.homA"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                
-                
-        </intent-filter>  
         </activity>
-        
+        <activity
+            android:name="st.alr.homA.TagActivity"
+            android:label="@string/title_activity_tag" >
+        </activity>
+        <activity
+            android:name="st.alr.homA.NfcReadActivity"
+            android:label="@string/title_activity_nfc_read" >
+            
+             <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="ext"
+                    android:pathPrefix="/st.alr.homa:nfc"
+                    android:scheme="vnd.android.nfc" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

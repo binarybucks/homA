@@ -22,5 +22,7 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_disconnected">DisconnectedActivity</string>
     <string name="title_activity_nfc">NfcActivity</string>
+    <string name="title_activity_tag">TagActivity</string>
+    <string name="title_activity_nfc_read">NfcReadActivity</string>
 
 </resources>
