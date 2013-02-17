@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/preferencesSystem" >
-  
+7  
         <st.alr.homA.ServerDialogPreference
             android:key="serverPreference"
             android:negativeButtonText="@string/preferencesServerCancel"
@@ -10,6 +9,10 @@
             android:title="@string/preferencesServerTitle"  >
         </st.alr.homA.ServerDialogPreference>
         
-    </PreferenceCategory>
-
+  <CheckBoxPreference
+          android:title="Run in background"
+          android:defaultValue="true"
+          android:summary="Display a notification to keep the application running in the background"
+          android:key="runInBackgroundPreference" />
+        
 </PreferenceScreen>

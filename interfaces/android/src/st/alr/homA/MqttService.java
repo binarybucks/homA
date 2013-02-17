@@ -70,7 +70,6 @@ public class MqttService extends Service implements MqttCallback
 
     private static MQTT_CONNECTIVITY mqttConnectivity = MQTT_CONNECTIVITY.INITIAL;
     private short keepAliveSeconds = 20 * 60;
-    private static int nofiticationID = 1337;
     private String mqttClientId = null;
     private MqttClient mqttClient = null;
     private NetworkConnectionIntentReceiver netConnReceiver;
@@ -80,7 +79,11 @@ public class MqttService extends Service implements MqttCallback
     private static NotificationCompat.Builder notificationBuilder;
     private static MqttService instance;
     public static final String MQTT_PING_ACTION = "st.alr.homA.MqttService.PING";
-
+    private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
+    private NotificationManager notificationManager;
+    private static int NOTIFCATION_ID = 1337;
+    private boolean notificationEnabled = true;
+    
     @Override
     public void onCreate()
     {
@@ -92,11 +95,32 @@ public class MqttService extends Service implements MqttCallback
 
         mBinder = new LocalBinder<MqttService>(this);
         executor = Executors.newFixedThreadPool(2);
+        notificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+        
+        preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+          @Override
+          public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
+              
+              if (key.equals("runInBackgroundPreference")) {
+                  
+                  handleNotification();
+              }
+          }
+        };
+        
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferencesChangedListener);
+
         EventBus.getDefault().register(this);
-
-        createNotification();
-
+        handleNotification();
+    }
+    
+    private void handleNotification(){
+        if(notificationEnabled = sharedPreferences.getBoolean("runInBackgroundPreference", true)) {        
+            createNotification();
+        } else {
+            notificationManager.cancel(NOTIFCATION_ID);
+        }
     }
 
     @Override
@@ -239,6 +263,8 @@ public class MqttService extends Service implements MqttCallback
             mBinder.close();
             mBinder = null;
         }
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferencesChangedListener);
+
 
         super.onDestroy();
     }
@@ -583,7 +609,8 @@ public class MqttService extends Service implements MqttCallback
 
     public void onEvent(Events.MqttConnectivityChanged event) {
         mqttConnectivity = event.getConnectivity();
-        updateNotification();
+        if(notificationEnabled)
+            updateNotification();
     }
 
     /*
@@ -722,7 +749,9 @@ public class MqttService extends Service implements MqttCallback
     public void deliveryComplete(MqttDeliveryToken token) {
     }
 
-    private static void createNotification() {
+    
+    
+    private void createNotification() {
         Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
         android.support.v4.app.TaskStackBuilder stackBuilder = TaskStackBuilder.create(App
                 .getInstance());
@@ -734,14 +763,12 @@ public class MqttService extends Service implements MqttCallback
         updateNotification();
     }
 
-    private static void updateNotification() {
-        final NotificationManager mNotificationManager = (NotificationManager) App.getInstance()
-                .getSystemService(Context.NOTIFICATION_SERVICE);
+    private void updateNotification() {
         notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle("HomA");
         notificationBuilder.setOngoing(true).setContentText(getConnectivityText())
                 .setPriority(Notification.PRIORITY_MIN).setWhen(0);
         final Notification note = notificationBuilder.build();
-        mNotificationManager.notify(nofiticationID, note);
+        notificationManager.notify(NOTIFCATION_ID, note);
     }
 
     public void reconnect() {

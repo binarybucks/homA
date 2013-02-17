@@ -65,7 +65,7 @@ public class MainActivity extends FragmentActivity {
                 startActivity(intent1);
                 return true;
             case R.id.menu_nfc:
-                Intent intent2 = new Intent(this, NfcActivity.class);
+                Intent intent2 = new Intent(this, NfcWriteActivity.class);
                 startActivity(intent2);
                 return true;
             default:
@@ -150,8 +150,18 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
+
         return true;
     }
+    
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if(!NfcAdapter.getDefaultAdapter(this).isEnabled()) {
+            menu.removeItem(R.id.menu_nfc);            
+        }
+
+        return true;
+    }
+
 
     public void onEventMainThread(Events.RoomAdded event) {
         Log.v(this.toString(), "Room added: " + event.getRoom().getId());

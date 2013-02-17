@@ -19,8 +19,9 @@ public class NfcReadActivity extends Activity {
         
         
         if(NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-            Intent srv = new Intent(this, NfcService.class);        
+            Intent srv = new Intent(this, NfcReadService.class);        
             srv.putExtras(getIntent().getExtras());
+            srv.setAction(getIntent().getAction());
             startService(srv);
             
             

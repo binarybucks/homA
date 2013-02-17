@@ -15,11 +15,9 @@ import android.view.Menu;
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
 	private static SharedPreferences sharedPreferences;
-	private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
 
 	@Override
 	protected void onDestroy() {
-		sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferencesChangedListener);
 		super.onDestroy();
 	}
 

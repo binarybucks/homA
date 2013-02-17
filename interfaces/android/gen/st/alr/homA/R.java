@@ -29,6 +29,7 @@ public final class R {
         public static final int devices_list=0x7f09000c;
         public static final int disconnectedLayout=0x7f090000;
         public static final int imageView1=0x7f090001;
+        public static final int item1=0x7f090015;
         public static final int list_item=0x7f090011;
         public static final int menu_nfc=0x7f090014;
         public static final int menu_settings=0x7f090013;
@@ -48,20 +49,17 @@ public final class R {
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int activity_nfc=0x7f030001;
-        public static final int activity_tag=0x7f030002;
-        public static final int fragment_device_range=0x7f030003;
-        public static final int fragment_device_switch=0x7f030004;
-        public static final int fragment_device_text=0x7f030005;
-        public static final int fragment_room=0x7f030006;
-        public static final int preferences_server=0x7f030007;
-        public static final int row_layout=0x7f030008;
-        public static final int tag_activity=0x7f030009;
+        public static final int fragment_device_range=0x7f030002;
+        public static final int fragment_device_switch=0x7f030003;
+        public static final int fragment_device_text=0x7f030004;
+        public static final int fragment_room=0x7f030005;
+        public static final int preferences_server=0x7f030006;
+        public static final int row_layout=0x7f030007;
+        public static final int tag_activity=0x7f030008;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;
         public static final int activity_nfc=0x7f080001;
-        public static final int activity_nfc_read=0x7f080002;
-        public static final int activity_tag=0x7f080003;
     }
     public static final class string {
         public static final int appName=0x7f060001;
