@@ -4,14 +4,12 @@ package st.alr.homA;
 import java.io.IOException;
 import java.util.Map;
 
-import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NdefFormatable;
-import android.nfc.tech.NfcA;
 import android.os.Build;
 import android.os.Bundle;
 import android.annotation.TargetApi;
