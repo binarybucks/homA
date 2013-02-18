@@ -72,14 +72,21 @@ public class NfcReadService extends Service
     }
 
     private void handleNfcMessage(String message) {
-        String[] tokens = message.split("=");
-        if (tokens.length == 2) {
-            Log.v(this.toString(), "Got topic: " + tokens[0]);
-            Log.v(this.toString(), "Got topic: " + tokens[1]);           
-            MqttService.getInstance().publish(tokens[0], tokens[1]);
-        } else {
-            Log.e(this.toString(), "Failed to parse message");
+        String[] pairs = message.split(",");
+        
+        for (String pair : pairs) {
+            String[] tokens = pair.split("=");
+            if (tokens.length == 2) {
+                Log.v(this.toString(), "Got topic: " + tokens[0]);
+                Log.v(this.toString(), "Got topic: " + tokens[1]);           
+                MqttService.getInstance().publish(tokens[0], tokens[1]);
+            } else {
+                Log.e(this.toString(), "Failed to parse message");
+            }
         }
+        
+        
+
         
     }
 

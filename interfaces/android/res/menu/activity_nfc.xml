@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/item1"></item>
+    <item android:id="@+id/add" android:title="Add" android:orderInCategory="98" android:showAsAction="always" android:icon="@drawable/ic_action_add" ></item>
+    <item android:id="@+id/write" android:title="Write" android:orderInCategory="99" android:showAsAction="always" android:icon="@drawable/ic_action_write"></item>
     
+    
+        <item android:id="@+id/recordingStart" android:title="Start recording" android:orderInCategory="97" android:showAsAction="always" android:icon="@drawable/ic_action_record_start"></item>
+        <item android:id="@+id/recordingStop" android:title="Stop recording" android:orderInCategory="97" android:showAsAction="always" android:icon="@drawable/ic_action_record_stop"></item>
+        
 
 </menu>

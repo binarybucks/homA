@@ -599,7 +599,11 @@ public class MqttService extends Service implements MqttCallback
 
         try
         {
-            mqttClient.getTopic(topicStr + "/on").publish(message);
+            mqttClient.getTopic(topicStr).publish(message);
+            if(App.isRecording()) {
+                App.addToNfcRecordMap(topicStr, value);
+            }
+            
         } catch (MqttException e)
         {
             Log.e(this.toString(), e.getMessage());

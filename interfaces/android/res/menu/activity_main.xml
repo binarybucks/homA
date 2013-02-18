@@ -7,5 +7,5 @@
 <item
         android:id="@+id/menu_nfc"
         android:orderInCategory="99"
-        android:title="@string/menuNfc"/>
+        android:title="@string/title_activity_nfc"/>
 </menu>

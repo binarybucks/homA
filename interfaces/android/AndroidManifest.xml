@@ -6,7 +6,7 @@
     android:versionName="1.3" >
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="14"
         android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -44,16 +44,13 @@
         </service>
 
         <activity
+            android:parentActivityName="st.alr.homA.MainActivity"
             android:name="st.alr.homA.NfcWriteActivity"
             android:label="@string/title_activity_nfc" >
         </activity>
+
         <activity
-            android:name="st.alr.homA.TagActivity"
-            android:label="@string/title_activity_tag" >
-        </activity>
-        <activity
-            android:name="st.alr.homA.NfcReadActivity"
-            android:label="@string/title_activity_nfc_read" >
+            android:name="st.alr.homA.NfcReadActivity"  >
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 

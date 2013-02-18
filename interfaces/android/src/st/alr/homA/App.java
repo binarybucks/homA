@@ -6,22 +6,31 @@ import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.Events;
+import st.alr.homA.support.NfcRecordAdapter;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.support.ValueSortedMap;
 import de.greenrobot.event.EventBus;
 import android.app.Application;
 
+import android.widget.ListAdapter;
+
 public class App extends Application {
     private static App instance;
     private static HashMap<String, Device> devices;
     private static ValueSortedMap<String, Room> rooms;
-
+    
+    
+    private static NfcRecordAdapter nfcRecordListAdapter;
+    private static boolean recording = false;
+    
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new ValueSortedMap<String, Room>();
+        nfcRecordListAdapter = new NfcRecordAdapter(this);
+                
         EventBus.getDefault().register(this);
     }
 
@@ -84,6 +93,33 @@ public class App extends Application {
     
     
     
+    public static void addToNfcRecordMap(String topic, String paylaod) {
+        nfcRecordListAdapter.put(topic, paylaod);
+    }
+    
+    public static void removeFromNfcRecordMap(String topic) {
+        nfcRecordListAdapter.remove(topic);
+    }
+        
+    public static HashMap<String, String> getNfcRecordMap() {
+        return nfcRecordListAdapter.getMap();
+    }
+    
+    public static NfcRecordAdapter getRecordMapListAdapter(){
+        return nfcRecordListAdapter;
+    }
     
     
+    public static boolean isRecording(){
+        return recording;
+    }
+    
+    public static void startRecording(){
+        recording = true;        
+    }
+
+    public static void stopRecording(){
+        recording = false;
+    }
 }
+

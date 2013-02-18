@@ -21,7 +21,7 @@ public class Control {
     public Control(Context context, String id, String topic, Device device) {
         this.id = id;
         this.value = "0";
-        this.topic = topic;
+        this.topic = topic + "/on";
         this.device = device;
         this.context = context;
     }

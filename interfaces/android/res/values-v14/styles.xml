@@ -17,11 +17,12 @@
 	    <item name="android:fadingEdge">none</item>
 	    <item name="android:dividerHeight">3px</item>
 		<item name="android:divider">@drawable/homa_divider</item>
-		<item name="android:listSelector">@drawable/list_background</item>	
     </style>
+    
+    
+    <style name="homa_listview_item">
+    	<item name="android:background">@drawable/list_background</item>	
+	</style>
+	
 
-	<style name="homa_dialog_listview" parent="@android:style/Widget.ListView">
-    	<item name="android:fadingEdge">none</item>
-    	<item name="android:dividerHeight">0dp</item>
-    </style>
 </resources>
