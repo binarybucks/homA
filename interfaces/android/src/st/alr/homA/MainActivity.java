@@ -15,14 +15,10 @@ import st.alr.homA.view.ControlView;
 import de.greenrobot.event.EventBus;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -101,6 +97,7 @@ public class MainActivity extends FragmentActivity {
     }
     
     
+    @Override
     protected void onResume() {
         super.onResume();
         updateViewVisibility();
@@ -154,6 +151,7 @@ public class MainActivity extends FragmentActivity {
         return true;
     }
     
+    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if(!NfcAdapter.getDefaultAdapter(this).isEnabled()) {
             menu.removeItem(R.id.menu_nfc);            

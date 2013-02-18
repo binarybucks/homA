@@ -5,11 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import st.alr.homA.R;
-import st.alr.homA.model.Device;
-import st.alr.homA.support.DeviceMapAdapter.ViewHolder;
-
 import android.content.Context;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;

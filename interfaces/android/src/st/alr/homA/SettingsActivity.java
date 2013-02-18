@@ -4,17 +4,14 @@ import st.alr.homA.support.Events;
 import de.greenrobot.event.EventBus;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
-	private static SharedPreferences sharedPreferences;
 
 	@Override
 	protected void onDestroy() {
@@ -34,8 +31,6 @@ public class SettingsActivity extends PreferenceActivity {
         startService(service);
 
 		EventBus.getDefault().register(this);
-
-		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, new UserPreferencesFragment()).commit();
 

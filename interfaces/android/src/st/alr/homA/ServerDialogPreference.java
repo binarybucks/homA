@@ -7,7 +7,6 @@ import android.preference.DialogPreference;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 
 public class ServerDialogPreference extends DialogPreference {
@@ -29,15 +28,9 @@ public class ServerDialogPreference extends DialogPreference {
 
 	@Override
 	protected View onCreateDialogView() {
-	    
 		View root = super.onCreateDialogView();
-//        Button b = (Button)root.findViewById(getDialog().BUTTON_NEGATIVE);
-//        b.setClickable(false);
-        
-		
 		address = (EditText) root.findViewById(R.id.serverAddress);
 		port = (EditText) root.findViewById(R.id.serverPort);
-
 		return root;
 	}
 

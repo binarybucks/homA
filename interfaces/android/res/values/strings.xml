@@ -17,7 +17,7 @@
     <string name="defaultsServerAddress">"192.168.8.2"</string>
     <string name="defaultsServerPort">"1883"</string>
     <string name="menuSettings">Settings</string>
-    <string name="title_activity_nfc">NFC writer</string>
+    <string name="title_activity_nfc">Write Tags</string>
     <string name="nfcWriteWaitingForTag">Place your phone about a tag to write</string>
     
     

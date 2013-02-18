@@ -12,8 +12,6 @@ import st.alr.homA.support.ValueSortedMap;
 import de.greenrobot.event.EventBus;
 import android.app.Application;
 
-import android.widget.ListAdapter;
-
 public class App extends Application {
     private static App instance;
     private static HashMap<String, Device> devices;
@@ -39,7 +37,7 @@ public class App extends Application {
     }
 
     public static Room getRoom(int index) {
-        return (Room) rooms.get(index);
+        return rooms.get(index);
     }
 
     public static Integer getRoomCount() {
