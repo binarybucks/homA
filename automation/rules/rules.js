@@ -12,7 +12,7 @@ var Message = function (topic, payload) {
     }
 };
 
-var flow = nools.compile(__dirname + "/homA.nools", null, {"Message":Message}, null);
+var flow = nools.compile(__dirname + "/homA.nools", null, null, null);
 var session = flow.getSession();
 
 function receiveMqtt(topic, payload){
