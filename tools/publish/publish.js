@@ -8,7 +8,6 @@ var argv = require('optimist').usage('Usage: $0 [--brokerHost 127.0.0.1] [--brok
 															.default("retained", false)
 															.argv;
 
-var MQTT_CLIENT_ID ='publishjs'
 var topic = undefined;
 var payload = undefined;
 var mqttClient;
