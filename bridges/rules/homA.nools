@@ -1,0 +1,21 @@
+
+
+rule test {
+    when {
+    		m1 : Message m1.t == '/test1' && m1.p == '1';
+    		m1 : Message m2.t == '/test2' && m2.p == '0';
+    }
+    then {      
+    		console.log("matched test1:1 test2:0. Changed test1: " + facts.m1.changed + ". Changed test2: " + facts.m2.changed)
+    }
+}
+
+rule test2 {
+    when {
+    		m1 : Message m1.t == '/test1' && m1.p == '1';
+    		m1 : Message m2.t == '/test2' && m2.p == '1';
+    }
+    then {      
+    		console.log("matched test1:1 test2:1. Changed test1: " + facts.m1.changed + ". Changed test2: " + facts.m2.changed)
+    }
+}
