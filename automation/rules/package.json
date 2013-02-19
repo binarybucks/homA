@@ -1,5 +1,5 @@
 { "name": "rules"
 , "version" : "0.1.0"
-, "dependencies" : {"nools" : "0.0.5", "datejs" : "0.0.2"}
+, "dependencies" : {"nools" : "0.0.5", "datejs" : "0.0.2", "mqttjs" : "0.1.7", "optimist" : "0.3.5"}
 }
 

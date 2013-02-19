@@ -1,5 +1,13 @@
+#!/usr/bin/env node
 var nools = require("nools");
 var date = require("datejs")
+var mqtt = require('mqttjs')
+var argv = require('optimist').usage('Usage: $0 [--brokerHost 127.0.0.1] [--brokerPort 1883]')
+                              .default("brokerHost", '127.0.0.1')
+                              .default("brokerPort", 1883)
+                              .argv;
+
+var mqttClient;
 var messages = {};
 
 var Message = function (topic, payload) {
@@ -12,30 +20,60 @@ var Message = function (topic, payload) {
     }
 };
 
-var flow = nools.compile(__dirname + "/homA.nools", null, null, null);
+var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, mqttPublish: mqttPublish}});
 var session = flow.getSession();
+
+(function mqttConnect() {
+    mqtt.createClient(argv.brokerPort, argv.brokerHost, function(err, client) {
+        if (err) {
+            console.log('MQTT        %s', err);
+            process.exit(1);
+        }
+
+        mqttClient = client;
+        client.connect({keepalive: 3000});
+
+        client.on('connack', function(packet) {
+            client.subscribe({topic: '#'});
+        });
+
+        client.on('close', function() {
+            process.exit(-1);
+        });
+
+        client.on('error', function(e) {
+            console.log('MQTT        Error: %s', e);
+            process.exit(-1);
+        });
+
+        client.on('publish', function(packet) {
+            process.nextTick(function(){receiveMqtt(packet.topic, packet.payload);})
+        });
+    });
+})();
+
+function mqttPublish(topic, payload, retained) {
+    mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
+}
 
 function receiveMqtt(topic, payload){
     if (topic in messages) {
-        console.log("Modifiying " + topic + ":" + payload);
         var m = messages[topic];
-        m.updatePayload(payload);
-        session.modify(m);
+
+        if(payload !== "" && payload !== undefined) {
+            console.log("M => " + topic + ":" + payload);
+            m.updatePayload(payload);
+            session.modify(m);
+        } else {
+            session.retract(m);
+            delete messages[topic];
+        }
     } else {
-        console.log("Asserting " + topic + ":" + payload);
+        console.log("A => " + topic + ":" + payload);
         var m = new Message(topic, payload);
         messages[topic] = m;
         session.assert(m);
     }
     session.match();
 }
-
-
-receiveMqtt('/test1', '1');
-receiveMqtt('/test2', '0');
-receiveMqtt('/test2', '1');
-receiveMqtt('/test1', '0');
-receiveMqtt('/test2', '0');
-receiveMqtt('/test1', '1');
-receiveMqtt('/test1', '1');
 

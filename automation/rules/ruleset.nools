@@ -1,0 +1,38 @@
+rule away {
+    when {
+    		m1 : Message m1.t == '/scenes/away' && m1.p == '1';
+    }
+    then {      
+        console.log("Scene: Away")
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0" , true);
+        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0" , true);
+
+    }
+}
+
+rule night {
+    when {
+        m1 : Message m1.t == '/scenes/night' && m1.p == '1';
+    }
+    then {      
+        console.log("Scene: Night");
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0" , true);
+        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0" , true);
+
+    }
+}
+
+rule morning {
+    when {
+            m1 : Message m1.t == '/scene/morning' && m1.p == '1';
+    }
+    then {      
+        console.log("Scene: Morning");
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1" , true);
+        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1" , true);
+    }
+}
+
+
+
+
