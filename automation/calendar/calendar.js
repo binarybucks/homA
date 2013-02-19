@@ -12,7 +12,7 @@ var argv = require('optimist').argv;
 var MQTT_CLIENT_ID ='458293-GoogleCalendarBridge'
 var MQTT_BROKER_PORT = 1883
 var MQTT_BROKER_HOST = 'localhost'
-var CALENDAR_QUERY_INTERVALL = 2*60*1000;
+var CALENDAR_QUERY_INTERVALL = 60*60*1000;
 
 var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
 var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
@@ -100,7 +100,7 @@ function oauth2getAccessTokenCallback(err, access_token, refresh_token, results)
 	    accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
 	    settings[MQTT_TOPIC_REFRESH_TOKEN] = !!refresh_token ? refresh_token : settings[MQTT_TOPIC_REFRESH_TOKEN];
 
-	    mqttPublish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN]); // save refresh token on broker for future starts
+	    mqttPublish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
 
 	    console.log('OAUTH       Access token: ' + accessToken);
 	    console.log('OAUTH       Access token refresh in: ' + accessTokenRefreshIn+"ms");
@@ -140,7 +140,7 @@ function calendarScheduleQuery(){
 function calendarSchedule(date, topic, payload){
 	console.log("Calendar    At "  + date + " publishing " + topic + ":" + payload );
 	var job = schedule.scheduleJob(date, function(){
-			mqttPublish(topic, payload);
+			mqttPublish(topic, payload, true);
 	});
 }
 
@@ -193,9 +193,9 @@ function calendarQuery() {
 	});	
 }
 
-function mqttPublish(topic, payload) {
+function mqttPublish(topic, payload, retained) {
 			console.log("publishing " + topic + ":" + payload);
-			mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: true});
+			mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
 	
 }
 
