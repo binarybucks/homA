@@ -15,11 +15,11 @@ import android.os.Bundle;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -35,7 +35,6 @@ import android.widget.TextView;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class NfcWriteActivity extends FragmentActivity {
     private static boolean writeMode;
-    private WriteDialog writeDialog;
     private ListView listView;
     private Menu menu;
 
@@ -77,12 +76,11 @@ public class NfcWriteActivity extends FragmentActivity {
         switch (item.getItemId()) {
             case R.id.add:
                 AddDialog addDialog = new AddDialog();
-                addDialog.show(getSupportFragmentManager(), "addDialog");
-
+                getFragmentManager().beginTransaction().add(addDialog, "addDialog").commit();
                 return true;
             case R.id.write:
-                writeDialog = new WriteDialog();
-                writeDialog.show(getSupportFragmentManager(), "writeDialog");
+                WriteDialog writeDialog = new WriteDialog();
+                getFragmentManager().beginTransaction().add(writeDialog, "writeDialog").commit();
                 return true;
             case R.id.recordingStart:
                 startRecording();
@@ -255,7 +253,11 @@ public class NfcWriteActivity extends FragmentActivity {
     }
 
     private void publishProgress(String message, boolean success) {
-        writeDialog.setText(message);
+        WriteDialog f = (WriteDialog ) (getFragmentManager().findFragmentByTag("writeDialog"));
+        Log.v(this.toString(), "publishProgress to fragment: " + f);
+        if (f != null) {
+            f.setText(message);            
+        }
     }    
 
     public static class AddDialog extends DialogFragment {
@@ -306,16 +308,19 @@ public class NfcWriteActivity extends FragmentActivity {
         IntentFilter writeTagFilters[];
         Tag mytag;
 
-        private View getContentView() {
-            View view = getActivity().getLayoutInflater()
-                    .inflate(R.layout.fragment_nfc_write, null);
+        
+        
+        private View getContentView(Bundle savedInstance) {
+            Log.v(this.toString(), "getContentView: " + savedInstance);
+            String savedMessage = savedInstance != null ? savedInstance.getString("savedMessage") : null;
+            
+            View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_nfc_write, null);
             tv = (TextView) view.findViewById(R.id.writeTextView);
 
             adapter = NfcAdapter.getDefaultAdapter(getActivity());
 
             if (adapter == null || !adapter.isEnabled()) {
-
-                tv.setText("Please enable NFC in your Phones settings to use this feature");
+                tv.setText(savedMessage != null ? savedMessage : "Please enable NFC in your Phones settings to use this feature");
             } else {
                 pendingIntent = PendingIntent.getActivity(getActivity(), 0, new Intent(
                         getActivity(), getActivity().getClass())
@@ -327,12 +332,17 @@ public class NfcWriteActivity extends FragmentActivity {
                         tagDetected
                 };
 
-                tv.setText("Place phone above a NFC tag to write");
-
+                tv.setText(savedMessage != null ? savedMessage : "Place phone above a NFC tag to write");
             }
 
             return view;
         }
+        
+        public void onStart () {
+            super.onStart();
+            Log.v(this.toString(), "WriteFragment onStart. Tag is " + getTag());
+        }
+
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -340,7 +350,7 @@ public class NfcWriteActivity extends FragmentActivity {
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setTitle("Write")
-                    .setView(getContentView())
+                    .setView(getContentView(savedInstanceState))
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
                         @Override
@@ -359,15 +369,8 @@ public class NfcWriteActivity extends FragmentActivity {
 
         @Override
         public void onPause() {
+            WriteModeOff();
             super.onPause();
-            WriteModeOff();
-        }
-
-        @Override
-        public void onDismiss(DialogInterface dialog) {
-            super.onDismiss(dialog);
-            WriteModeOff();
-            NfcWriteActivity.writeMode = false;
         }
 
         @Override
@@ -377,15 +380,23 @@ public class NfcWriteActivity extends FragmentActivity {
         }
 
         private void WriteModeOn() {
-            if (adapter != null && adapter.isEnabled()) {
+            if (adapter != null && adapter.isEnabled() && pendingIntent != null && writeTagFilters != null) {
                 adapter.enableForegroundDispatch(getActivity(), pendingIntent, writeTagFilters, null);
             }
         }
 
         private void WriteModeOff() {
-            if (adapter != null && adapter.isEnabled()) {
-                adapter.disableForegroundDispatch(getActivity());
+            Log.v(this.toString(), "activit: " + getActivity());
+            if (adapter != null && adapter.isEnabled() && getActivity() != null) {
+                adapter.disableForegroundDispatch(getActivity());                
             }
         }
+        
+        public void onSaveInstanceState (Bundle outState) {
+            super.onSaveInstanceState(outState);
+            outState.putString("savedMessage", (String) tv.getText());
+        }
+
+
     }
 }

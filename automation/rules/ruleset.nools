@@ -1,6 +1,6 @@
 rule away {
     when {
-    		m1 : Message m1.t == '/scenes/away' && m1.p == '1';
+    		m1 : Message m1.t == '/tag' && m1.p == 'door';
     }
     then {      
         console.log("Scene: Away")
@@ -10,9 +10,10 @@ rule away {
     }
 }
 
-rule night {
+rule morning {
     when {
-        m1 : Message m1.t == '/scenes/night' && m1.p == '1';
+        t0: Time between 5 and 8
+        m1 : Message m1.t == '/tag' && m1.p == 'bed';
     }
     then {      
         console.log("Scene: Night");
@@ -22,9 +23,10 @@ rule night {
     }
 }
 
-rule morning {
+rule evening {
     when {
-            m1 : Message m1.t == '/scene/morning' && m1.p == '1';
+        t0: Time between 20 and 02
+        m1 : Message m1.t == '/tag' && m1.p == 'bed';
     }
     then {      
         console.log("Scene: Morning");
