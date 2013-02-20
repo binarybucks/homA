@@ -5,11 +5,10 @@ rule morning {
     }
     then {      
         console.log("Rule: morning ");
+        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);	//Campusboard on
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
     }
 }
-
-// foo
-
 
 rule night {
     when {
@@ -18,6 +17,9 @@ rule night {
     }
     then {      
         console.log("Rule: night");
+        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
+
     }
 }
 
@@ -27,19 +29,12 @@ rule away {
     }
     then {      
         console.log("Rule: away ");
+        mqttPublish("/devices/158293-433MhzSwitch-02/controls/Power/on", "0", true);	//Amp off
+        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
+
     }
 }
-
-rule test {
-    when {
-        m1: Message m1.t == '/tag' && m1.p == 'test';
-    }
-    then {      
-        console.log("Rule: test ");
-    }
-}
-
-
 
 rule desk {
     when {
@@ -47,5 +42,6 @@ rule desk {
     }
     then {      
         console.log("Rule: desk ");
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk on
     }
 }

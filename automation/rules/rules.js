@@ -61,15 +61,11 @@ var Clock = function(){
     }
 }
 
-
 var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, mqttPublish: mqttPublish, Clock: Clock}});
 var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
 setInterval(function(){session.modify(clock.step());}, 5*1000);
-
-
-
 
 function mqttPublish(topic, payload, retained) {
     mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
