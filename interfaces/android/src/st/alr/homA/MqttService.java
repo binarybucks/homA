@@ -84,6 +84,7 @@ public class MqttService extends Service implements MqttCallback
     private static int NOTIFCATION_ID = 1337;
     private boolean notificationEnabled = true;
     
+    
     @Override
     public void onCreate()
     {

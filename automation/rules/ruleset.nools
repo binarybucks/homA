@@ -1,40 +1,41 @@
-rule away {
-    when {
-    		m1 : Message m1.t == '/tag' && m1.p == 'door';
-    }
-    then {      
-        console.log("Scene: Away")
-        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0" , true);
-        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0" , true);
-
-    }
-}
-
 rule morning {
     when {
-        t0: Time between 5 and 8
-        m1 : Message m1.t == '/tag' && m1.p == 'bed';
+    		c: Clock c.isMorning();	
+        m: Message m1.is('/tag', 'bed');
     }
     then {      
-        console.log("Scene: Night");
-        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0" , true);
-        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0" , true);
-
+        console.log("Scene: morning ");
     }
 }
 
-rule evening {
+rule afternoon {
     when {
-        t0: Time between 20 and 02
-        m1 : Message m1.t == '/tag' && m1.p == 'bed';
+    		c: Clock c.isAfternoon();	
+        m: Message m1.is('/tag', 'desk');
     }
     then {      
-        console.log("Scene: Morning");
-        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1" , true);
-        mqttPublish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1" , true);
+        console.log("Scene: afternoon ");
     }
 }
 
+rule away {
+    when {
+        m: Message m1.is('/tag', 'door');
+    }
+    then {      
+        console.log("Scene: away ");
+    }
+}
+
+rule night {
+    when {
+        c: Clock c.isEvening() || c.isNight();	
+        m: Message m1.is('/tag', 'desk');
+    }
+    then {      
+        console.log("Scene: night");
+    }
+}
 
 
 

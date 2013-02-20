@@ -1,6 +1,9 @@
 
 package st.alr.homA;
 
+import de.greenrobot.event.EventBus;
+import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
+import st.alr.homA.support.Events.MqttConnectivityChanged;
 import android.app.Service;
 import android.content.Intent;
 import android.nfc.NdefMessage;
@@ -13,6 +16,9 @@ import android.util.Log;
 
 public class NfcReadService extends Service
 {
+    private boolean waitingForConnection = false;
+    Runnable deferred;
+    
     @Override
     public void onCreate()
     {
@@ -26,7 +32,8 @@ public class NfcReadService extends Service
     {
 
         Log.v(this.toString(), "NFC Read service started: ");
-
+        EventBus.getDefault().register(this, MqttConnectivityChanged.class);
+        
         if (intent != null) {
 
             String action = intent.getAction();
@@ -64,11 +71,28 @@ public class NfcReadService extends Service
         String[] pairs = message.split(",");
 
         for (String pair : pairs) {
-            String[] tokens = pair.split("=");
+            final String[] tokens = pair.split("=");
             if (tokens.length == 2) {
                 Log.v(this.toString(), "Got topic: " + tokens[0]);
-                Log.v(this.toString(), "Got topic: " + tokens[1]);
-                MqttService.getInstance().publish(tokens[0], tokens[1]);
+                Log.v(this.toString(), "Got payload: " + tokens[1]);
+                
+                if (MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {                    
+                    MqttService.getInstance().publish(tokens[0], tokens[1]);
+                } else {
+                    Log.d(this.toString(), "No broker connection established yet, deferring publish");
+                    waitingForConnection = true;
+                    deferred = new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            Log.d(this.toString(), "Broker connection established, publishing deferred message");
+
+                            MqttService.getInstance().publish(tokens[0], tokens[1]);                           
+                        }
+                    };
+                }
+                
+                
             } else {
                 Log.e(this.toString(), "Failed to parse message");
             }
@@ -76,6 +100,12 @@ public class NfcReadService extends Service
 
     }
 
+    public void onEvent(MqttConnectivityChanged event) {
+        if(waitingForConnection && event.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+            deferred.run();
+        }
+    }
+    
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
