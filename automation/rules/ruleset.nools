@@ -1,41 +1,51 @@
 rule morning {
     when {
     		c: Clock c.isMorning();	
-        m: Message m1.is('/tag', 'bed');
+        m1: Message m1.t == '/tag' && m1.p == 'bed';
     }
     then {      
-        console.log("Scene: morning ");
+        console.log("Rule: morning ");
     }
 }
 
-rule afternoon {
+// foo
+
+
+rule night {
     when {
-    		c: Clock c.isAfternoon();	
-        m: Message m1.is('/tag', 'desk');
+        c: Clock c.isEvening() || c.isNight();	
+        m1: Message m1.t == '/tag' && m1.p == 'bed'; 
     }
     then {      
-        console.log("Scene: afternoon ");
+        console.log("Rule: night");
     }
 }
 
 rule away {
     when {
-        m: Message m1.is('/tag', 'door');
+        m1: Message m1.t == '/tag' && m1.p == 'door';
     }
     then {      
-        console.log("Scene: away ");
+        console.log("Rule: away ");
     }
 }
 
-rule night {
+rule test {
     when {
-        c: Clock c.isEvening() || c.isNight();	
-        m: Message m1.is('/tag', 'desk');
+        m1: Message m1.t == '/tag' && m1.p == 'test';
     }
     then {      
-        console.log("Scene: night");
+        console.log("Rule: test ");
     }
 }
 
 
 
+rule desk {
+    when {
+        m1: Message m1.t == '/tag' && m1.p == 'desk';
+    }
+    then {      
+        console.log("Rule: desk ");
+    }
+}

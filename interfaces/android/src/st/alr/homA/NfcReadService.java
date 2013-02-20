@@ -11,6 +11,7 @@ import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -81,8 +82,7 @@ public class NfcReadService extends Service
                 } else {
                     Log.d(this.toString(), "No broker connection established yet, deferring publish");
                     waitingForConnection = true;
-                    deferred = new Runnable() {
-                        
+                    deferred = new Runnable() {                        
                         @Override
                         public void run() {
                             Log.d(this.toString(), "Broker connection established, publishing deferred message");
@@ -90,6 +90,16 @@ public class NfcReadService extends Service
                             MqttService.getInstance().publish(tokens[0], tokens[1]);                           
                         }
                     };
+                    
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(this.toString(), "Gave up waiting for broker connection, purging deferred message");
+                            waitingForConnection = false;
+                            deferred = null;
+                        }
+                    }, 10*1000);
                 }
                 
                 
@@ -102,7 +112,10 @@ public class NfcReadService extends Service
 
     public void onEvent(MqttConnectivityChanged event) {
         if(waitingForConnection && event.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
-            deferred.run();
+            if(deferred != null) {
+                waitingForConnection = false;
+                deferred.run();
+            }
         }
     }
     
