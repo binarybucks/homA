@@ -20,7 +20,7 @@ function mqttConnect() {
 
 	  client.on('connack', function(packet) {
         if (packet.returnCode === 0) {
-            setInterval(function() {client.pingreq();}, 1000);
+            setInterval(function() {client.pingreq();}, 30000);
 	  			client.subscribe({topic: '#'});
 	  				unpublish();
 
