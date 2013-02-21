@@ -100,7 +100,7 @@ function mqttReceive(topic, payload){
         }
 
         mqttClient = client;
-        client.connect({keepalive: 3000});
+        client.connect({keepalive: 1000});
 
         client.on('connack', function(packet) {
             client.subscribe({topic: '#'});

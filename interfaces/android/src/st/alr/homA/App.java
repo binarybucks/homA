@@ -2,6 +2,9 @@
 package st.alr.homA;
 
 import java.util.HashMap;
+
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
@@ -91,15 +94,15 @@ public class App extends Application {
     
     
     
-    public static void addToNfcRecordMap(String topic, String paylaod) {
-        nfcRecordListAdapter.put(topic, paylaod);
+    public static void addToNfcRecordMap(String topic, MqttMessage message) {
+        nfcRecordListAdapter.put(topic, message);
     }
     
     public static void removeFromNfcRecordMap(String topic) {
         nfcRecordListAdapter.remove(topic);
     }
         
-    public static HashMap<String, String> getNfcRecordMap() {
+    public static HashMap<String, MqttMessage> getNfcRecordMap() {
         return nfcRecordListAdapter.getMap();
     }
     

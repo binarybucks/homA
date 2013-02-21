@@ -20,7 +20,8 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:mode="twoLine"
     style="@style/homa_listview_item" 
-    android:paddingLeft="14dip">
+    android:paddingLeft="14dip"
+    android:paddingRight="14dip">
     
 	<TextView android:id="@android:id/text1"
 		android:layout_width="match_parent"
