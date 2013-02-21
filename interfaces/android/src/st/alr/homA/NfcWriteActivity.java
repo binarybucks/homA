@@ -365,7 +365,7 @@ public class NfcWriteActivity extends FragmentActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setTitle("Write")
                     .setView(getContentView(savedInstanceState))
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
