@@ -119,7 +119,7 @@ function mqttReceive(topic, payload){
         });
 
         client.on('publish', function(packet) {
-            if(packet.topic = "/sys/ping") {
+            if(packet.topic == "/sys/ping") {
                 return;
             }
             process.nextTick(function(){mqttReceive(packet.topic, packet.payload);})
