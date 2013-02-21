@@ -42,6 +42,6 @@ rule desk {
     }
     then {      
         console.log("Rule: desk ");
-        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk on
+        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
     }
 }
