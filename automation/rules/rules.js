@@ -101,10 +101,10 @@ function mqttReceive(topic, payload){
 
         mqttClient = client;
         client.connect({"keepalive": 40000});
-        setInterval(function(){mqttPublish("/sys/ping", "ping");}, 30000);
 
 
         client.on('connack', function(packet) {
+            setInterval(function(){mqttPublish("/sys/ping", "ping");}, 30000);
             client.subscribe({topic: '#'});
         });
 

@@ -16,10 +16,11 @@ function mqttConnect() {
 	  	process.exit(1);
 	  }
 	  mqttClient = client;
-	  client.connect({keepalive: 3000});
+	  client.connect({keepalive: 40000});
 
 	  client.on('connack', function(packet) {
 	  	client.subscribe({topic: '#'});
+	  	setInterval(function(){mqttPublish("/sys/ping", "ping");}, 30000);
 			unpublish();
 
 	  });
@@ -34,6 +35,10 @@ function mqttConnect() {
 	  });
 
 	 	client.on('publish', function(packet) {
+	 		if(packet.topic == "/sys/ping") {
+	 			return;
+	 		}
+
 	  	if(packet.payload != "" && packet.payload != undefined) {
 		 		messages[packet.topic.toString()] = packet.payload;
 	  	} else {
