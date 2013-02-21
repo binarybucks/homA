@@ -53,7 +53,7 @@ var Clock = function(){
         return this.between(this.getHours(), 18, 23);
     }
     this.isNight = function() {
-        return bthis.etween(this.getHours(), 0, 5);
+        return this.between(this.getHours(), 0, 5);
     }
     this.step = function(){
         this.date = new Date();
@@ -111,6 +111,7 @@ function mqttReceive(topic, payload){
         });
 
         client.on('close', function() {
+            console.log('MQTT        Connection closed');
             process.exit(-1);
         });
 
