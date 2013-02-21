@@ -36,6 +36,15 @@ rule away {
     }
 }
 
+rule home {
+	when {
+		m1: Message m1.t == '/tag' && m1.p == 'flur';	
+	}
+	then {
+	        console.log("Rule: home");
+	        mqttPublish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);    //Desk on
+	}
+}
 rule desk {
     when {
         m1: Message m1.t == '/tag' && m1.p == 'desk';
