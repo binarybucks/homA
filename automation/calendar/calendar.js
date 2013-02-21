@@ -38,9 +38,10 @@ function mqttBootstrap() {
 	  mqttClient = client;
 
 	  client.on('connack', function(packet) {
+
 	    if (packet.returnCode === 0) {
 	    	console.log('MQTT        Connection established');
-        setInterval(function(){mqttPublish("/sys/ping", "ping");}, 30000);
+	    	setInterval(function() {client.pingreq();}, 1000);
 	    	client.subscribe({topic: "/sys/" + MQTT_CLIENT_ID + "/#"});
 	    } else {
 	      console.log('MQTT        Connack error %d', packet.returnCode);

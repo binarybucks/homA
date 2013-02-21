@@ -104,8 +104,16 @@ function mqttReceive(topic, payload){
 
 
         client.on('connack', function(packet) {
-            setInterval(function(){mqttPublish("/sys/ping", "ping");}, 30000);
+
+        if (packet.returnCode === 0) {
+            setInterval(function() {client.pingreq();}, 1000);
             client.subscribe({topic: '#'});
+        } else {
+          console.log('MQTT        Connack error %d', packet.returnCode);
+          process.exit(-1);
+        }
+
+
         });
 
         client.on('close', function() {
@@ -119,9 +127,6 @@ function mqttReceive(topic, payload){
         });
 
         client.on('publish', function(packet) {
-            if(packet.topic == "/sys/ping") {
-                return;
-            }
             process.nextTick(function(){mqttReceive(packet.topic, packet.payload);})
         });
     });

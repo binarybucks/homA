@@ -19,9 +19,17 @@ function mqttConnect() {
 	  client.connect({keepalive: 40000});
 
 	  client.on('connack', function(packet) {
-	  	client.subscribe({topic: '#'});
-	  	setInterval(function(){mqttPublish("/sys/ping", "ping");}, 30000);
-			unpublish();
+        if (packet.returnCode === 0) {
+            setInterval(function() {client.pingreq();}, 1000);
+	  			client.subscribe({topic: '#'});
+	  				unpublish();
+
+        } else {
+          console.log('MQTT        Connack error %d', packet.returnCode);
+          process.exit(-1);
+        }
+
+
 
 	  });
 
@@ -35,10 +43,6 @@ function mqttConnect() {
 	  });
 
 	 	client.on('publish', function(packet) {
-	 		if(packet.topic == "/sys/ping") {
-	 			return;
-	 		}
-
 	  	if(packet.payload != "" && packet.payload != undefined) {
 		 		messages[packet.topic.toString()] = packet.payload;
 	  	} else {
