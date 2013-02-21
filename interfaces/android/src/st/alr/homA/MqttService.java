@@ -588,21 +588,26 @@ public class MqttService extends Service implements MqttCallback
         mqttConnectivity = newConnectivity;
     }
 
-    public void publish(String topicStr, String value) {
+    public void publish(String topicStr, String payload) {
+        publish(topicStr, payload, true);
+    }
+    
+    public void publish(String topicStr, String payload, boolean retained) {
         boolean isOnline = isOnline(false);
         boolean isConnected = isConnected();
 
         if (!isOnline || !isConnected) {
             return;
         }
-        MqttMessage message = new MqttMessage(value.getBytes());
+        MqttMessage message = new MqttMessage(payload.getBytes());
         message.setQos(0);
-
+        message.setRetained(retained);
+        
         try
         {
             mqttClient.getTopic(topicStr).publish(message);
             if(App.isRecording()) {
-                App.addToNfcRecordMap(topicStr, value);
+                App.addToNfcRecordMap(topicStr,message);
             }
             
         } catch (MqttException e)

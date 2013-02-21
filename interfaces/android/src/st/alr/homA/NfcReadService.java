@@ -68,17 +68,18 @@ public class NfcReadService extends Service
         stopSelf();
     }
 
-    private void handleNfcMessage(String message) {
-        String[] pairs = message.split(",");
+    private void handleNfcMessage(String nfcMessage) {
+        String[] mqttMessages = nfcMessage.split(";");
 
-        for (String pair : pairs) {
-            final String[] tokens = pair.split("=");
-            if (tokens.length == 2) {
+        for (String mqttMessage : mqttMessages) {
+            final String[] tokens = mqttMessage.split(",");
+            if (tokens.length == 3) {
                 Log.v(this.toString(), "Got topic: " + tokens[0]);
                 Log.v(this.toString(), "Got payload: " + tokens[1]);
-                
+                Log.v(this.toString(), "Got retained: " + tokens[2]);
+
                 if (MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {                    
-                    MqttService.getInstance().publish(tokens[0], tokens[1]);
+                    MqttService.getInstance().publish(tokens[0], tokens[1], tokens[2] == "t");
                 } else {
                     Log.d(this.toString(), "No broker connection established yet, deferring publish");
                     waitingForConnection = true;
@@ -87,7 +88,7 @@ public class NfcReadService extends Service
                         public void run() {
                             Log.d(this.toString(), "Broker connection established, publishing deferred message");
 
-                            MqttService.getInstance().publish(tokens[0], tokens[1]);                           
+                            MqttService.getInstance().publish(tokens[0], tokens[1], tokens[2] == "t");                           
                         }
                     };
                     
@@ -104,7 +105,7 @@ public class NfcReadService extends Service
                 
                 
             } else {
-                Log.e(this.toString(), "Failed to parse message");
+                Log.e(this.toString(), "Failed to parse mqttMessages");
             }
         }
 

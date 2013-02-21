@@ -4,6 +4,9 @@ package st.alr.homA.support;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import st.alr.homA.R;
 import android.content.Context;
 import android.util.SparseBooleanArray;
@@ -14,12 +17,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 public class NfcRecordAdapter extends BaseAdapter {
-    private HashMap<String, String> map;
+    private HashMap<String, MqttMessage> map;
     Context context;
 
     public NfcRecordAdapter(Context context) {
         this.context = context;
-        map = new HashMap<String, String>();
+        map = new HashMap<String, MqttMessage>();
     }
 
     @Override
@@ -33,8 +36,8 @@ public class NfcRecordAdapter extends BaseAdapter {
         return getValue(position);
     }
 
-    public String getValue(int position) {
-        return (String) map.values().toArray()[position];
+    public MqttMessage getValue(int position) {
+        return (MqttMessage) map.values().toArray()[position];
     }
 
     public String getKey(int position) {
@@ -71,16 +74,24 @@ public class NfcRecordAdapter extends BaseAdapter {
             holder = (ViewHolder) rowView.getTag();
         }
 
+        MqttMessage m = getValue(position);
+        String payload;
+        try {
+            payload = new String(m.getPayload());
+        } catch (MqttException e) {
+            payload = "Undefined";
+        }
+        
         holder.topic.setText(getKey(position));
-        holder.payload.setText(getValue(position));
+        holder.payload.setText("Payload: " + payload + " Retained: " + m.isRetained());
 
         return rowView;
     }
 
-    public void put(String topic, String payload) {
+    public void put(String topic, MqttMessage message) {
         synchronized (map) {
 
-            map.put(topic, payload);
+            map.put(topic, message);
             this.notifyDataSetChanged();
         }
     }
@@ -108,8 +119,8 @@ public class NfcRecordAdapter extends BaseAdapter {
         }
     }
 
-    public HashMap<String, String> getMap() {
-        return new HashMap<String, String>(map);
+    public HashMap<String, MqttMessage> getMap() {
+        return new HashMap<String, MqttMessage>(map);
     }
 
 }

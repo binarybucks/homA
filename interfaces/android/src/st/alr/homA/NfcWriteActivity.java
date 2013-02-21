@@ -4,6 +4,9 @@ package st.alr.homA;
 import java.io.IOException;
 import java.util.Map;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -29,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -224,7 +228,7 @@ public class NfcWriteActivity extends FragmentActivity {
             Log.v(this.toString(), "techlist:" + mytag.getTechList());
 
             
-            Map<String, String> map = App.getRecordMapListAdapter().getMap();
+            Map<String, MqttMessage> map = App.getRecordMapListAdapter().getMap();
             if (map.size() < 1) {
                 publishProgress("No content to write", false);
                 return;
@@ -235,8 +239,15 @@ public class NfcWriteActivity extends FragmentActivity {
             
             
             StringBuffer text = new StringBuffer();
-            for (String key : map.keySet()) {
-                text.append(key + "=" + map.get(key) + ",");
+            for (String topic : map.keySet()) {
+                String payload;
+                try {
+                    payload = new String(map.get( topic).getPayload());
+                } catch (MqttException e) {
+                    payload = "undefined";
+                }
+                String retained = map.get( topic).isRetained() ? "t" : "f";
+                text.append( topic + "," + payload + "," + retained + ";");
             }
             text.deleteCharAt(text.length() - 1);// strip last ","
 
@@ -263,13 +274,14 @@ public class NfcWriteActivity extends FragmentActivity {
     public static class AddDialog extends DialogFragment {
         TextView topicInput;
         TextView payloadInput;
+        CheckBox retainedCheckbox;
 
         private View getContentView() {
             View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_nfc_add, null);
             topicInput = (TextView) view.findViewById(R.id.topicInput);
 
             payloadInput = (TextView) view.findViewById(R.id.paylodInput);
-
+            retainedCheckbox = (CheckBox) view.findViewById(R.id.retainedCheck);
             return view;
         }
 
@@ -289,8 +301,10 @@ public class NfcWriteActivity extends FragmentActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            App.addToNfcRecordMap(topicInput.getText().toString(), payloadInput
-                                    .getText().toString());
+                            MqttMessage m = new MqttMessage();
+                            m.setPayload(payloadInput.getText().toString().getBytes());
+                            m.setRetained(retainedCheckbox.isChecked());
+                            App.addToNfcRecordMap(topicInput.getText().toString(), m);
                             dismiss();
                         }
                     });
