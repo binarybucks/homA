@@ -14,14 +14,9 @@ var Message = function (topic, payload) {
     this.t = topic;
     this.p = payload;
     this.changed = false;
-    this.clock = new Clock();
     this.updatePayload = function(payload) {
-        this.clock.step();
         this.changed = this.p != payload;
         this.p = payload;
-    }
-    this.is = function(topic, payload) {
-        return false;
     }
 };
 
@@ -65,7 +60,6 @@ var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Messag
 var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
-setInterval(function(){session.modify(clock.step());}, 5*1000);
 
 function mqttPublish(topic, payload, retained) {
     mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
@@ -93,6 +87,8 @@ function mqttReceive(topic, payload){
         messages[topic] = m;
         session.assert(m);
     }
+
+    session.modify(clock.step());
     session.match();
 }
 
