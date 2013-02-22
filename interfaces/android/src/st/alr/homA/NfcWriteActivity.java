@@ -127,10 +127,10 @@ public class NfcWriteActivity extends FragmentActivity {
                     mode.setTitle(null);
                     break;
                 case 1:
-                    mode.setTitle("One item selected");
+                    mode.setTitle(getResources().getString(R.string.actionBarSingleItem));
                     break;
                 default:
-                    mode.setTitle(checkedCount + " items selected");
+                    mode.setTitle(checkedCount + getResources().getString(R.string.actionBarMultipleItems));
                     break;
             }
         }
@@ -178,16 +178,15 @@ public class NfcWriteActivity extends FragmentActivity {
                 ndef.connect();
 
                 if (!ndef.isWritable()) {
-                    publishProgress("Tag is read-only.", false);
+                    publishProgress(getResources().getString(R.string.nfcWriteTagReadOnly), false);
                     success = false;
                 }
                 if (ndef.getMaxSize() < ndefMsg.getByteArrayLength()) {
-                    publishProgress("Tag capacity is " + ndef.getMaxSize() + " bytes, message is " + ndefMsg.getByteArrayLength() + " bytes.", false);
+                    publishProgress(getResources().getString(R.string.nfcWriteTagCapacityIs) + ndef.getMaxSize() + " byte" + getResources().getString(R.string.nfcWriteTagMessageSizeIs) + ndefMsg.getByteArrayLength() + "byte.", false);
                     success = false;
                 }
 
                 ndef.writeNdefMessage(ndefMsg);
-                publishProgress("Wrote message to pre-formatted tag.", true);
                 success = true;
             } else {
                 NdefFormatable format = NdefFormatable.get(tag);
@@ -195,19 +194,19 @@ public class NfcWriteActivity extends FragmentActivity {
                     try {
                         format.connect();
                         format.format(ndefMsg);
-                        publishProgress("Formatted tag and wrote message.", true);
+                        publishProgress(getResources().getString(R.string.nfcWriteTagFormatedAndWrote), true);
                         success = true;
                     } catch (IOException e) {
-                        publishProgress("Failed to format tag.", false);
+                        publishProgress(getResources().getString(R.string.nfcWriteTagFailedToFormat), false);
                         success = false;
                     }
                 } else {
-                    publishProgress("Tag doesn't support NDEF.", false);
+                    publishProgress(getResources().getString(R.string.nfcWriteTagNoNDEFSupport), false);
                     success = false;
                 }
             }
         } catch (Exception e) {
-            Log.e(this.toString(), "Failed to write tag ("+ e.getMessage()+")", e);
+            Log.e(this.toString(), getResources().getString(R.string.nfcWriteTagFailedToWrite) +  " ("+ e.getMessage()+")", e);
         }
 
         return success;
@@ -230,7 +229,7 @@ public class NfcWriteActivity extends FragmentActivity {
             
             Map<String, MqttMessage> map = App.getRecordMapListAdapter().getMap();
             if (map.size() < 1) {
-                publishProgress("No content to write", false);
+                publishProgress(getResources().getString(R.string.nfcWriteTagNoContent), false);
                 return;
             }
             
@@ -255,7 +254,7 @@ public class NfcWriteActivity extends FragmentActivity {
 
             if (write(text.toString(), mytag)) {
                 Log.v(this.toString(), "Write ok");
-                publishProgress("Tag written successfully", true);
+                publishProgress(getResources().getString(R.string.nfcWriteTagSuccess), true);
 
             } else {
                 Log.e(this.toString(), "Write fail");
@@ -346,7 +345,7 @@ public class NfcWriteActivity extends FragmentActivity {
                         tagDetected
                 };
 
-                tv.setText(savedMessage != null ? savedMessage : "Place phone above a NFC tag to write");
+                tv.setText(savedMessage != null ? savedMessage : getResources().getString(R.string.nfcWriteWaitingForTag));
             }
 
             return view;
@@ -400,7 +399,6 @@ public class NfcWriteActivity extends FragmentActivity {
         }
 
         private void WriteModeOff() {
-            Log.v(this.toString(), "activit: " + getActivity());
             if (adapter != null && adapter.isEnabled() && getActivity() != null) {
                 adapter.disableForegroundDispatch(getActivity());                
             }

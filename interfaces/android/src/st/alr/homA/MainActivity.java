@@ -153,7 +153,7 @@ public class MainActivity extends FragmentActivity {
     
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(!NfcAdapter.getDefaultAdapter(this).isEnabled()) {
+        if(NfcAdapter.getDefaultAdapter(this) == null || !NfcAdapter.getDefaultAdapter(this).isEnabled()) {
             menu.removeItem(R.id.menu_nfc);            
         }
 
@@ -169,7 +169,6 @@ public class MainActivity extends FragmentActivity {
         m.notifyDataSetChanged();
 
         if (currentRoom != null && currentRoom.compareTo(App.getRoom(currentItem)) > 0) {
-            Log.v(this.toString(), "Shifting index ");
             mViewPager.setCurrentItem(currentItem + 1, false);
         }
 

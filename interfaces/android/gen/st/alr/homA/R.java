@@ -69,8 +69,7 @@ public final class R {
         public static final int fragment_room=0x7f030007;
         public static final int preferences_server=0x7f030008;
         public static final int row_layout=0x7f030009;
-        public static final int tag_activity=0x7f03000a;
-        public static final int two_line_row_layout=0x7f03000b;
+        public static final int two_line_row_layout=0x7f03000a;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;
@@ -78,24 +77,42 @@ public final class R {
         public static final int activity_nfc_actionmode=0x7f080002;
     }
     public static final class string {
+        public static final int actionBarMultipleItems=0x7f060023;
+        public static final int actionBarSingleItem=0x7f060022;
         public static final int appName=0x7f060001;
-        public static final int connectivityConnected=0x7f060009;
-        public static final int connectivityConnecting=0x7f060008;
-        public static final int connectivityDisconnected=0x7f06000b;
-        public static final int connectivityDisconnecting=0x7f06000a;
-        public static final int defaultsRoomName=0x7f06000c;
-        public static final int defaultsServerAddress=0x7f06000d;
-        public static final int defaultsServerPort=0x7f06000e;
-        public static final int menuSettings=0x7f06000f;
-        public static final int nfcWriteWaitingForTag=0x7f060011;
-        public static final int preferencesServerAddress=0x7f060004;
-        public static final int preferencesServerCancel=0x7f060006;
-        public static final int preferencesServerConnect=0x7f060007;
-        public static final int preferencesServerPort=0x7f060005;
-        public static final int preferencesServerTitle=0x7f060003;
-        public static final int preferencesSystem=0x7f060002;
+        public static final int connectivityConnected=0x7f060008;
+        public static final int connectivityConnecting=0x7f060007;
+        public static final int connectivityDisconnected=0x7f06000a;
+        public static final int connectivityDisconnecting=0x7f060009;
+        public static final int defaultsRoomName=0x7f06000b;
+        public static final int defaultsServerAddress=0x7f06000c;
+        public static final int defaultsServerPort=0x7f06000d;
+        public static final int menuAdd=0x7f060010;
+        public static final int menuDiscard=0x7f06000f;
+        public static final int menuSettings=0x7f06000e;
+        public static final int menuStartRecording=0x7f060012;
+        public static final int menuStopRecording=0x7f060013;
+        public static final int menuWrite=0x7f060011;
+        public static final int nfcWritePayloadInput=0x7f060016;
+        public static final int nfcWriteRetainedInput=0x7f060018;
+        public static final int nfcWriteTagCapacityIs=0x7f06001e;
+        public static final int nfcWriteTagFailedToFormat=0x7f06001b;
+        public static final int nfcWriteTagFailedToWrite=0x7f06001c;
+        public static final int nfcWriteTagFormatedAndWrote=0x7f06001a;
+        public static final int nfcWriteTagMessageSizeIs=0x7f06001f;
+        public static final int nfcWriteTagNoContent=0x7f060020;
+        public static final int nfcWriteTagNoNDEFSupport=0x7f06001d;
+        public static final int nfcWriteTagReadOnly=0x7f060019;
+        public static final int nfcWriteTagSuccess=0x7f060021;
+        public static final int nfcWriteTopicInput=0x7f060017;
+        public static final int nfcWriteWaitingForTag=0x7f060015;
+        public static final int preferencesServerAddress=0x7f060003;
+        public static final int preferencesServerCancel=0x7f060005;
+        public static final int preferencesServerConnect=0x7f060006;
+        public static final int preferencesServerPort=0x7f060004;
+        public static final int preferencesServerTitle=0x7f060002;
         public static final int titleActivityMain=0x7f060000;
-        public static final int title_activity_nfc=0x7f060010;
+        public static final int title_activity_nfc=0x7f060014;
     }
     public static final class style {
         public static final int Theme_homa=0x7f070000;

@@ -3,7 +3,6 @@
 
     <string name="titleActivityMain">HomA</string>
     <string name="appName">HomA</string>
-    <string name="preferencesSystem">"System"</string>
     <string name="preferencesServerTitle">"Server"</string>
     <string name="preferencesServerAddress">"Server address"</string>
     <string name="preferencesServerPort">"Server port"</string>
@@ -16,9 +15,27 @@
     <string name="defaultsRoomName">"unassigned"</string>
     <string name="defaultsServerAddress">"192.168.8.2"</string>
     <string name="defaultsServerPort">"1883"</string>
-    <string name="menuSettings">Settings</string>
-    <string name="title_activity_nfc">Write Tags</string>
-    <string name="nfcWriteWaitingForTag">Place your phone about a tag to write</string>
-    
-    
+    <string name="menuSettings">"Settings"</string>
+    <string name="menuDiscard">"Discard"</string>
+    <string name="menuAdd">"Add"</string>
+    <string name="menuWrite">"Write"</string>
+    <string name="menuStartRecording">"Start recording"</string>
+    <string name="menuStopRecording">"Stop recording"</string>
+    <string name="title_activity_nfc">"Write Tags"</string>
+    <string name="nfcWriteWaitingForTag">"Place your phone about a tag to write"</string>
+    <string name="nfcWritePayloadInput">"Payload"</string>
+    <string name="nfcWriteTopicInput">"Topic"</string>
+    <string name="nfcWriteRetainedInput">"Retained"</string>
+    <string name="nfcWriteTagReadOnly">"Tag is read-only"</string>
+    <string name="nfcWriteTagFormatedAndWrote">"Formatted tag and wrote message"</string>
+    <string name="nfcWriteTagFailedToFormat">"Failed to format tag"</string>
+    <string name="nfcWriteTagFailedToWrite">"Failed to write tag"</string>
+    <string name="nfcWriteTagNoNDEFSupport">"Tag does not support NDEF format"</string>
+    <string name="nfcWriteTagCapacityIs">"Tag capacity is "</string>
+    <string name="nfcWriteTagMessageSizeIs">", Message size is "</string>
+    <string name="nfcWriteTagNoContent">"No content to write"</string>
+    <string name="nfcWriteTagSuccess">"Tag written successfully"</string>
+    <string name="actionBarSingleItem">"One item selected"</string>
+    <string name="actionBarMultipleItems">"items selected"</string>
+
 </resources>
