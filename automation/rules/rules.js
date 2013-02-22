@@ -31,27 +31,19 @@ var Clock = function(){
         return this.date.getMinutes();
     }
 
-    this.between = function(i, a, b) {
-        return i >= a && i <=b;
+    this.hoursIsBetween = function(a, b) {
+        return this.date.getHours() >= a && this.date.getHours() <=b;
     }
 
-    this.isMorning = function() {
-        return this.between(this.getHours(), 6, 11);
-    }
-    this.isNoon = function() {
-        return this.between(this.getHours(), 12, 14);
-    }
-    this.isAfternoon = function(){
-        return this.between(this.getHours(), 15, 17);
-    }
-    this.isEvening = function() {
-        return this.between(this.getHours(), 18, 23);
-    }
-    this.isNight = function() {
-        return this.between(this.getHours(), 0, 5);
-    }
     this.step = function(){
+
         this.date = new Date();
+        this.isMorning = this.hoursIsBetween(6, 11);
+        this.isNoon = this.hoursIsBetween(12, 14);
+        this.isAfternoon = this.hoursIsBetween(15, 17);
+        this.isEvening = this.hoursIsBetween(18, 23);
+        this.isNight = this.hoursIsBetween(6,11); //this.hoursIsBetween(0, 5);
+
         return this;
     }
 }
@@ -62,7 +54,8 @@ var clock = new Clock();
 session.assert(clock);
 
 function mqttPublish(topic, payload, retained) {
-    mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
+    console.log("Simulated publish of " + topic + ":" + payload + "(retained: " + retained+")");
+    //mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
 }
 
 function mqttReceive(topic, payload){

@@ -45,14 +45,8 @@ public class MainActivity extends FragmentActivity {
     private static Room currentRoom;
     private static HashMap<String, DeviceMapAdapter> deviceMapAdapter = new HashMap<String, DeviceMapAdapter>();
     RelativeLayout disconnectedLayout;
-    LinearLayout connectedLayout; 
+    LinearLayout connectedLayout;
 
-    
-    
-    
-    
-    
-    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -69,54 +63,46 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    
     @Override
     protected void onStart() {
         super.onStart();
-        
+
         Intent service = new Intent(this, MqttService.class);
         startService(service);
-        //enableForegroundDispatch();
-
-
     }
 
-    
-    public void onEventMainThread (MqttConnectivityChanged event) {        
+    public void onEventMainThread(MqttConnectivityChanged event) {
         updateViewVisibility();
     }
-    
+
     private void updateViewVisibility() {
-        if(MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+        if (MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
             connectedLayout.setVisibility(View.VISIBLE);
             disconnectedLayout.setVisibility(View.INVISIBLE);
         } else {
             connectedLayout.setVisibility(View.INVISIBLE);
             disconnectedLayout.setVisibility(View.VISIBLE);
-        }        
+        }
     }
-    
-    
+
     @Override
     protected void onResume() {
         super.onResume();
         updateViewVisibility();
     }
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
-        
-        
-        
+
         setContentView(R.layout.activity_main);
-        
+
         disconnectedLayout = (RelativeLayout) findViewById(R.id.disconnectedLayout);
-        connectedLayout = (LinearLayout) findViewById(R.id.connectedLayout);        
+        connectedLayout = (LinearLayout) findViewById(R.id.connectedLayout);
 
         updateViewVisibility();
-        
+
         roomsFragmentPagerAdapter = new RoomsFragmentPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
 
@@ -150,16 +136,16 @@ public class MainActivity extends FragmentActivity {
 
         return true;
     }
-    
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if(NfcAdapter.getDefaultAdapter(this) == null || !NfcAdapter.getDefaultAdapter(this).isEnabled()) {
-            menu.removeItem(R.id.menu_nfc);            
+        if (NfcAdapter.getDefaultAdapter(this) == null
+                || !NfcAdapter.getDefaultAdapter(this).isEnabled()) {
+            menu.removeItem(R.id.menu_nfc);
         }
 
         return true;
     }
-
 
     public void onEventMainThread(Events.RoomAdded event) {
         Log.v(this.toString(), "Room added: " + event.getRoom().getId());
@@ -189,13 +175,12 @@ public class MainActivity extends FragmentActivity {
 
         m.addItem(event.getDevice());
     }
+
     public void onEventMainThread(Events.DeviceRenamed event) {
         Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
         DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getDevice().getRoom());
         m.sortDataset();
     }
-    
-    
 
     public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
         Log.v(this.toString(), "DeviceRemovedFromRoom: " + event.getDevice().toString() + " "
@@ -242,7 +227,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     public static class DeviceFragment extends DialogFragment {
-        Room room; 
+        Room room;
         Device device;
 
         static DeviceFragment newInstance(String roomId, String deviceId) {
@@ -258,16 +243,17 @@ public class MainActivity extends FragmentActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             room = getArguments() != null ? App.getRoom(getArguments().getString("roomId")) : null;
-            device = getArguments() != null ? room.getDevices().get(getArguments().getString("deviceId")) : null;
+            device = getArguments() != null ? room.getDevices().get(
+                    getArguments().getString("deviceId")) : null;
 
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(device.getName());
             LinearLayout outerLayout = new LinearLayout(this.getActivity());
             outerLayout.setOrientation(LinearLayout.VERTICAL);
-            
+
             ScrollView sw = new ScrollView(this.getActivity());
-            
+
             LinearLayout ll = new LinearLayout(this.getActivity());
             ll.setOrientation(LinearLayout.VERTICAL);
             ll.setPadding(16, 0, 16, 0);
@@ -278,41 +264,23 @@ public class MainActivity extends FragmentActivity {
             sw.addView(ll);
             outerLayout.addView(sw);
 
-            
-
-            
             builder.setView(outerLayout);
             return builder.create();
         }
 
-
-
-
-
         public ControlView getControlView(Control control) {
             ControlView v = null;
 
-                
             switch (control.getType()) {
                 case SWITCH:
-                    try {
-
                     v = new st.alr.homA.view.SwitchControlView(getActivity());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                     break;
                 case RANGE:
-                    v = new  st.alr.homA.view.RangeControlView(getActivity());
-                    break;    
-                case TEXT:
-                    v = new  st.alr.homA.view.TextControlView(getActivity());
-                    break;    
+                    v = new st.alr.homA.view.RangeControlView(getActivity());
+                    break;
                 default:
-                    // TODO: Add view for unknown types here instead of a textview
-                    v = new  st.alr.homA.view.TextControlView(getActivity());
+                    v = new st.alr.homA.view.TextControlView(getActivity());
             }
-   
 
             return v;
         }
@@ -359,7 +327,8 @@ public class MainActivity extends FragmentActivity {
             lv.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long it) {
-                    DeviceFragment d = DeviceFragment.newInstance(room.getId(), room.getDevices().values().toArray()[position].toString());
+                    DeviceFragment d = DeviceFragment.newInstance(room.getId(), room.getDevices()
+                            .values().toArray()[position].toString());
                     d.show(getFragmentManager(), "tag");
                 }
             });

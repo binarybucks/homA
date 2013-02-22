@@ -659,7 +659,7 @@ public class MqttService extends Service implements MqttCallback
 
     private void ping() throws MqttException {
 
-        MqttTopic topic = mqttClient.getTopic("$SYS/KEEPALIVEPING");
+        MqttTopic topic = mqttClient.getTopic("$SYS/keepalive");
 
         MqttMessage message = new MqttMessage();
         message.setRetained(false);

@@ -1,6 +1,6 @@
 rule morning {
     when {
-    		c: Clock c.isMorning();	
+    		c: Clock c.isMorning;	
         m1: Message m1.t == '/tag' && m1.p == 'bed';
     }
     then {      
@@ -12,7 +12,7 @@ rule morning {
 
 rule night {
     when {
-        c: Clock c.isEvening() || c.isNight();	
+        c: Clock c.isEvening || c.isNight;	
         m1: Message m1.t == '/tag' && m1.p == 'bed'; 
     }
     then {      
