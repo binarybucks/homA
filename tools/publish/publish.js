@@ -14,7 +14,10 @@ var client = require('homa-mqttjs');
 	client.connect();
 })();
 
+
+// A payload of "" somehow becomes "true" during argv evaluation.
+// To fix this we manually check if the payload equals "true" and replace it with a propper emtpy string
 client.events.on('connected', function() {
-	client.publish(client.argv.topic, client.argv.payload, client.argv.retained);
+	client.publish(client.argv.topic, client.argv.payload === true ? "" : client.argv.payload, client.argv.retained);
 	client.disconnect();
 });

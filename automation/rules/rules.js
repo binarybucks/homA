@@ -53,9 +53,9 @@ client.events.on('connected', function(packet) {
 
 function forget(m) {
     if (m.t in messages) {
-                  console.log("R <= " + m.t + ":" + m.p);
-            session.retract(m);
-            delete messages[m.topic];  
+        console.log("R <= " + m.t + ":" + m.p);
+        session.retract(m);
+        delete messages[m.t];  
     }
 }
 
@@ -70,6 +70,7 @@ client.events.on('receive', function(packet) {
             forget(m);
         }
     } else {
+        console.log("payload: " + packet.payload);
         if(!packet.payload) {
             return;
         }
