@@ -51,6 +51,8 @@ client.events.on('connected', function(packet) {
     client.subscribe('#');
 });
 
+// It is a good idea to forget knowledge that triggered a rule which publishes things
+// Otherwise the rule would fire again if the publish is received and the session is matched, resulting in an infinite loop
 function forget(m) {
     if (m.t in messages) {
         console.log("R <= " + m.t + ":" + m.p);
@@ -70,7 +72,6 @@ client.events.on('receive', function(packet) {
             forget(m);
         }
     } else {
-        console.log("payload: " + packet.payload);
         if(!packet.payload) {
             return;
         }

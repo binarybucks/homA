@@ -7,6 +7,7 @@ var client = require('homa-mqttjs');
 												.demand("payload")
 												.alias("topic", "t")
 												.alias("payload", "p")
+												.alias("retained", "r")
 												.default("retained", false).argv;
 
 
