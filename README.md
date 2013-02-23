@@ -1,8 +1,5 @@
 # HomA
 
-![Logo](https://github.com/binarybucks/homA/blob/master/spec/artwork/homA.png)
-
-
 HomA is a free and open source framework for building smart homes and connecting them to the internet of things. 
 It is designed to provide an entry into the world of home automation while also remaining highly extensible and adaptable for advanced users. 
 
