@@ -1,74 +1,34 @@
 #!/usr/bin/env node
-var mqtt = require('mqttjs')
-var argv = require('optimist').usage('Usage: $0 [--brokerHost 127.0.0.1] [--brokerPort 1883]')
-															.default("brokerHost", '127.0.0.1')
-															.default("brokerPort", 1883)
-															.argv;
+var client = require('homa-mqttjs');
+		client.argv = client.argv.argv;
 
-var mqttClient;
 var messages = {};
 
+client.events.on('connected', function(packet) {
+	client.subscribe('#');
+	unpublish();
+});
 
-function mqttConnect() {
-	mqtt.createClient(argv.brokerPort, argv.brokerHost, function(err, client) {
-	  if (err) {
-	  	console.log('MQTT        %s', err);
-	  	process.exit(1);
-	  }
-	  mqttClient = client;
-	  client.connect({keepalive: 40000});
+client.events.on('receive', function(packet) {
+  if(packet.payload != "" && packet.payload != undefined) {
+ 		messages[packet.topic.toString()] = packet.payload;
+	} else {
+		delete messages[packet.topic];
+	}
+	process.nextTick(printMessages);
+});
 
-	  client.on('connack', function(packet) {
-        if (packet.returnCode === 0) {
-            setInterval(function() {client.pingreq();}, 30000);
-	  			client.subscribe({topic: '#'});
-	  				unpublish();
-
-        } else {
-          console.log('MQTT        Connack error %d', packet.returnCode);
-          process.exit(-1);
-        }
-
-
-
-	  });
-
-	  client.on('close', function() {
-	    process.exit(-1);
-	  });
-
-	  client.on('error', function(e) {
-	    console.log('MQTT        Error: %s', e);
-	    process.exit(-1);
-	  });
-
-	 	client.on('publish', function(packet) {
-	  	if(packet.payload != "" && packet.payload != undefined) {
-		 		messages[packet.topic.toString()] = packet.payload;
-	  	} else {
-	  		delete messages[packet.topic];
-	  	}
-	 		process.nextTick(printMessages);
-	
-		});
-	});
-}
 
 function unpublish() {
 		ask("", function(data) {
 			if(data != undefined && parseInt(data) <= Object.keys(messages).length-1) {
-				process.nextTick(function(){mqttPublish(Object.keys(messages)[data], "", true);});
+				process.nextTick(function(){client.publish(Object.keys(messages)[data], "", true);});
 				process.nextTick(unpublish);
 			} else {
 				printMessages();
 				process.nextTick(unpublish);
 			}
 		});
-}
-
-
-function mqttPublish(topic, payload, retained) {
-	mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
 }
 
 function printMessages(){
@@ -86,8 +46,8 @@ function pad(num, size) {
     return s.substr(s.length-size);
 }
 
-
 function ask(question, callback) {
+	console.log("ask");
  var stdin = process.stdin, stdout = process.stdout;
  stdin.resume();
  stdout.write(question);
@@ -97,4 +57,8 @@ function ask(question, callback) {
  });
 }
 
-mqttConnect();
+(function connect() {
+	client.connect();
+})();
+
+

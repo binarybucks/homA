@@ -1,13 +1,9 @@
 #!/usr/bin/env node
 var nools = require("nools");
 var date = require("datejs")
-var mqtt = require('mqttjs')
-var argv = require('optimist').usage('Usage: $0 [--brokerHost 127.0.0.1] [--brokerPort 1883]')
-                              .default("brokerHost", '127.0.0.1')
-                              .default("brokerPort", 1883)
-                              .argv;
+var client = require('homa-mqttjs');
+    client.argv = client.argv.argv;
 
-var mqttClient;
 var messages = {};
 
 var Message = function (topic, payload) {
@@ -36,92 +32,53 @@ var Clock = function(){
     }
 
     this.step = function(){
-
         this.date = new Date();
         this.isMorning = this.hoursIsBetween(6, 11);
-        this.isNoon = this.hoursIsBetween(12, 14);
+        this.isNoon = this.hoursIsBetween(142, 14);
         this.isAfternoon = this.hoursIsBetween(15, 17);
         this.isEvening = this.hoursIsBetween(18, 23);
         this.isNight = this.hoursIsBetween(6,11); //this.hoursIsBetween(0, 5);
-
         return this;
     }
 }
 
-var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, mqttPublish: mqttPublish, Clock: Clock}});
+var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, publish: client.publish, Clock: Clock}});
 var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
 
-function mqttPublish(topic, payload, retained) {
-    console.log("Simulated publish of " + topic + ":" + payload + "(retained: " + retained+")");
-    //mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
-}
+client.events.on('connected', function(packet) {
+    client.subscribe('#');
+});
 
-function mqttReceive(topic, payload){
-    if (topic in messages) {
-        var m = messages[topic];
-
-        if(payload !== "" && payload !== undefined) {
-            console.log("M => " + topic + ":" + payload);
-            m.updatePayload(payload);
+client.events.on('receive', function(packet) {
+    if (packet.topic in messages) {
+        var m = messages[packet.topic];
+        if(packet.payload) {
+            console.log("M => " + packet.topic + ":" + packet.payload);
+            m.updatePayload(packet.payload);
             session.modify(m);
         } else {
-            console.log("R <= " + topic + ":" + m.p);
+            console.log("R <= " + packet.topic + ":" + m.p);
             session.retract(m);
-            delete messages[topic];
+            delete messages[packet.topic];
         }
     } else {
-        if(payload == "" || payload == undefined) {
+        if(!packet.payload) {
             return;
         }
-        console.log("A => " + topic + ":" + payload);
-        var m = new Message(topic, payload);
-        messages[topic] = m;
+        console.log("A => " + packet.topic + ":" + packet.ayload);
+        var m = new Message(packet.topic, packet.payload);
+        messages[packet.topic] = m;
         session.assert(m);
     }
 
     session.modify(clock.step());
     session.match();
-}
+});
 
-(function mqttConnect() {
-    mqtt.createClient(argv.brokerPort, argv.brokerHost, function(err, client) {
-        if (err) {
-            console.log('MQTT        %s', err);
-            process.exit(1);
-        }
-
-        mqttClient = client;
-        client.connect({"keepalive": 40000});
-
-
-        client.on('connack', function(packet) {
-
-        if (packet.returnCode === 0) {
-            setInterval(function() {client.pingreq();}, 30000);
-            client.subscribe({topic: '#'});
-        } else {
-          console.log('MQTT        Connack error %d', packet.returnCode);
-          process.exit(-1);
-        }
-
-
-        });
-
-        client.on('close', function() {
-            console.log('MQTT        Connection closed');
-            process.exit(-1);
-        });
-
-        client.on('error', function(e) {
-            console.log('MQTT        Error: %s', e);
-            process.exit(-1);
-        });
-
-        client.on('publish', function(packet) {
-            process.nextTick(function(){mqttReceive(packet.topic, packet.payload);})
-        });
-    });
+(function connect() {
+    client.connect();
 })();
+
 

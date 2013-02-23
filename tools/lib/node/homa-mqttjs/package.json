@@ -1,0 +1,13 @@
+{
+  "name": "homa-mqttjs",
+  "version": "0.1.3",
+  "description": "A simple wrapper around mqttjs for easier usage in my personal projects",
+  "main": "index.js",
+  "repository": "",
+  "author": "Alexander Rust",
+  "dependencies": {
+    "mqttjs": "~0.1.8",
+    "optimist": "~0.3.5"
+  },
+  "devDependencies": {}
+}
