@@ -37,12 +37,12 @@ var Clock = function(){
         this.isNoon = this.hoursIsBetween(142, 14);
         this.isAfternoon = this.hoursIsBetween(15, 17);
         this.isEvening = this.hoursIsBetween(18, 23);
-        this.isNight = this.hoursIsBetween(6,11); //this.hoursIsBetween(0, 5);
+        this.isNight = this.hoursIsBetween(0,5);
         return this;
     }
 }
 
-var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, publish: client.publish, Clock: Clock}});
+var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, publish: client.publish, forget: forget, Clock: Clock}});
 var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
@@ -50,6 +50,14 @@ session.assert(clock);
 client.events.on('connected', function(packet) {
     client.subscribe('#');
 });
+
+function forget(m) {
+    if (m.t in messages) {
+                  console.log("R <= " + m.t + ":" + m.p);
+            session.retract(m);
+            delete messages[m.topic];  
+    }
+}
 
 client.events.on('receive', function(packet) {
     if (packet.topic in messages) {
@@ -59,15 +67,13 @@ client.events.on('receive', function(packet) {
             m.updatePayload(packet.payload);
             session.modify(m);
         } else {
-            console.log("R <= " + packet.topic + ":" + m.p);
-            session.retract(m);
-            delete messages[packet.topic];
+            forget(m);
         }
     } else {
         if(!packet.payload) {
             return;
         }
-        console.log("A => " + packet.topic + ":" + packet.ayload);
+        console.log("A => " + packet.topic + ":" + packet.payload);
         var m = new Message(packet.topic, packet.payload);
         messages[packet.topic] = m;
         session.assert(m);

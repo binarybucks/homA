@@ -1,25 +1,27 @@
 rule morning {
     when {
-    		c: Clock c.isMorning;	
+    		c: Clock isTrue(c.isMorning);	
         m1: Message m1.t == '/tag' && m1.p == 'bed';
     }
     then {      
-        console.log("Rule: morning ");
+        console.log("Rule: morning " + c.isMorning);
         publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);	//Campusboard on
         publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
+              	forget(m1);
+
     }
 }
 
 rule night {
     when {
-        c: Clock c.isEvening || c.isNight;	
+        c: Clock isTrue(c.isAfternoon) ||  isTrue(c.isEvening) || isTrue(c.isAfternoon);	
         m1: Message m1.t == '/tag' && m1.p == 'bed'; 
     }
     then {      
         console.log("Rule: night");
-        publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
-        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
-
+       	publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
+      	//publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
+      	forget(m1);
     }
 }
 
@@ -29,22 +31,29 @@ rule away {
     }
     then {      
         console.log("Rule: away ");
-        publish("/devices/158293-433MhzSwitch-02/controls/Power/on", "0", true);	//Amp off
-        publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
-        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
-
+       	publish("/devices/158293-433MhzSwitch-02/controls/Power/on", "0", true);	//Amp off
+       	publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
+       	//publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
+      	forget(m1);
     }
 }
 
 rule home {
 	when {
+		c: Clock;
 		m1: Message m1.t == '/tag' && m1.p == 'flur';	
 	}
 	then {
 	        console.log("Rule: home");
 	        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);    //Desk on
+	        if(c.isAfternoon) {
+		        console.log("light on");
+	        }
+	              	forget(m1);
+
 	}
 }
+
 rule desk {
     when {
         m1: Message m1.t == '/tag' && m1.p == 'desk';
@@ -52,5 +61,7 @@ rule desk {
     then {      
         console.log("Rule: desk ");
         publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
+        	forget(m1);
+
     }
 }
