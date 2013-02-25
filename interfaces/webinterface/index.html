@@ -3,11 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type" />
-    
     <link rel="stylesheet" type="text/css" href="app.css" media="screen" />
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
-
-
     <title>HomA</title>
   </head>
   <body>
@@ -46,9 +43,6 @@
       <ul id="room-detail-links">
       </ul>
     </script>
-
-
-
     <script id="room-list-template" type="text/template">
       <div class="view-header">
         <h1>
@@ -60,7 +54,6 @@
       <div class="view-footer">
         <a id="settingsLink" href="#/settings">Settings</a>
       </div>
-
     </script>
     <script id="room-detail-link-template" type="text/template">
       <h1>
@@ -107,10 +100,8 @@
           <div class="controls">
           </div>
     </script>
-
     <script id="device-settings-template" type="text/template">
       <div class="view-header">
-
       <h2>
         <a href="#/rooms/<%= roomname %>">
           <%= roomname %>
@@ -141,7 +132,6 @@
         </div>
       </div>
     </script>
-
     <script id="undefined-control-template" type="text/template">
       <h2>
         <%= id %>
@@ -168,15 +158,11 @@
       </h2>
       <span><%= value %></span> 
     </script>
-    
-
     <script src="libs/mosquitto.js"></script>
     <script src="libs/jquery.js"></script>
     <script src="libs/json2.js"></script>
     <script src="libs/underscore.js"></script>
     <script src="libs/backbone.js"></script>
-
     <script src="app.js" type="text/javascript"></script>
   </body>
-  </html>   
-            
+</html>   

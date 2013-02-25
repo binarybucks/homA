@@ -117,6 +117,7 @@ function calendarSchedule(date, topic, payload){
 	var job = schedule.scheduleJob(date, function(){
 			client.publish(topic, payload, true);
 	});
+	events.push(job);
 }
 
 function calendarQuery() {

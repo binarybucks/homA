@@ -1,10 +1,7 @@
 /*html5doctor.com Reset Stylesheet v1.6.1 Last Updated: 2010-09-17 Author: Richard Clark - http://richclarkdesign.com  Twitter: @rich_clark */
 html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{ margin:0; padding:0; border:0; outline:0; font-size:100%; vertical-align:baseline; background:transparent}body{ line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{ display:block} ul{ list-style:none}blockquote,q{ quotes:none}blockquote:before,blockquote:after,q:before,q:after{ content:''; content:none}a{ margin:0; padding:0; font-size:100%; vertical-align:baseline; background:transparent}ins{ background-color:#ff9; color:#000; text-decoration:none}mark{ background-color:#ff9; color:#000; font-style:italic; font-weight:bold}del{ text-decoration:line-through}abbr[title],dfn[title]{ border-bottom:1px dotted; cursor:help}table{ border-collapse:collapse; border-spacing:0}hr{ display:block; height:1px; border:0;  border-top:1px solid #ccc; margin:1em 0; padding:0}input,select{ vertical-align:middle}
 
-
-/*
-Homer Stylesheet    
-*/
+/*HomA Stylesheet */
 
 html, body {
     font-family: "Gotham Light", "Helvetica Neue", sans-serif;
@@ -13,16 +10,12 @@ html, body {
     width: 100%;
     color: #a2a3a3;
 }
-
-
 body {
     margin: 0;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-image: -webkit-gradient(linear, right top, left bottom, from(#5dabc4), to(#1d4574));
 }
-
-
 #container {
     background: #FFF;
     box-shadow: 0 0 9px rgba(0, 0, 0, 0.38);
@@ -32,82 +25,57 @@ body {
     margin: 35px auto;
     margin-bottom: ;
 }
-
-
-
 .view-header {
     border-bottom: 1px solid #e8e8e8;
     margin-bottom: 35px;
     padding-bottom: 30px;
 }
-
 h1 {
     color: #a5a5a7;
     display: inline;
 }
-
 h2 {
     color: #cdcdd0;
     display: inline;
     text-transform: capitalize;
 }
-
-
-
 .view-header h1{
     font-size: 27px;
 }
-
-
 .view-header ~ * h1 {
     display: block;
     margin-bottom: 5px;
 
 }
-
-
 .view-header h2 {
     font-size: 17px;
 }
 .view-header h2:after {
     content: '/';
 }
-
 .view-footer {
     margin-top: 35px;
     padding-top : 30px;
-
-
     font-size: 12px;
 }
-
 .device, .setting {
     margin-bottom: 35px;
 }
-
 .device:last-child, .setting:last-child {
     margin-bottom: 0;
 }
-
 .device .controls 
 {
     color: #cdcdd0;
 }
-
-
-
 .device h1 {
     cursor: pointer;
 }
-
-
 .device .control {
-        line-height: 24px;
+    line-height: 24px;
     margin-bottom: 10px;
     position: relative;
     height: 24px;
-
-
 }
 .device .control h2 {
     position: absolute;
@@ -115,35 +83,25 @@ h2 {
     top: 1px; }
 
 .device .control input[type="checkbox"],  .device .control .rangeWrapper, .device .control span {
-        position: absolute;
+    position: absolute;
     left: 120px;
     top: 3px;
-
 }
-
 .device .control span {
     top: 2px;
 }
-
 input {
     margin: 0;
 }
-
 input[type="checkbox"] {
-
     border-radius: 2px;
     background: #ebebeb;
     border: 1px solid #d9d9d9;
-
     cursor: pointer;
     height: 18px;
     width: 50px;
     -webkit-appearance: none;
-
 }
-
-
-
 input[type="checkbox"]:after { 
     margin-top: -4px;
     background-color: #fbfbfb;
@@ -158,39 +116,27 @@ input[type="checkbox"]:after {
     position: relative;
     width: 22px;
 }
-
 input[type="checkbox"]:checked {
     border: 1px solid #7badcd;
     padding-left: 30px;
     padding-right: 0;
 }
-
 input[type="checkbox"]:checked, input[type="range"] {
     background: -webkit-linear-gradient(top, #c0e5f3 0%, #9adbed 100%);
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.3);
 }
-
-
-
-
-
-
-
 .rangeWrapper { 
     display: inline-block;
     overflow: hidden;
     padding: 2px 2px 4px 0;
 }
-
 .rangeWrapper, input[type="range"], input[type="range"]::-webkit-slider-thumb::before {
     width: 185px;
 } 
-
 input[type="range"] {
     -webkit-appearance: none;
     background: -webkit-linear-gradient(top, #c0e5f3 0%, #9adbed 100%);
-        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.3);
-
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.3);
     border: 1px solid #7badcd;
     -webkit-background-size: 20px;
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -199,9 +145,6 @@ input[type="range"] {
     position: relative;
     border-radius: 2px;
 }
-
-
-/*Right border*/
 input[type="range"]::after {
     background: #d9d9d9;
     content: '.';
@@ -215,8 +158,6 @@ input[type="range"]::after {
     width: 1px;
     z-index: 3;
 }
-
-
 input[type="range"]::-webkit-slider-thumb,
 input[type="range"]::-webkit-slider-thumb::after {
     -webkit-appearance: none;
@@ -229,15 +170,12 @@ input[type="range"]::-webkit-slider-thumb::after {
     width: 22px;
     z-index: 2;
 }
-
-/* Handle*/
 input[type="range"]::-webkit-slider-thumb::after {
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.3);
     background-color: #fbfbfb;
     background: url('images/handle.png') no-repeat 7px 7px, -webkit-linear-gradient(top, #fbfbfb 0%,#f4f4f4 100%); 
     border: 1px solid #c0c8ca;
     box-shadow: 0 1px 2px #dbdbdb;
-
     border-radius: 2px;
     border-radius: 2px;
     content: '.';
@@ -246,14 +184,11 @@ input[type="range"]::-webkit-slider-thumb::after {
     text-indent: -9999px;
     top: -1px;
 }
-
-
 input[type="range"]::-webkit-slider-thumb::before {
     background: #ebebeb;
     border: 1px solid #d9d9d9;
     border-width: 1px 0;
-pointer-events:none; /*Make clickthrough*/
-
+    pointer-events:none; /*Make clickthrough*/
     content: '.';
     display: block;
     height: 18px;
@@ -263,33 +198,21 @@ pointer-events:none; /*Make clickthrough*/
     text-indent: -9999px;
     width: 400px;
 }
-
 input[type="text"] {
     height: 22px;
     border: 1px solid #d9d9d9;
-        border-radius: 2px;
-        padding-left: 10px;
-        padding-right: 10px;
-        vertical-align: center;
-        padding-top: 6px;
-        padding-bottom: 6px;
-        color: #a2a3a3;
-            font-size: 14px;
-
+    border-radius: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    vertical-align: center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    color: #a2a3a3;
+    font-size: 14px;
 }
-
-
 input[type="text"]:focus {
     outline: none;
     border-color: #7bbacd;
     -webkit-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1),inset 0 -1px 0 rgba(0,0,0,0.07);
-
 }
-
-
-
-
 a {text-decoration: none; color: inherit;}
-
-
-

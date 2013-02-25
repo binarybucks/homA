@@ -1,0 +1,5 @@
+{ "name": "suntimes"
+, "version" : "0.1.0"
+, "dependencies" : {"suncalc" : "~1.0.0", "datejs" : "0.0.2", "homa-mqttjs" : "~0.1.3", "node-schedule" : "0.1.6"}
+}
+

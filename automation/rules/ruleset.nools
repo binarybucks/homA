@@ -1,20 +1,7 @@
-rule morning {
-    when {
-    		c: Clock isTrue(c.isMorning);	
-        m1: Message m1.t == '/tag' && m1.p == 'bed';
-    }
-    then {      
-        console.log("Rule triggered: morning " + c.isMorning);
-        publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);	//Campusboard on
-        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
-        forget(m1);
-    }
-}
-
 rule night {
     when {
         c: Clock isTrue(c.isAfternoon) ||  isTrue(c.isEvening) || isTrue(c.isAfternoon);	
-        m1: Message m1.t == '/tag' && m1.p == 'bed'; 
+        m1: Message m1.t == '/events/tag' && m1.p == 'bed'; 
     }
     then {      
         console.log("Rule triggered: night");
@@ -26,7 +13,7 @@ rule night {
 
 rule away {
     when {
-        m1: Message m1.t == '/tag' && m1.p == 'door';
+        m1: Message m1.t == '/events/tag' && m1.p == 'door';
     }
     then {      
         console.log("Rule triggered: away ");
@@ -40,13 +27,13 @@ rule away {
 rule home {
 	when {
 		c: Clock;
-		m1: Message m1.t == '/tag' && m1.p == 'flur';	
+		m1: Message m1.t == '/events/tag' && m1.p == 'flur';	
 	}
 	then {
 	        console.log("Rule triggered: home");
 	        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);    //Desk on
 	        if(c.isAfternoon || c.isEvening || c.isNight) {
-            publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);  //Campusboard on
+                publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);  //Campusboard on
 	        }
 	        forget(m1);
 	}
@@ -54,11 +41,22 @@ rule home {
 
 rule desk {
     when {
-        m1: Message m1.t == '/tag' && m1.p == 'desk';
+        m1: Message m1.t == '/events/tag' && m1.p == 'desk';
     }
     then {      
         console.log("Rule triggered: desk ");
         publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
+        forget(m1);
+    }
+}
+
+rule sunset {    
+    when {
+        m1: Message m1.t == '/events/sun' && m1.p == 'sunset';
+    }
+    then {      
+        console.log("Rule triggered: sunset ");
+        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);    //Desk on
         forget(m1);
     }
 }

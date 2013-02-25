@@ -3,8 +3,6 @@ $(function(){
 
 
   Backbone.View.prototype.close = function() {
-    console.log("closing view");
-
     this.off();
     this.remove();
 
@@ -14,12 +12,10 @@ $(function(){
     }
 
     if (this.model) {
-      console.log("removing all event handlers this view has on its model");
       this.model.off(null, null, this);
     }
 
     if (this.collection) {
-      console.log("removing all event handlers this view has on its collection");
       this.collection.off(null, null, this);
     }
   }
@@ -82,7 +78,7 @@ $(function(){
 
     removeFromCurrentRoom: function() {
       if (this.get("room") != undefined && this.get("room") != null) {
-        console.log("removing device from room: " + this.get("room").id);
+        console.log("Removing device from room: " + this.get("room").id);
         this.get("room").devices.remove(this);
 
 
@@ -101,7 +97,7 @@ $(function(){
       var targetRoom = Rooms.get(cleanedName);
     
       if (targetRoom == null) {
-        console.log("room " + cleanedName +" does not exist");
+        console.log("Room " + cleanedName +" does not exist, creating it");
         targetRoom = new Room({id: cleanedName});
         Rooms.add(targetRoom);
       } 
@@ -202,7 +198,6 @@ $(function(){
         this.$el.html(tmpl());
 
         // According to http://jsperf.com/backbone-js-collection-iteration for iteration with collection.models is pretty fast
-        console.log("number of rooms: " + this.model.length);
         for (var i = 0, l = this.model.length; i < l; i++) {
             this.addRoom(this.model.models[i]);
         }
@@ -210,7 +205,7 @@ $(function(){
         return this;
     },
     removeRoom: function(room) {
-      console.log("room removed, removing detail link view");
+      console.log("Room removed, removing detail link view");
        room.detailViewLink.close();
     },
 
@@ -300,8 +295,7 @@ $(function(){
     },
 
     removeDevice: function(device) {
-      console.log("removing device from room: "+ device.get('id') + " " + this.model.get('id'))
-      console.log()
+      console.log("Removing device from room: "+ device.get('id') + " " + this.model.get('id'))
       device.view.close();
       // $(device.view.el).unbind();
       // $(device.view.el).remove();
@@ -402,8 +396,6 @@ $(function(){
 
     // Specialized methods for type range
     rangeRender: function() {
-            console.log("range reder");
-
       var tmpl = this.templateByType("range");
       this.$el.html(tmpl(this.model.toJSON()));
       this.input = this.$('input');
@@ -411,13 +403,10 @@ $(function(){
     },
 
     rangeInhibitInputUpdates: function(event) {
-      console.log("preventing input updates");
       this.allowUpdates = false; 
     },    
 
     rangeAllowInputUpdates: function(event) {
-      console.log("allowing input updates");
-
       this.allowUpdates = true; 
     },
 
@@ -430,8 +419,6 @@ $(function(){
 
 
     rangeModelValueChanged: function(model) {
-            console.log("model value changed to: " + this.model.get("value"));
-
       if (this.allowUpdates) {
         this.render();
       }
@@ -475,7 +462,6 @@ $(function(){
 
     // Helper methods
     methodNotImplemented: function() {
-      console.log("method is not implemented");
     },
 
     templateByType: function(type) {
@@ -535,7 +521,6 @@ $(function(){
     className: "device", 
 
     initialize: function() {
-      console.log("new DeviceView created for: " + this.model.id);
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
@@ -586,7 +571,6 @@ $(function(){
     },
 
     renderToplevelView: function(view) {
-      console.log("renderToplevelView");
       this.$el.html(view.render().$el);
       view.delegateEvents();
 
@@ -621,11 +605,8 @@ $(function(){
 
 
   },
-  initialize: function() {console.log("Router inizalized");},
 
   index: function() {
-    console.log("showing roomListView");
-
     var roomListView = new RoomListView({model: Rooms});
     App.showView(roomListView);
   },
@@ -636,7 +617,6 @@ $(function(){
   },
 
   deviceSettings: function(id) {
-    console.log("device settings");
     var device = Devices.get(id); // Room might not yet exists
     var view; 
     if (device == null) {
@@ -650,7 +630,6 @@ $(function(){
 
 
   room: function(id) {
-    console.log("showing roomDetailView for room: " + id);
     var room = Rooms.get(id); // Room might not yet exists
     var view; 
     if (room == null) {
@@ -688,13 +667,9 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-      // console.log("-----------RECEIVED-----------");
-      // console.log("Received: "+topic+":"+payload);    
+      console.log("-----------RECEIVED-----------");
+      console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
-
-  console.log("pl")
-     console.log(payload)
- 
 
     // Ensure the device for the message exists
     var deviceId = splitTopic[2]
@@ -704,10 +679,10 @@ $(function(){
       Devices.add(device);
       device.moveToRoom(undefined);
     } else if (device != null && payload == "") {   
-      console.log("removing " + deviceId);
+      console.log("Removing device with id: " + deviceId);
       console.log(payload);
       // Remove the device when any received topic under that device tree is "" (actually this also removes the device when just a control should be removed, but 
-      // but right now there is no usecase to remove a single control only.)
+      // right now there is no usecase to remove a single control only.)
       // This just removes the device when the webinterface is loaded and a "" is received. This does not ensure persistent removal during reloads. 
       // It's the devices job to ensure that all of its values are correctly unpublished 
       device.removeFromCurrentRoom();
@@ -740,7 +715,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-     // console.log("-----------/ RECEIVED-----------");
+     console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {
