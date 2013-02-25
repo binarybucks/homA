@@ -17,11 +17,11 @@ public abstract class ControlView {
 
 
 
-    public ControlView(Activity activity, int layoutRessource) {
+    public ControlView(Activity activity, int layoutRessource, int valueRessource, int nameRessource) {
         this.activity = activity;
         _layout = activity.getLayoutInflater().inflate(layoutRessource, null);
-        _value = _layout.findViewById(R.id.controlValue);
-        _name = (TextView) _layout.findViewById(R.id.controlName);
+        _value = _layout.findViewById(valueRessource);
+        _name = (TextView) _layout.findViewById(nameRessource);
         
     }
 

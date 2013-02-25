@@ -6,7 +6,7 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/controlName"
+        android:id="@+id/textControlName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="0dip"
@@ -19,7 +19,7 @@
         />
 
     <TextView
-        android:id="@+id/controlValue"
+        android:id="@+id/textControlValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dip"
