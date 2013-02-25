@@ -3,7 +3,6 @@
 var express = require('express');
 var oauth = require('oauth');
 var os = require("os");
-var schedule = require('node-schedule');
 
 var client = require('homa-mqttjs');
 		client.argv = client.argv.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
@@ -11,11 +10,9 @@ var client = require('homa-mqttjs');
 												.default("systemId", "458293-GoogleCalendarBridge")
 												.default("calendarQueryInterval", 30).argv;
 
-
 var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
 var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
 var accessToken, accessTokenRefreshIn, oa;
-var events = [];
 var settings = {};
 var bootstrapCompleted = false;
 var calendarQueryInterval = client.argv.calendarQueryInterval*60*1000;
@@ -112,14 +109,6 @@ function calendarScheduleQuery(){
 	process.nextTick(calendarQuery);
 }
 
-function calendarSchedule(date, topic, payload){
-	console.log("Calendar    At "  + date + " publishing " + topic + ":" + payload );
-	var job = schedule.scheduleJob(date, function(){
-			client.publish(topic, payload, true);
-	});
-	events.push(job);
-}
-
 function calendarQuery() {
 	var timeMax = encodeURIComponent(new Date((new Date()).getTime()+ (calendarQueryInterval + (5*60*1000))).toISOString());
 	var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(new Date().toISOString())+"&timeMax="+timeMax;	
@@ -134,10 +123,9 @@ function calendarQuery() {
 				if (items == undefined) {
 					return;
 				}
-				// Unschedule all events
-				for (var i=0; i<events.length; i++) {
-					events[i].cancel();
-				}
+
+				client.unschedulePublishes();
+
 			} catch (e) {
 				return;
 			}
@@ -150,12 +138,12 @@ function calendarQuery() {
 
 					// Schedule start events
 					for(key in payload.start){
-						calendarSchedule(new Date(item.start.dateTime), key, payload.start[key]);
+						client.schedulePublish(new Date(item.start.dateTime)), key, payload.start[key], true); 
 					}
 
 					// Schedule end events
 					for(key in payload.end){
-						calendarSchedule(new Date(item.end.dateTime), key, payload.end[key]);
+						client.schedulePublish(new Date(item.start.dateTime)), key, payload.start[key], true); 
 					}
 				} catch (e) {
 					console.log(e)
@@ -163,17 +151,5 @@ function calendarQuery() {
 				}
     	}
 		}
-
 	});	
 }
-
-
-
-
-
-
-
-
-
-
-

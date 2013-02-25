@@ -35,15 +35,10 @@ function printMessages(){
 	console.log("\n\n   #: Topic:Value");
 	var i = 0;
 	for (key in messages) {
-		console.log(pad(i.toString(), 4)+": " + key + ":" + messages[key]);
+		console.log(client.pad(i.toString(), 4, " ")+": " + key + ":" + messages[key]);
 		i++;
 	};
 	process.stdout.write("      Enter # to unpublish: ");
-}
-
-function pad(num, size) {
-    var s = "     " + num;
-    return s.substr(s.length-size);
 }
 
 function ask(question, callback) {
