@@ -38,7 +38,7 @@ $(function(){
     },
 
    initialize: function() {
-      if (!this.get("title")) {
+      if (!this.get("title")) { 
         this.set({"server": localStorage.getItem("homA_server") || "127.0.0.1"});
         this.set({"devMode": localStorage.getItem("homA_devMode") == 1 });
       }
@@ -93,20 +93,19 @@ $(function(){
     },
 
     moveToRoom: function(roomName) {
+      this.removeFromCurrentRoom();
+
       var cleanedName = roomName || "unassigned";
       var targetRoom = Rooms.get(cleanedName);
-    
+
       if (targetRoom == null) {
         console.log("Room " + cleanedName +" does not exist, creating it");
         targetRoom = new Room({id: cleanedName});
         Rooms.add(targetRoom);
       } 
 
-      this.removeFromCurrentRoom();
-      
       targetRoom.devices.add(this);
       this.set("room", targetRoom);
-   //   this.room = targetRoom;
     },
   });
 

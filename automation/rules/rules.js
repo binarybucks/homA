@@ -6,14 +6,18 @@ var client = require('homa-mqttjs');
 
 var messages = {};
 
-var Message = function (topic, payload) {
-    this.t = topic;
-    this.p = payload;
-    this.changed = false;
-    this.updatePayload = function(payload) {
-        this.changed = this.p != payload;
-        this.p = payload;
+var Message = function (packet) {
+    this.updatePayload = function(packet) {
+        this.p_previous = this.p;
+        this.p = packet.payload;
+        this.changed = this.p_previous != this.p;
+        this.retained = packet.retain;
     }
+    
+    this.changedFromTo = function(from, to) {
+        return this.p_previous == from && this.p == to;
+    }
+    this.updatePayload(packet);
 };
 
 var Clock = function(){
@@ -34,7 +38,7 @@ var Clock = function(){
     this.step = function(){
         this.date = new Date();
         this.isMorning = this.hoursIsBetween(6, 11);
-        this.isNoon = this.hoursIsBetween(142, 14);
+        this.isNoon = this.hoursIsBetween(12, 14);
         this.isAfternoon = this.hoursIsBetween(15, 17);
         this.isEvening = this.hoursIsBetween(18, 23);
         this.isNight = this.hoursIsBetween(0,5);
@@ -62,11 +66,12 @@ function forget(m) {
 }
 
 client.events.on('receive', function(packet) {
+    console.log("retained: " + packet.retain);
     if (packet.topic in messages) {
         var m = messages[packet.topic];
         if(packet.payload) {
             console.log("M => " + packet.topic + ":" + packet.payload);
-            m.updatePayload(packet.payload);
+            m.updatePayload(packet);
             session.modify(m);
         } else {
             forget(m);
@@ -76,7 +81,7 @@ client.events.on('receive', function(packet) {
             return;
         }
         console.log("A => " + packet.topic + ":" + packet.payload);
-        var m = new Message(packet.topic, packet.payload);
+        var m = new Message(packet);
         messages[packet.topic] = m;
         session.assert(m);
     }
