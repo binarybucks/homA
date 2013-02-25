@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-
 var express = require('express');
 var oauth = require('oauth');
 var os = require("os");
 
-var client = require('homa-mqttjs');
-		client.argv = client.argv.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
+var homa = require('homa');
+		homa.argv = homa.argv.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
 												.describe("calendarQueryInterval", "The number of minutes between queries to the Google Calendar")
 												.default("systemId", "458293-GoogleCalendarBridge")
 												.default("calendarQueryInterval", 30).argv;
@@ -15,24 +14,24 @@ var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
 var accessToken, accessTokenRefreshIn, oa;
 var settings = {};
 var bootstrapCompleted = false;
-var calendarQueryInterval = client.argv.calendarQueryInterval*60*1000;
+var calendarQueryInterval = homa.argv.calendarQueryInterval*60*1000;
 
 
 // Changing these might break things
-var MQTT_TOPIC_SYS = "/sys/"+client.argv.systemId + "/#"
-var MQTT_TOPIC_CALENDAR_ID = "/sys/" + client.argv.systemId + "/calendarId";
-var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + client.argv.systemId + "/refreshToken";
+var MQTT_TOPIC_SYS = "/sys/"+homa.argv.systemId + "/#"
+var MQTT_TOPIC_CALENDAR_ID = "/sys/" + homa.argv.systemId + "/calendarId";
+var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + homa.argv.systemId + "/refreshToken";
 
 (function connect() {
-	client.connect();
+	homa.mqttHelper.connect();
 })();
 
 
-client.events.on('connected', function(packet) {
-	client.subscribe(MQTT_TOPIC_SYS);
+homa.mqttHelper.on('connected', function(packet) {
+	homa.mqttHelper.subscribe(MQTT_TOPIC_SYS);
 });
 
-client.events.on('receive', function(packet) {
+homa.mqttHelper.on('receive', function(packet) {
 	console.log("MQTT        Received: " + packet.topic + ":" + packet.payload);
 	settings[packet.topic] = packet.payload;
 	if (bootstrapComplete() && !bootstrapCompleted) {
@@ -72,7 +71,7 @@ function oauth2getAccessTokenCallback(err, access_token, refresh_token, results)
 	    accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
 	    settings[MQTT_TOPIC_REFRESH_TOKEN] = !!refresh_token ? refresh_token : settings[MQTT_TOPIC_REFRESH_TOKEN];
 
-	    client.publish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
+	    homa.mqttHelper.publish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
 
 	    console.log('OAUTH       Access token: ' + accessToken);
 	    console.log('OAUTH       Access token refresh in: ' + accessTokenRefreshIn+"ms");
@@ -124,7 +123,7 @@ function calendarQuery() {
 					return;
 				}
 
-				client.unschedulePublishes();
+				homa.mqttHelper.unschedulePublishes();
 
 			} catch (e) {
 				return;
@@ -138,12 +137,12 @@ function calendarQuery() {
 
 					// Schedule start events
 					for(key in payload.start){
-						client.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
+						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
 					}
 
 					// Schedule end events
 					for(key in payload.end){
-						client.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
+						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
 					}
 				} catch (e) {
 					console.log(e)

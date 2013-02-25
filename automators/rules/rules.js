@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 var nools = require("nools");
 var date = require("datejs")
-var client = require('homa-mqttjs');
-    client.argv = client.argv.argv;
+var homa = require('homa');
+    homa.argv = homa.argv.argv;
 
 var messages = {};
 
@@ -46,13 +46,13 @@ var Clock = function(){
     }
 }
 
-var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, publish: client.publish, forget: forget, Clock: Clock}});
+var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, publish: homa.mqttHelper.publish, homa: homa, forget: forget, Clock: Clock}});
 var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
 
-client.events.on('connected', function(packet) {
-    client.subscribe('#');
+homa.mqttHelper.on('connected', function(packet) {
+    homa.mqttHelper.subscribe('#');
 });
 
 // It is a good idea to forget knowledge that triggered a rule which publishes things
@@ -65,8 +65,7 @@ function forget(m) {
     }
 }
 
-client.events.on('receive', function(packet) {
-    console.log("retained: " + packet.retain);
+homa.mqttHelper.on('receive', function(packet) {
     if (packet.topic in messages) {
         var m = messages[packet.topic];
         if(packet.payload) {
@@ -91,7 +90,7 @@ client.events.on('receive', function(packet) {
 });
 
 (function connect() {
-    client.connect();
+    homa.mqttHelper.connect();
 })();
 
 

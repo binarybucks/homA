@@ -1,5 +1,2 @@
-{ "name": "publish"
-, "version" : "0.1.0"
-, "dependencies" : {"homa-mqttjs" : "~0.1.3"}
-}
+{ "name": "publish",  "version" : "0.1.0" , "dependencies" : {"homa" : ">=0.1.0"}}
 

@@ -1,15 +1,14 @@
 #!/usr/bin/env node
-var client = require('homa-mqttjs');
-		client.argv = client.argv.argv;
-
+var homa = require('homa');
+		homa.argv = homa.argv.argv;
 var messages = {};
 
-client.events.on('connected', function(packet) {
-	client.subscribe('#');
+homa.mqttHelper.on('connected', function(packet) {
+	homa.mqttHelper.subscribe('#');
 	unpublish();
 });
 
-client.events.on('receive', function(packet) {
+homa.mqttHelper.on('receive', function(packet) {
   if(packet.payload != "" && packet.payload != undefined) {
  		messages[packet.topic.toString()] = packet.payload;
 	} else {
@@ -18,11 +17,10 @@ client.events.on('receive', function(packet) {
 	process.nextTick(printMessages);
 });
 
-
 function unpublish() {
 		ask("", function(data) {
 			if(data != undefined && parseInt(data) <= Object.keys(messages).length-1) {
-				process.nextTick(function(){client.publish(Object.keys(messages)[data], "", true);});
+				process.nextTick(function(){homa.mqttHelper.publish(Object.keys(messages)[data], "", true);});
 				process.nextTick(unpublish);
 			} else {
 				printMessages();
@@ -32,17 +30,21 @@ function unpublish() {
 }
 
 function printMessages(){
-	console.log("\n\n   #: Topic:Value");
+			homa.logHelper.log("\n\n\n         #:", " Topic:Value")
+
+
 	var i = 0;
 	for (key in messages) {
-		console.log(client.pad(i.toString(), 4, " ")+": " + key + ":" + messages[key]);
+
+		homa.logHelper.log("      " + homa.stringHelper.pad(i.toString(), 4, " ") +": ", key + ":" + messages[key])
+		//console.log(homa.stringHelper.pad(i.toString(), 4, " ")+": " + key + ":" + messages[key]);
 		i++;
 	};
-	process.stdout.write("      Enter # to unpublish: ");
+
+	process.stdout.write("             Enter # to unpublish: ");
 }
 
 function ask(question, callback) {
-	console.log("ask");
  var stdin = process.stdin, stdout = process.stdout;
  stdin.resume();
  stdout.write(question);
@@ -53,7 +55,7 @@ function ask(question, callback) {
 }
 
 (function connect() {
-	client.connect();
+	homa.mqttHelper.connect();
 })();
 
 

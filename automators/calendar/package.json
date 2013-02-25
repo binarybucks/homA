@@ -1,0 +1,5 @@
+{ "name": "calendar"
+, "version" : "0.1.0"
+, "dependencies" : {"homa" : ">=0.1.0", "express" : "3.1.0", "oauth" : "0.9.8", "querystring" : "0.1.0", "request" : "2.12.0"}
+}
+

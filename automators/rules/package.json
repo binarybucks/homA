@@ -1,0 +1,5 @@
+{ "name": "rules"
+, "version" : "0.1.0"
+, "dependencies" : {"homa" : ">=0.1.0", "nools" : ">=0.0.5", "datejs" : ">=0.0.2"}
+}
+

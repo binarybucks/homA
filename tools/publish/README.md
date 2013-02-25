@@ -5,6 +5,7 @@ This is a small Node.js command-line utility to publish a single message to an M
 ```
 $ npm install
 ```
+
 ### Usage
 ```
 $ node publish.js --brokerHost localhost [--brokerPort 1883] [--retained | -e] (--topic | -t) "/foo" (--payload | -p) "bar" 
