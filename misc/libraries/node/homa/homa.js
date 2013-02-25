@@ -6,9 +6,12 @@ var util = require('util');
 var events = require('events');
 var mqtt = require('mqttjs');
 var schedule = require('node-schedule');
+var log = require('npmlog')
 var argv = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT");
 		argv = process.env.HOMA_BROKER_HOST ? argv.default("brokerHost", process.env.HOMA_BROKER_HOST) : argv.demand("brokerHost");
 		argv = process.env.HOMA_BROKER_PORT ? argv.default("brokerPort", process.env.HOMA_BROKER_PORT) : argv.default("brokerPort", 1883);
+
+log.disableColor();
 
 var StringHelper = function() {
 	this.pad = function(n, width, symbol, back) {
@@ -22,23 +25,16 @@ var StringHelper = function() {
 	}
 }
 
-var LogHelper = function() {
-	this.log = function(tag, message) {
-		console.log("%s %s", exports.stringHelper.pad(tag, 12, " ", true), message)
-	}
-}
-
 var MqttHelper = function() {
-	var TAG = "MQTT"
 	var mqttClient;
-	var scheduledPublishes = [];
 	var self = this;
+	self.scheduledPublishes = [];
 
 	this.connect = function(host, port, callback) {
-		exports.logHelper.log(TAG, "Connecting to " +  (host || module.exports.argv.brokerHost) + ":" + (port || exports.argv.brokerPort));
+		log.info("MQTT", "Connecting to %s:%s", host || module.exports.argv.brokerHost, port || exports.argv.brokerPort);
 		mqtt.createClient(port || exports.argv.brokerPort, host || exports.argv.brokerHost, function(err, client) {
 		  if (err) {
-		  	exports.logHelper.log(TAG, err.toString());
+		  	log.error("MQTT", "Error: %s", err);
 		  	process.exit(1);
 		  }
 
@@ -50,18 +46,18 @@ var MqttHelper = function() {
 	            setInterval(function() {client.pingreq();}, 30000);
 	            self.emit('connected', packet);
 	        } else {
-	        	exports.logHelper.log(TAG, "Connack error");
+	        	log.error("MQTT", "Connack error");
 	          process.exit(-1);
 	        }
 		  });
 
 		  client.on('close', function() {
-		  	exports.logHelper.log(TAG, "Connection closed");
+		  	log.info("MQTT", "Connection closed");
 		    process.exit(-1);
 		  });
 
 		  client.on('error', function(e) {
-		  	exports.logHelper.log(TAG, "Error " + e.toString);
+		  	log.error("MQTT", "Error: %s", e);
 		    process.exit(-1);
 		  });
 
@@ -72,12 +68,12 @@ var MqttHelper = function() {
 	}
 
 	this.publish = function(topic, payload, retained) {
-		exports.logHelper.log(TAG, "Publishing " + topic + ":" + payload + "(retained: " + retained + ")");
+		log.info("MQTT", "Publishing %s:%s (retained=%s)", topic, payload, retained);
 		self.mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
 	}
 
 	this.schedulePublish = function(date, topic, payload, retained){
-		exports.logHelper.log("SCHEDULE", "At " + date + " publishing " + topic + ":" + payload + "(retained: " + retained || false + ")");
+		log.info("SCHEDULE", "At %s, publishing %s:%s (retained=%s)", date, topic, payload, retained);
 		var job = schedule.scheduleJob(date, function(){
 				self.publish(topic, payload, retained || false);
 		});
@@ -107,7 +103,7 @@ util.inherits(MqttHelper, events.EventEmitter);
 
 module.exports.mqttHelper = new MqttHelper();
 module.exports.stringHelper = new StringHelper();
-module.exports.logHelper = new LogHelper();
 
 module.exports.scheduler = schedule;
 module.exports.argv = argv; 
+module.exports.logger = log;

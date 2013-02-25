@@ -3,7 +3,7 @@ rule away {
         m1: Message m1.t == '/events/tag' && m1.p == 'door';
     }
     then {      
-        console.log("Rule triggered: away ");
+        log.info("RULES", "Rule triggered: away ");
         publish("/devices/158293-433MhzSwitch-02/controls/Power/on", "0", true);    //Amp off
         publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);    //Campusboard off
         publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);    //Desk off
@@ -17,7 +17,7 @@ rule home {
         m1: Message m1.t == '/events/tag' && m1.p == 'flur';    
     }
     then {
-            console.log("Rule triggered: home");
+            log.info("RULES", "Rule triggered: home");
             publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);    //Desk on
             if(c.isAfternoon || c.isEvening || c.isNight) {
                 publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);  //Campusboard on
@@ -32,7 +32,7 @@ rule night {
         m1: Message m1.t == '/events/tag' && m1.p == 'bed'; 
     }
     then {      
-        console.log("Rule triggered: night");
+        log.info("RULES", "Rule triggered: night");
        	publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
       	publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
       	forget(m1);
@@ -46,7 +46,7 @@ rule desk {
         m1: Message m1.t == '/events/tag' && m1.p == 'desk';
     }
     then {      
-        console.log("Rule triggered: desk ");
+        log.info("RULES", "Rule triggered: desk ");
         publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
         forget(m1);
     }
@@ -57,7 +57,7 @@ rule sunset {
         m1: Message m1.t == '/events/sun' && m1.p == 'sunset';
     }
     then {      
-        console.log("Rule triggered: sunset ");
+        log.info("RULES", "Rule triggered: sunset ");
         publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);    //Campusboard on
         forget(m1);
     }

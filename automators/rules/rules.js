@@ -3,7 +3,6 @@ var nools = require("nools");
 var date = require("datejs")
 var homa = require('homa');
     homa.argv = homa.argv.argv;
-
 var messages = {};
 
 var Message = function (packet) {
@@ -17,6 +16,7 @@ var Message = function (packet) {
     this.changedFromTo = function(from, to) {
         return this.p_previous == from && this.p == to;
     }
+    this.t = packet.topic;
     this.updatePayload(packet);
 };
 
@@ -46,7 +46,7 @@ var Clock = function(){
     }
 }
 
-var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, publish: homa.mqttHelper.publish, homa: homa, forget: forget, Clock: Clock}});
+var flow = nools.compile(__dirname + "/ruleset.nools", {define: {Message: Message, homa: homa, publish: homa.mqttHelper.publish, log: homa.logger, forget: forget, Clock: Clock}});
 var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
@@ -59,7 +59,7 @@ homa.mqttHelper.on('connected', function(packet) {
 // Otherwise the rule would fire again if the publish is received and the session is matched, resulting in an infinite loop
 function forget(m) {
     if (m.t in messages) {
-        console.log("R <= " + m.t + ":" + m.p);
+        homa.logger.info("RULES", "RETRACTING <= " + m.t + ":" + m.p);
         session.retract(m);
         delete messages[m.t];  
     }
@@ -69,7 +69,7 @@ homa.mqttHelper.on('receive', function(packet) {
     if (packet.topic in messages) {
         var m = messages[packet.topic];
         if(packet.payload) {
-            console.log("M => " + packet.topic + ":" + packet.payload);
+            homa.logger.info("RULES", "MODIFYING => " + packet.topic + ":" + packet.payload);
             m.updatePayload(packet);
             session.modify(m);
         } else {
@@ -79,7 +79,7 @@ homa.mqttHelper.on('receive', function(packet) {
         if(!packet.payload) {
             return;
         }
-        console.log("A => " + packet.topic + ":" + packet.payload);
+        homa.logger.info("RULES", "ASSERTING => " + packet.topic + ":" + packet.payload);
         var m = new Message(packet);
         messages[packet.topic] = m;
         session.assert(m);

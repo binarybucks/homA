@@ -1,15 +1,16 @@
 {
   "name": "homa",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Meta package for the HomA framework",
   "main": "homa.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "mqttjs": "~0.1.8",
-    "optimist": "~0.3.5",
-    "node-schedule" : "~0.1.6"
+    "mqttjs": ">=0.1.8",
+    "optimist": ">=0.3.5",
+    "node-schedule" : ">=0.1.6",
+    "npmlog" : ">=0.0.2"
   },
   "repository": "",
   "author": "Alexander Rust",

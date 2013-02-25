@@ -30,18 +30,13 @@ function unpublish() {
 }
 
 function printMessages(){
-			homa.logHelper.log("\n\n\n         #:", " Topic:Value")
-
-
+	console.log("\n\n\n");
 	var i = 0;
 	for (key in messages) {
-
-		homa.logHelper.log("      " + homa.stringHelper.pad(i.toString(), 4, " ") +": ", key + ":" + messages[key])
-		//console.log(homa.stringHelper.pad(i.toString(), 4, " ")+": " + key + ":" + messages[key]);
+		console.log(" " + homa.stringHelper.pad(i.toString(), 4, " ")+": " + key + ":" + messages[key]);
 		i++;
 	};
-
-	process.stdout.write("             Enter # to unpublish: ");
+	process.stdout.write("       Enter # to unpublish: ");
 }
 
 function ask(question, callback) {

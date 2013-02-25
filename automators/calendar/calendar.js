@@ -32,11 +32,10 @@ homa.mqttHelper.on('connected', function(packet) {
 });
 
 homa.mqttHelper.on('receive', function(packet) {
-	console.log("MQTT        Received: " + packet.topic + ":" + packet.payload);
 	settings[packet.topic] = packet.payload;
 	if (bootstrapComplete() && !bootstrapCompleted) {
 		bootstrapCompleted = true;
-		console.log("Settings    Bootstrap completed. Waiting 5 seconds for refresh token");
+		homa.logger.info("CALENDAR", "Bootstrap completed. Waiting 5 seconds for refresh token");
 		setTimeout(function () {oauth2expressBotstrap(); oauth2bootstrap();} , 5*1000); // 5 seconds grace period to receive refresh token. Otherwise request authentication from user 
 	}
 });
@@ -46,7 +45,7 @@ function bootstrapComplete() {
 		var requiredItems = [MQTT_TOPIC_CALENDAR_ID];
 		for(i=0;i<requiredItems.length;i++){
 			if(settings[requiredItems[i]] == undefined || settings[requiredItems[i]] == ""){
-				console.log("Settings    Not yet received: " + requiredItems[i] )
+				homa.logger.info("CALENDAR", "Waiting to receive setting: " + requiredItems[i] );
 				pass = false;
 			}
 		}
@@ -56,8 +55,8 @@ function bootstrapComplete() {
 function oauth2bootstrap() {
 	oa = new oauth.OAuth2(clientId, clientSecret, "https://accounts.google.com/o", "/oauth2/auth", "/oauth2/token");
 	if(settings[MQTT_TOPIC_REFRESH_TOKEN] == undefined || settings[MQTT_TOPIC_REFRESH_TOKEN] == "" ) {
-		console.log("OAUTH       Requesting new access- and refresh token");
-		console.log("OAUTH       No refresh token provided. \n            Please point your browser to: " +os.hostname()+":8553/");
+		homa.logger.info("OAUTH", "Requesting new access- and refresh token");
+		homa.logger.info("OAUTH", "No refresh token provided. \n            Please point your browser to: " +os.hostname()+":8553/");
 	} else {
 		oauth2refreshAccessToken();
 	}
@@ -65,7 +64,7 @@ function oauth2bootstrap() {
 
 function oauth2getAccessTokenCallback(err, access_token, refresh_token, results){
 	if (err) {
-	    console.log('Error       ' + JSON.stringify(err));
+	    homa.logger.error("OAUTH", "Error: %s", JSON.stringify(err));
 	} else {
 	    accessToken = access_token;
 	    accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
@@ -73,17 +72,17 @@ function oauth2getAccessTokenCallback(err, access_token, refresh_token, results)
 
 	    homa.mqttHelper.publish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
 
-	    console.log('OAUTH       Access token: ' + accessToken);
-	    console.log('OAUTH       Access token refresh in: ' + accessTokenRefreshIn+"ms");
-	    console.log('OAUTH       Refresh token: ' + settings[MQTT_TOPIC_REFRESH_TOKEN]);
-	   	console.log('OAUTH       Token type: ' + results.token_type);
+	    homa.logger.info("OAUTH", "Access token: " + accessToken);
+	   	homa.logger.info("OAUTH", "Access token refresh in: " + accessTokenRefreshIn+"ms");
+	    homa.logger.info("OAUTH", "Refresh token: " + settings[MQTT_TOPIC_REFRESH_TOKEN]);
+	   	homa.logger.info("OAUTH", "Token type: " + results.token_type);
 	   	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
 	   	process.nextTick(calendarQuery);
 	}
 }
 
 function oauth2refreshAccessToken() {
-		console.log("OAUTH       Refreshing access token");
+		homa.logger.info("OAUTH", "Refreshing access token");
 	  	oa.getOAuthAccessToken(settings[MQTT_TOPIC_REFRESH_TOKEN], {grant_type:'refresh_token'}, oauth2getAccessTokenCallback);
 }
 
@@ -112,10 +111,10 @@ function calendarQuery() {
 	var timeMax = encodeURIComponent(new Date((new Date()).getTime()+ (calendarQueryInterval + (5*60*1000))).toISOString());
 	var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(new Date().toISOString())+"&timeMax="+timeMax;	
 	
-	console.log("Calendar    Executing query: " + query);
+	homa.logger.info("CALENDAR", "Executing query: " + query); 
 	oa.get( query, accessToken, function (error, result, response) {
 		if(error) {
-			console.log("Error       " + error);
+			homa.logger.error("CALENDAR", "Error: %s", error); 
 		} else {
 			try {
 				var items = JSON.parse(result).items
@@ -145,7 +144,7 @@ function calendarQuery() {
 						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
 					}
 				} catch (e) {
-					console.log(e)
+					homa.logger.error("CALENDAR", "Error: %s", e); 
 					continue;
 				}
     	}

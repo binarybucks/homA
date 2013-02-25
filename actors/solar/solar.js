@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 var date = require("datejs")
 var suncalc = require('suncalc');
-var client = require('homa-mqttjs');
-		client.argv = client.argv.describe("latitude", "Latitude at current location")
+var homa = require('homa');
+		homa.argv = homa.argv.describe("latitude", "Latitude at current location")
 												.describe("longitude", "Longitude at current location")
 												.demand("latitude")
 												.demand("longitude")
@@ -11,44 +11,44 @@ var client = require('homa-mqttjs');
 												.argv;
 
 (function(){
-	client.connect();
+	homa.mqttHelper.connect();
 })();
 
-client.events.on('connected', function(packet) {
-	var rule = new client.scheduler.RecurrenceRule();
+homa.mqttHelper.on('connected', function(packet) {
+	var rule = new homa.scheduler.RecurrenceRule();
 	rule.hour = 0;
-	var j = client.scheduler.scheduleJob(rule, querySuntimes);
+	var j = homa.scheduler.scheduleJob(rule, querySuntimes);
 	querySuntimes();
 
-	client.publish("/devices/294028-solar/controls/Sunset/type", "text", true);
-	client.publish("/devices/294028-solar/controls/Sunrise/type", "text", true);
+	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset/type", "text", true);
+	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise/type", "text", true);
 });
 
 
 function querySuntimes(){
-	console.log("SOLAR       Querying solar positions for " + client.argv.latitude + ":"+client.argv.longitude);
-	var times = suncalc.getTimes(new Date(), client.argv.latitude,client.argv.longitude);
+	homa.logger.info("SOLAR", "Querying solar positions for " + homa.argv.latitude + ":"+homa.argv.longitude);
+	var times = suncalc.getTimes(new Date(), homa.argv.latitude,homa.argv.longitude);
 
-	client.unschedulePublishes();
+	homa.mqttHelper.unschedulePublishes();
 
 	for(key in times) {
-		client.schedulePublish(times[key], "/events/sun", key.toString(), false);
+		homa.mqttHelper.schedulePublish(times[key], "/events/sun", key.toString(), false);
 	}
 
-	client.publish("/devices/294028-solar/controls/Sunrise", client.pad(times.sunrise.getHours(), 2, "0") +":"+client.pad(times.sunrise.getMinutes(), 2, "0"), true);
-	client.publish("/devices/294028-solar/controls/Sunset", client.pad(times.sunset.getHours(), 2, "0")+":"+client.pad(times.sunset.getMinutes(), 2, "0"), true);
+	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise", homa.stringHelper.pad(times.sunrise.getHours(), 2, "0") +":"+homa.stringHelper.pad(times.sunrise.getMinutes(), 2, "0"), true);
+	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset", homa.stringHelper.pad(times.sunset.getHours(), 2, "0")+":"+homa.stringHelper.pad(times.sunset.getMinutes(), 2, "0"), true);
 
-	console.log("SOLAR       sunrise  (top edge of the sun appears on the horizon): "+times.sunrise + "\n" + 
-	 						"SOLAR       sunriseEnd (bottom edge of the sun touches the horizon): "+times.sunriseEnd + "\n" + 
-							"SOLAR       goldenHourEnd (morning golden hour ends): "+times.goldenHourEnd + "\n" + 
-							"SOLAR       solarNoon (solar noon (sun is in the highest position):"+times.solarNoon + "\n" + 
- 							"SOLAR       goldenHour (evening golden hour starts): "+times.goldenHour + "\n" + 
-							"SOLAR       sunsetStart (bottom edge of the sun touches the horizon): "+times.sunsetStart + "\n" + 
-							"SOLAR       sunset (sun disappears below the horizon, evening civil twilight starts): "+times.sunset + "\n" + 
-							"SOLAR       dusk (evening nautical twilight starts): "+times.dusk + "\n" + 
-							"SOLAR       nauticalDusk (evening astronomical twilight starts): "+times.nauticalDusk + "\n" + 
-							"SOLAR       night (dark enough for astronomical observations): "+times.night + "\n" + 
-							"SOLAR       nightEnd (morning astronomical twilight starts): "+times.nightEnd + "\n" + 
-							"SOLAR       nauticalDawn (morning nautical twilight starts): "+times.nauticalDawn + "\n" + 
-							"SOLAR       dawn (morning nautical twilight ends, morning civil twilight starts): "+times.dawn);
+	homa.logger.info("SOLAR", "sunrise  (top edge of the sun appears on the horizon): "+times.sunrise);
+	homa.logger.info("SOLAR", "sunriseEnd (bottom edge of the sun touches the horizon): "+times.sunriseEnd);
+	homa.logger.info("SOLAR", "goldenHourEnd (morning golden hour ends): "+times.goldenHourEnd);
+	homa.logger.info("SOLAR", "solarNoon (solar noon (sun is in the highest position):"+times.solarNoon);
+ 	homa.logger.info("SOLAR", "goldenHour (evening golden hour starts): "+times.goldenHour);
+	homa.logger.info("SOLAR", "sunsetStart (bottom edge of the sun touches the horizon): "+times.sunsetStart);
+	homa.logger.info("SOLAR", "sunset (sun disappears below the horizon, evening civil twilight starts): "+times.sunset);
+	homa.logger.info("SOLAR", "dusk (evening nautical twilight starts): "+times.dusk );
+	homa.logger.info("SOLAR", "nauticalDusk (evening astronomical twilight starts): "+times.nauticalDusk);
+	homa.logger.info("SOLAR", "night (dark enough for astronomical observations): "+times.night );
+	homa.logger.info("SOLAR", "nightEnd (morning astronomical twilight starts): "+times.nightEnd );
+	homa.logger.info("SOLAR", "nauticalDawn (morning nautical twilight starts): "+times.nauticalDawn);
+	homa.logger.info("SOLAR", "dawn (morning nautical twilight ends, morning civil twilight starts): "+times.dawn);
 }
