@@ -138,12 +138,12 @@ function calendarQuery() {
 
 					// Schedule start events
 					for(key in payload.start){
-						client.schedulePublish(new Date(item.start.dateTime)), key, payload.start[key], true); 
+						client.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
 					}
 
 					// Schedule end events
 					for(key in payload.end){
-						client.schedulePublish(new Date(item.start.dateTime)), key, payload.start[key], true); 
+						client.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
 					}
 				} catch (e) {
 					console.log(e)
