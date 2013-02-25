@@ -5,7 +5,9 @@
 var sys = require('sys');
 var mqtt = require('mqttjs');
 var argv = require('optimist');
+var schedule = require('node-schedule');
 var EventEmitter = require('events').EventEmitter;
+var scheduledPublishes = [];
 
 // This requires the --brokerHost (--brokerPort) commandline argument if the environment variable HOMA_BROKER_HOST (HOMA_BROKER_PORT) is not set. 
 // If the environment variable is set the the default value of brokerHost (brokerPort) is set to the value of the environment variable
@@ -16,6 +18,8 @@ argv = process.env.HOMA_BROKER_PORT ? argv.default("brokerPort", process.env.HOM
 
 module.exports.argv = argv; 
 module.exports.events = new EventEmitter();
+module.exports.scheduledPublishes = scheduledPublishes;
+module.exports.scheduler = schedule;
 
 module.exports.connect = function(host, port, callback) {
 	console.log("MQTT        Connecting to %s:%s", host || exports.argv.brokerHost, port || exports.argv.brokerPort );
@@ -56,20 +60,45 @@ module.exports.connect = function(host, port, callback) {
 }
 
 module.exports.publish = function(topic, payload, retained) {
-		console.log("MQTT        Publishing %s:%s (retained=%s)", topic, payload, retained);
-		exports.mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
+	console.log("MQTT        Publishing %s:%s (retained=%s)", topic, payload, retained);
+	exports.mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
 }
+
+module.exports.schedulePublish = function (date, topic, payload, retained){
+	console.log("SCHEDULE    At "  + date + " publishing " + topic + ":" + payload);
+	var job = schedule.scheduleJob(date, function(){
+			exports.publish(topic, payload, retained || false);
+	});
+	scheduledPublishes.push(job);
+	return job;
+}
+
+
+module.exports.unschedulePublishes = function() {
+	for (var i=0; i<scheduledPublishes.length; i++) {
+		scheduledPublishes[i].cancel();
+	}
+}
+
 
 module.exports.disconnect = function() {
 	exports.mqttClient.disconnect();
 }
 
-
 module.exports.subscribe = function(topic) {
 	exports.mqttClient.subscribe({topic: topic});
 }
 
-
 module.exports.unsubscribe = function(topic) {
 	exports.mqttClient.unsubscribe({topic: topic});
 }
+
+
+// Helper function that pads a number or string with a symbol to a specific length
+module.exports.pad = function(n, width, symbol) {
+  symbol = symbol || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(symbol) + n;
+}
+
+
