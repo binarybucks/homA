@@ -141,7 +141,7 @@ function calendarQuery() {
 
 					// Schedule end events
 					for(key in payload.end){
-						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
+						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.end[key], true); 
 					}
 				} catch (e) {
 					homa.logger.error("CALENDAR", "Error: %s", e); 
