@@ -10,7 +10,7 @@ import android.widget.Switch;
 
 public class SwitchControlView extends ControlView {
     public SwitchControlView(Activity activity) {
-        super(activity, R.layout.fragment_device_switch);
+        super(activity, R.layout.fragment_device_switch, R.id.switchControlValue, R.id.switchControlName);
     }
 
     public void setContent(String name, String value) {

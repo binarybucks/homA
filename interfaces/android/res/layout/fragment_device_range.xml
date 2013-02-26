@@ -6,7 +6,7 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/controlName"
+        android:id="@+id/seekControlName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dip"
@@ -18,7 +18,7 @@
         android:textSize="14sp" />
 
     <SeekBar
-        android:id="@+id/controlValue"
+        android:id="@+id/seekControlValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dip"

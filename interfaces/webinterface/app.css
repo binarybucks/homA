@@ -14,7 +14,7 @@ body {
     margin: 0;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-image: -webkit-gradient(linear, right top, left bottom, from(#5dabc4), to(#1d4574));
+    background-image: gradient(linear, right top, left bottom, from(#5dabc4), to(#1d4574));
 }
 #container {
     background: #FFF;

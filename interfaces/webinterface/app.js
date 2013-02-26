@@ -153,7 +153,7 @@ $(function(){
     saveServerOnEnter: function(e) { 
       console.log("saving");
       if (e.keyCode == 13) {
-        this.model.set("server", e.srcElement.value);
+        this.model.set("server", e.target.value);
         this.model.save();
       }
     },
@@ -413,7 +413,7 @@ $(function(){
 
 
     rangeInputValueChanged: function(event) {
-      App.publishMqtt(this.model.get("topic"), event.srcElement.value);
+      App.publishMqtt(this.model.get("topic"), event.target.value);
     },
 
 
@@ -433,7 +433,7 @@ $(function(){
 
 
     switchInputValueChanged: function(event) {
-      App.publishMqtt(this.model.get("topic"), event.srcElement.checked == 0 ? "0" : "1");
+      App.publishMqtt(this.model.get("topic"), event.target.checked == 0 ? "0" : "1");
     },
 
     switchModelValueChanged: function(model) {
@@ -495,7 +495,7 @@ $(function(){
     },
 
     publishValue: function(e, type) {
-      var value = e.srcElement.value;
+      var value = e.target.value;
       mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/"+type, value ? value : "", 0, true);
     },
 

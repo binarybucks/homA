@@ -239,13 +239,26 @@ public class MainActivity extends FragmentActivity {
             f.setArguments(args);
             return f;
         }
+        
+        
+        public void onSaveInstanceState (Bundle outState) {
+            super.onSaveInstanceState(outState);
+            Log.v(this.toString(), "savingInstance");
+        }
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             room = getArguments() != null ? App.getRoom(getArguments().getString("roomId")) : null;
             device = getArguments() != null ? room.getDevices().get(
                     getArguments().getString("deviceId")) : null;
+                    
+                    
+                    Log.v(this.toString(), "onCreateDialog with savedInstance:  " + savedInstanceState);
 
+                    
+              
+                    
+                    
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(device.getName());
@@ -290,7 +303,10 @@ public class MainActivity extends FragmentActivity {
             super.onDestroyView();
             for (Control control : device.getControls().values()) {
                 control.removeValueChangedObserver();
+                
             }
+            
+
         }
     }
 
@@ -311,6 +327,8 @@ public class MainActivity extends FragmentActivity {
             room = getArguments() != null ? App.getRoom(getArguments().getString("id")) : null;
         }
 
+        
+  
         @Override
         public void onSaveInstanceState(Bundle outState) {
             super.onSaveInstanceState(outState);

@@ -8,12 +8,13 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class RangeControlView extends ControlView {
     public RangeControlView(Activity activity) {
-        super(activity, R.layout.fragment_device_range);
+        super(activity, R.layout.fragment_device_range, R.id.seekControlValue, R.id.seekControlName);
     }
 
     public void setContent(String name, String value) {
         _name.setText(name);
         ((SeekBar) _value).setProgress(Integer.parseInt(value));
+        ((SeekBar) _value).setMax(255);
     }
 
     @Override
