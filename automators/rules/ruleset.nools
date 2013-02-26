@@ -52,6 +52,16 @@ rule desk {
     }
 }
 
+rule uni {
+    when {
+        m1: Message m1.t == '/events/tag' && m1.p == 'uni';
+    }
+    then {
+        log.info("RULES", "Rule triggered: Uni ");
+        forget(m1);
+    }
+}
+
 rule sunset {    
     when {
         m1: Message m1.t == '/events/sun' && m1.p == 'sunset';
