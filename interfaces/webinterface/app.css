@@ -14,7 +14,15 @@ body {
     margin: 0;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-image: gradient(linear, right top, left bottom, from(#5dabc4), to(#1d4574));
+/*    background-image: -webkit-gradient(linear, right top, left bottom, from(#5dabc4), to(#1d4574));*/
+background: #1d4574; /* Old browsers */
+background: -moz-linear-gradient(45deg, #1d4574 0%, #5dabc4 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#1d4574), color-stop(100%,#5dabc4)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(45deg, #1d4574 0%,#5dabc4 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(45deg, #1d4574 0%,#5dabc4 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(45deg, #1d4574 0%,#5dabc4 100%); /* IE10+ */
+background: linear-gradient(45deg, #1d4574 0%,#5dabc4 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1d4574', endColorstr='#5dabc4',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 }
 #container {
     background: #FFF;
