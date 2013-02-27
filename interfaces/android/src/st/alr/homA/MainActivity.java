@@ -329,7 +329,6 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            // todo: restore room from saved instance
             String id = getArguments().getString("id");
             if (id == null && savedInstanceState != null) {
                 Log.d(this.toString(), "restoring room id from savedInstanceState");
