@@ -10,7 +10,7 @@ $ npm install
 ``` 
 $ node calendar.js [--brokerHost 127.0.0.1] [--brokerPort 1883] [--brokerClientId 458293-GoogleCalendarBridge] [--queryIntervall 60]
 ```
-``
+```
 $ node publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/458293-GoogleCalendarBridge/calendarId" --payload "xxx@group.calendar.google.com"
 ```
 
