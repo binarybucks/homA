@@ -27,11 +27,12 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new ValueSortedMap<String, Room>();
         nfcRecordListAdapter = new NfcRecordAdapter(this);
-                
+
         EventBus.getDefault().register(this);
     }
 

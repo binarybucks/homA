@@ -17,7 +17,8 @@ var homa = require('homa');
 homa.mqttHelper.on('connected', function(packet) {
 	var rule = new homa.scheduler.RecurrenceRule();
 	rule.hour = 0;
-	var j = homa.scheduler.scheduleJob(rule, querySuntimes);
+	var j = homa.scheduler.scheduleJob(rule, function(){querySuntimes();});
+	console.log(j);
 	querySuntimes();
 
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset/type", "text", true);

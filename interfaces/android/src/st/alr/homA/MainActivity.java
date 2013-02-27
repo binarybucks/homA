@@ -93,9 +93,14 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        
+        
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
 
+//        String foo = null;
+//        foo.contains("asdf");
+        
         setContentView(R.layout.activity_main);
 
         disconnectedLayout = (RelativeLayout) findViewById(R.id.disconnectedLayout);
@@ -324,7 +329,14 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            room = getArguments() != null ? App.getRoom(getArguments().getString("id")) : null;
+            // todo: restore room from saved instance
+            String id = getArguments().getString("id");
+            if (id == null && savedInstanceState != null) {
+                Log.d(this.toString(), "restoring room id from savedInstanceState");
+                id = savedInstanceState.getString("id");
+            }
+            
+            room = App.getRoom(id);
         }
 
         

@@ -37,5 +37,5 @@
     <string name="nfcWriteTagSuccess">"Tag written successfully"</string>
     <string name="actionBarSingleItem">"One item selected"</string>
     <string name="actionBarMultipleItems">"items selected"</string>
-
+    
 </resources>

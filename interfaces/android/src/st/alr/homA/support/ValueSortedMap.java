@@ -32,20 +32,31 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
     
     
     public V get(String key) {
+        synchronized (dataSorted) {
+
         return dataMap.get(key);
+        }
     }
 
 
     public V get(int index) {
+        synchronized (dataSorted) {
+
         return dataSorted.get(index);
+        }
     }
     
-    public void sortDataset() {        
+    public void sortDataset() { 
+        synchronized (dataSorted) {
+
         Collections.sort(dataSorted, new GenericObjectComparator());
+        }
     }
     
     @Override
     public V put(K key, V value) {
+        synchronized (dataSorted) {
+
         // TODO: Optimize inserts
         dataMap.put(key, value);      
 
@@ -55,6 +66,7 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
         
         sortDataset();
         return value;
+        }
     }
 
     public int size() {
@@ -64,12 +76,18 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
     }
   
     public Collection<V> values(){
+        synchronized (dataSorted) {
+
         return this.dataSorted;
+        }
     }
   
     public void clear() {
+        synchronized (dataSorted) {
+
         this.dataMap.clear();
         this.dataSorted.clear();
+        }
     }
 
     public V remove(Object key) {
@@ -84,8 +102,10 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
   
     @Override
     public V get(Object key) {
+        synchronized (dataSorted) {
         return dataMap.get(key);
-    }
+        }
+        }
  
     @Override
     public boolean containsKey(Object key) {
@@ -109,7 +129,9 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
     
     @Override
     public Set<K> keySet() {
-        return dataMap.keySet();
+        synchronized (dataSorted) {
+
+        return dataMap.keySet();}
     }
     
     @Override
@@ -129,13 +151,18 @@ public class ValueSortedMap<K, V> implements Map<K, V>{
 
     
     private ArrayList<V> getDataSorted() {
+        synchronized (dataSorted) {
+
         return dataSorted;
-        
+        }        
     }
 
     private HashMap<K, V> getDataMap() {
+        synchronized (dataSorted) {
+
         return dataMap;
-    }
+        }
+        }
     
 
 }

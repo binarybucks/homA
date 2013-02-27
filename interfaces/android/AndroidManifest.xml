@@ -65,6 +65,8 @@
                     android:scheme="vnd.android.nfc" />
             </intent-filter>
         </activity>
+        
+        
     </application>
 
 </manifest>
