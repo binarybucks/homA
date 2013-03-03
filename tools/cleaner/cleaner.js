@@ -3,12 +3,12 @@ var homa = require('homa');
 		homa.argv = homa.argv.argv;
 var messages = {};
 
-homa.mqttHelper.on('connected', function(packet) {
+homa.mqttHelper.on('connect', function(packet) {
 	homa.mqttHelper.subscribe('#');
 	unpublish();
 });
 
-homa.mqttHelper.on('receive', function(packet) {
+homa.mqttHelper.on('message', function(packet) {
   if(packet.payload != "" && packet.payload != undefined) {
  		messages[packet.topic.toString()] = packet.payload;
 	} else {

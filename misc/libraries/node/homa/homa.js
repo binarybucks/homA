@@ -26,55 +26,42 @@ var StringHelper = function() {
 }
 
 var MqttHelper = function() {
-	var mqttClient;
 	var self = this;
+	self.mqttClient;
 	self.scheduledPublishes = [];
 
 	this.connect = function(host, port, callback) {
+		self.mqttClient = mqtt.createClient(port || exports.argv.brokerPort, host || exports.argv.brokerHost, {keepalive: 40000});
 		log.info("MQTT", "Connecting to %s:%s", host || module.exports.argv.brokerHost, port || exports.argv.brokerPort);
-		mqtt.createClient(port || exports.argv.brokerPort, host || exports.argv.brokerHost, function(err, client) {
-		  if (err) {
-		  	log.error("MQTT", "Error: %s", err);
-		  	process.exit(1);
-		  }
+	
+	  self.mqttClient.on('connect', function() {
+         self.emit('connect');
+ 	  });
 
-		  self.mqttClient = client;
-		  client.connect({keepalive: 40000});
+	  self.mqttClient.on('close', function() {
+	  	log.info("MQTT", "Connection closed");
+	    process.exit(-1);
+	  });
 
-		  client.on('connack', function(packet) {
-	        if (packet.returnCode === 0) {
-	            setInterval(function() {client.pingreq();}, 30000);
-	            self.emit('connected', packet);
-	        } else {
-	        	log.error("MQTT", "Connack error");
-	          process.exit(-1);
-	        }
-		  });
+	  self.mqttClient.on('error', function(e) {
+	  	log.error("MQTT", "Error: %s", e);
+	    process.exit(-1);
+	  });
 
-		  client.on('close', function() {
-		  	log.info("MQTT", "Connection closed");
-		    process.exit(-1);
-		  });
-
-		  client.on('error', function(e) {
-		  	log.error("MQTT", "Error: %s", e);
-		    process.exit(-1);
-		  });
-
-		 	client.on('publish', function(packet) {
-		 		self.emit('receive', packet);
-			});
+	 	self.mqttClient.on('message', function(packet) {
+	 		self.emit('message', packet);
 		});
+	
 	}
 
 	this.publish = function(topic, payload, retained) {
 		log.info("MQTT", "Publishing %s:%s (retained=%s)", topic, payload, retained);
-		self.mqttClient.publish({ topic: topic.toString(), payload: payload.toString(), qos: 0, retain: retained});
+		self.mqttClient.publish(topic.toString(), payload.toString(), {qos: 0, retain: retained});
 	}
 
 	this.schedulePublish = function(date, topic, payload, retained){
 		log.info("SCHEDULE", "At %s, publishing %s:%s (retained=%s)", date, topic, payload, retained);
-		var job = schedule.scheduleJob(date, function(){
+		var job = exports.scheduler.scheduleJob(date, function(){
 				self.publish(topic, payload, retained || false);
 		});
 		self.scheduledPublishes.push(job);
@@ -88,7 +75,7 @@ var MqttHelper = function() {
 	}
 
 	this.disconnect =function(){
-		self.mqttClient.disconnect();
+		self.mqttClient.end();
 	}
 
 	this.subscribe  = function(topic) {

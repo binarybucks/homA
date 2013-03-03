@@ -244,7 +244,11 @@ public class MainActivity extends FragmentActivity {
             f.setArguments(args);
             return f;
         }
-        
+        public void onEventMainThread(MqttConnectivityChanged event) {
+            if(event.getConnectivity() != MqttService.MQTT_CONNECTIVITY.CONNECTED) {
+                this.dismiss();
+            }
+        }
         
         public void onSaveInstanceState (Bundle outState) {
             super.onSaveInstanceState(outState);
@@ -346,6 +350,7 @@ public class MainActivity extends FragmentActivity {
             outState.putString("id", room.getId());
         }
 
+        
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {

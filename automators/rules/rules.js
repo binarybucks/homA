@@ -51,7 +51,7 @@ var session = flow.getSession();
 var clock = new Clock();
 session.assert(clock);
 
-homa.mqttHelper.on('connected', function(packet) {
+homa.mqttHelper.on('connect', function(packet) {
     homa.mqttHelper.subscribe('#');
 });
 
@@ -65,7 +65,7 @@ function forget(m) {
     }
 }
 
-homa.mqttHelper.on('receive', function(packet) {
+homa.mqttHelper.on('message', function(packet) {
     if (packet.topic in messages) {
         var m = messages[packet.topic];
         if(packet.payload) {

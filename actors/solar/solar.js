@@ -14,30 +14,27 @@ var homa = require('homa');
 	homa.mqttHelper.connect();
 })();
 
-homa.mqttHelper.on('connected', function(packet) {
-	var rule = new homa.scheduler.RecurrenceRule();
-	rule.hour = 0;
-	var j = homa.scheduler.scheduleJob(rule, function(){querySuntimes();});
-	console.log(j);
-	querySuntimes();
-
+homa.mqttHelper.on('connect', function(packet) {
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset/type", "text", true);
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise/type", "text", true);
-});
 
+	homa.scheduler.scheduleJob('0 0 * * *', querySuntimes); // Query every day at midnight
+	querySuntimes();
+});
 
 function querySuntimes(){
 	homa.logger.info("SOLAR", "Querying solar positions for " + homa.argv.latitude + ":"+homa.argv.longitude);
 	var times = suncalc.getTimes(new Date(), homa.argv.latitude,homa.argv.longitude);
-
-	homa.mqttHelper.unschedulePublishes();
-
-	for(key in times) {
-		homa.mqttHelper.schedulePublish(times[key], "/events/sun", key.toString(), false);
-	}
-
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise", homa.stringHelper.pad(times.sunrise.getHours(), 2, "0") +":"+homa.stringHelper.pad(times.sunrise.getMinutes(), 2, "0"), true);
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset", homa.stringHelper.pad(times.sunset.getHours(), 2, "0")+":"+homa.stringHelper.pad(times.sunset.getMinutes(), 2, "0"), true);
+
+	homa.mqttHelper.unschedulePublishes();
+	var currentDate = new Date();
+	for(key in times) {
+		if(times[key] > currentDate) {
+			homa.mqttHelper.schedulePublish(times[key], "/events/sun", key.toString(), false);
+		}
+	}
 
 	homa.logger.info("SOLAR", "sunrise  (top edge of the sun appears on the horizon): "+times.sunrise);
 	homa.logger.info("SOLAR", "sunriseEnd (bottom edge of the sun touches the horizon): "+times.sunriseEnd);

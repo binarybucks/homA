@@ -10,7 +10,7 @@ var homa = require('homa');
 										.alias("retained", "r")
 										.default("retained", false).argv;
 
-homa.mqttHelper.on('connected', function() {
+homa.mqttHelper.on('connect', function() {
 	homa.mqttHelper.publish(homa.argv.topic, homa.argv.payload === true ? "" : homa.argv.payload, homa.argv.retained);
 	homa.mqttHelper.disconnect();
 });

@@ -13,8 +13,8 @@ public class RangeControlView extends ControlView {
 
     public void setContent(String name, String value) {
         _name.setText(name);
-        ((SeekBar) _value).setProgress(Integer.parseInt(value));
         ((SeekBar) _value).setMax(255);
+        ((SeekBar) _value).setProgress(Integer.parseInt(value));
     }
 
     @Override
