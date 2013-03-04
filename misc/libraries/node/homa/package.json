@@ -1,13 +1,13 @@
 {
   "name": "homa",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Meta package for the HomA framework",
   "main": "homa.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "mqttjs": ">=0.1.8",
+    "mqttjs": "git://github.com/adamvr/MQTT.js#master",
     "optimist": ">=0.3.5",
     "node-schedule" : ">=0.1.6",
     "npmlog" : ">=0.0.2"

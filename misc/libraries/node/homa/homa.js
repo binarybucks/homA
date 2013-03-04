@@ -31,7 +31,7 @@ var MqttHelper = function() {
 	self.scheduledPublishes = [];
 
 	this.connect = function(host, port, callback) {
-		self.mqttClient = mqtt.createClient(port || exports.argv.brokerPort, host || exports.argv.brokerHost, {keepalive: 40000});
+		self.mqttClient = mqtt.createClient(port || exports.argv.brokerPort, host || exports.argv.brokerHost, {keepalive: 40});
 		log.info("MQTT", "Connecting to %s:%s", host || module.exports.argv.brokerHost, port || exports.argv.brokerPort);
 	
 	  self.mqttClient.on('connect', function() {
