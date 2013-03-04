@@ -1,1 +1,4 @@
-{ "name": "publish" , "version" : "0.1.0" , "dependencies" : {"homa" : ">=0.1.0"} }
+{ "name": "publish"
+, "version" : "0.1.0" 
+, "private":"true"
+, "dependencies" : {"homa" : ">=0.1.0"} }
