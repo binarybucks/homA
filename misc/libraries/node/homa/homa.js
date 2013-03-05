@@ -4,7 +4,7 @@
 
 var util = require('util');
 var events = require('events');
-var mqtt = require('mqttjs');
+var mqtt = require('mqtt');
 var schedule = require('node-schedule');
 var log = require('npmlog')
 var argv = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT");
