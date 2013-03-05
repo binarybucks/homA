@@ -60,7 +60,7 @@ public class ServerDialogPreference extends DialogPreference {
 				MqttService.getInstance().reconnect();
 				break;
 			case DialogInterface.BUTTON_NEGATIVE:
-			    MqttService.getInstance().disconnect();
+			    MqttService.getInstance().disconnect(true);
 		}
 		super.onClick(dialog, which);
 	}
