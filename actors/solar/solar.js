@@ -2,7 +2,7 @@
 var date = require("datejs")
 var suncalc = require('suncalc');
 var homa = require('homa');
-		homa.argv = homa.argv.describe("latitude", "Latitude at current location")
+var argv = homa.paramHelper.describe("latitude", "Latitude at current location")
 												.describe("longitude", "Longitude at current location")
 												.demand("latitude")
 												.demand("longitude")
@@ -23,8 +23,8 @@ homa.mqttHelper.on('connect', function(packet) {
 });
 
 function querySuntimes(){
-	homa.logger.info("SOLAR", "Querying solar positions for " + homa.argv.latitude + ":"+homa.argv.longitude);
-	var times = suncalc.getTimes(new Date(), homa.argv.latitude,homa.argv.longitude);
+	homa.logger.info("SOLAR", "Querying solar positions for " + argv.latitude + ":"+ argv.longitude);
+	var times = suncalc.getTimes(new Date(), argv.latitude, argv.longitude);
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise", homa.stringHelper.pad(times.sunrise.getHours(), 2, "0") +":"+homa.stringHelper.pad(times.sunrise.getMinutes(), 2, "0"), true);
 	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset", homa.stringHelper.pad(times.sunset.getHours(), 2, "0")+":"+homa.stringHelper.pad(times.sunset.getMinutes(), 2, "0"), true);
 

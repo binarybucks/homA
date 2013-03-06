@@ -7,9 +7,9 @@ var events = require('events');
 var mqtt = require('mqtt');
 var schedule = require('node-schedule');
 var log = require('npmlog')
-var argv = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT");
-		argv = process.env.HOMA_BROKER_HOST ? argv.default("brokerHost", process.env.HOMA_BROKER_HOST) : argv.demand("brokerHost");
-		argv = process.env.HOMA_BROKER_PORT ? argv.default("brokerPort", process.env.HOMA_BROKER_PORT) : argv.default("brokerPort", 1883);
+var paramHelper = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT");
+		paramHelper = process.env.HOMA_BROKER_HOST ? paramHelper.default("brokerHost", process.env.HOMA_BROKER_HOST) : paramHelper.demand("brokerHost");
+		paramHelper = process.env.HOMA_BROKER_PORT ? paramHelper.default("brokerPort", process.env.HOMA_BROKER_PORT) : paramHelper.default("brokerPort", 1883);
 
 log.disableColor();
 
@@ -31,8 +31,8 @@ var MqttHelper = function() {
 	self.scheduledPublishes = [];
 
 	this.connect = function(host, port, callback) {
-		self.mqttClient = mqtt.createClient(port || exports.argv.brokerPort, host || exports.argv.brokerHost, {keepalive: 40});
-		log.info("MQTT", "Connecting to %s:%s", host || module.exports.argv.brokerHost, port || exports.argv.brokerPort);
+		self.mqttClient = mqtt.createClient(port || exports.paramHelper.argv.brokerPort, host || exports.paramHelper.argv.brokerHost, {keepalive: 40});
+		log.info("MQTT", "Connecting to %s:%s", host || module.exports.paramHelper.argv.brokerHost, port || exports.paramHelper.argv.brokerPort);
 	
 	  self.mqttClient.on('connect', function() {
          self.emit('connect');
@@ -48,10 +48,9 @@ var MqttHelper = function() {
 	    process.exit(-1);
 	  });
 
-	 	self.mqttClient.on('message', function(packet) {
-	 		self.emit('message', packet);
+	 	self.mqttClient.on('message', function(topic, payload) {
+	 		self.emit('message', {topic: topic, payload: payload, qos: 0, retain: false, messageId: 0 });
 		});
-	
 	}
 
 	this.publish = function(topic, payload, retained) {
@@ -79,18 +78,18 @@ var MqttHelper = function() {
 	}
 
 	this.subscribe  = function(topic) {
-		self.mqttClient.subscribe({topic: topic});
+		self.mqttClient.subscribe(topic);
 	}
 
  	this.unsubscribe = function(topic) {
-		self.mqttClient.unsubscribe({topic: topic});
+		self.mqttClient.unsubscribe(topic);
 	}
 }
 util.inherits(MqttHelper, events.EventEmitter);
 
 module.exports.mqttHelper = new MqttHelper();
 module.exports.stringHelper = new StringHelper();
+module.exports.paramHelper = paramHelper; 
 
 module.exports.scheduler = schedule;
-module.exports.argv = argv; 
 module.exports.logger = log;

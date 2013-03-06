@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var homa = require('homa');
-		homa.argv = homa.argv.argv;
+var argv = homa.paramHelper.argv;
 var messages = {};
 
 homa.mqttHelper.on('connect', function(packet) {
@@ -9,6 +9,7 @@ homa.mqttHelper.on('connect', function(packet) {
 });
 
 homa.mqttHelper.on('message', function(packet) {
+	console.log("p" + packet.payload);
   if(packet.payload != "" && packet.payload != undefined) {
  		messages[packet.topic.toString()] = packet.payload;
 	} else {

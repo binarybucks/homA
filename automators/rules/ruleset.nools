@@ -72,3 +72,15 @@ rule sunset {
         forget(m1);
     }
 }
+
+rule clearNonRetained {
+    when{
+        m1: Message isTrue(m1.retained);
+    } 
+    then {
+        forget(m1);
+    }
+
+}
+
+

@@ -2,7 +2,7 @@
 var nools = require("nools");
 var date = require("datejs")
 var homa = require('homa');
-    homa.argv = homa.argv.argv;
+var argv = homa.paramHelper.argv;
 var messages = {};
 
 var Message = function (packet) {

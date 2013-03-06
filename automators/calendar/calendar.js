@@ -4,7 +4,7 @@ var oauth = require('oauth');
 var os = require("os");
 
 var homa = require('homa');
-		homa.argv = homa.argv.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
+var argv = homa.paramHelper.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
 												.describe("calendarQueryInterval", "The number of minutes between queries to the Google Calendar")
 												.default("systemId", "458293-GoogleCalendarBridge")
 												.default("calendarQueryInterval", 30).argv;
@@ -14,13 +14,13 @@ var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
 var accessToken, accessTokenRefreshIn, oa;
 var settings = {};
 var bootstrapCompleted = false;
-var calendarQueryInterval = homa.argv.calendarQueryInterval*60*1000;
+var calendarQueryInterval = argv.calendarQueryInterval*60*1000;
 
 
 // Changing these might break things
 var MQTT_TOPIC_SYS = "/sys/"+homa.argv.systemId + "/#"
-var MQTT_TOPIC_CALENDAR_ID = "/sys/" + homa.argv.systemId + "/calendarId";
-var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + homa.argv.systemId + "/refreshToken";
+var MQTT_TOPIC_CALENDAR_ID = "/sys/" + argv.systemId + "/calendarId";
+var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + argv.systemId + "/refreshToken";
 
 (function connect() {
 	homa.mqttHelper.connect();
