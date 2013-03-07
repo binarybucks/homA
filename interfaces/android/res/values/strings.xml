@@ -37,5 +37,9 @@
     <string name="nfcWriteTagSuccess">"Tag written successfully"</string>
     <string name="actionBarSingleItem">"One item selected"</string>
     <string name="actionBarMultipleItems">"items selected"</string>
+        <string name="preferencesLicenseTitle">"Licenses"</string>
+        <string name="preferencesLicenseSummary">"Details for included open-source software"</string>
+                <string name="preferencesLicenseDismiss">"Dismiss"</string>
+        
     
 </resources>

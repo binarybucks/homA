@@ -29,37 +29,42 @@ public final class R {
         public static final int list_divider=0x7f02000c;
     }
     public static final class id {
-        public static final int add=0x7f09001b;
+        public static final int add=0x7f090020;
         public static final int connectedLayout=0x7f090002;
         public static final int devices_list=0x7f090012;
-        public static final int discard=0x7f09001f;
+        public static final int discard=0x7f090024;
         public static final int disconnectedLayout=0x7f090000;
+        public static final int eventbusHeader=0x7f090014;
+        public static final int eventbusLicense=0x7f090015;
         public static final int imageView1=0x7f090001;
-        public static final int list_item=0x7f090017;
-        public static final int menu_nfc=0x7f09001a;
-        public static final int menu_settings=0x7f090019;
+        public static final int list_item=0x7f09001c;
+        public static final int menu_nfc=0x7f09001f;
+        public static final int menu_settings=0x7f09001e;
         public static final int nfcRecords=0x7f090005;
         public static final int pager=0x7f090003;
         public static final int pager_title_strip=0x7f090004;
+        public static final int pahoHeader=0x7f090016;
+        public static final int pahoLicense=0x7f090017;
         public static final int paylodInput=0x7f09000f;
-        public static final int recordingStart=0x7f09001d;
-        public static final int recordingStop=0x7f09001e;
+        public static final int recordingStart=0x7f090022;
+        public static final int recordingStop=0x7f090023;
         public static final int retainedCheck=0x7f090010;
+        public static final int scrollView1=0x7f090013;
         public static final int seekControlName=0x7f090006;
         public static final int seekControlValue=0x7f090007;
-        public static final int serverAddress=0x7f090014;
-        public static final int serverAddressLabel=0x7f090013;
-        public static final int serverPort=0x7f090016;
-        public static final int serverPortLabel=0x7f090015;
+        public static final int serverAddress=0x7f090019;
+        public static final int serverAddressLabel=0x7f090018;
+        public static final int serverPort=0x7f09001b;
+        public static final int serverPortLabel=0x7f09001a;
         public static final int switchControlName=0x7f090008;
         public static final int switchControlValue=0x7f090009;
         public static final int textControlName=0x7f09000a;
         public static final int textControlValue=0x7f09000b;
         public static final int textView1=0x7f09000c;
         public static final int textView2=0x7f09000e;
-        public static final int title=0x7f090018;
+        public static final int title=0x7f09001d;
         public static final int topicInput=0x7f09000d;
-        public static final int write=0x7f09001c;
+        public static final int write=0x7f090021;
         public static final int writeTextView=0x7f090011;
     }
     public static final class layout {
@@ -71,9 +76,10 @@ public final class R {
         public static final int fragment_nfc_add=0x7f030005;
         public static final int fragment_nfc_write=0x7f030006;
         public static final int fragment_room=0x7f030007;
-        public static final int preferences_server=0x7f030008;
-        public static final int row_layout=0x7f030009;
-        public static final int two_line_row_layout=0x7f03000a;
+        public static final int preferences_license=0x7f030008;
+        public static final int preferences_server=0x7f030009;
+        public static final int row_layout=0x7f03000a;
+        public static final int two_line_row_layout=0x7f03000b;
     }
     public static final class menu {
         public static final int activity_main=0x7f080000;
@@ -110,6 +116,9 @@ public final class R {
         public static final int nfcWriteTagSuccess=0x7f060021;
         public static final int nfcWriteTopicInput=0x7f060017;
         public static final int nfcWriteWaitingForTag=0x7f060015;
+        public static final int preferencesLicenseDismiss=0x7f060026;
+        public static final int preferencesLicenseSummary=0x7f060025;
+        public static final int preferencesLicenseTitle=0x7f060024;
         public static final int preferencesServerAddress=0x7f060003;
         public static final int preferencesServerCancel=0x7f060005;
         public static final int preferencesServerConnect=0x7f060006;

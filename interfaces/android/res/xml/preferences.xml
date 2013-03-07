@@ -14,5 +14,13 @@
           android:defaultValue="true"
           android:summary="Display a notification to keep the application running in the background"
           android:key="runInBackgroundPreference" />
-        
+  
+   <st.alr.homA.LicenseDialogPreference
+            android:key="licenseDialog"
+            android:title="@string/preferencesLicenseTitle"
+            android:summary="@string/preferencesLicenseSummary" 
+            android:positiveButtonText="@string/preferencesLicenseDismiss"
+            android:negativeButtonText=""  >
+        </st.alr.homA.LicenseDialogPreference>
+               
 </PreferenceScreen>

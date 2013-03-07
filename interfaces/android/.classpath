@@ -5,6 +5,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="lib" path="libs/eventbus.jar"/>
-	<classpathentry kind="lib" path="libs/org.eclipse.paho.client.mqttv3.jar"/>
+	<classpathentry kind="lib" path="libs/paho.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
