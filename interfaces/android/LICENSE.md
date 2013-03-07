@@ -1,0 +1,1 @@
+Due to licensing restrictions of the Paho MQTT library, this application is licensed under Eclipse Public License v 1.0
