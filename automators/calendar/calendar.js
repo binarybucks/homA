@@ -31,7 +31,7 @@ homa.mqttHelper.on('connect', function(packet) {
 	homa.mqttHelper.subscribe(MQTT_TOPIC_SYS);
 });
 
-homa.mqttHelper.on('receive', function(packet) {
+homa.mqttHelper.on('message', function(packet) {
 	settings[packet.topic] = packet.payload;
 	if (bootstrapComplete() && !bootstrapCompleted) {
 		bootstrapCompleted = true;
