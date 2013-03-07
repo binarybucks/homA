@@ -1,3 +1,0 @@
-[submodule "webinterface/websocketServer"]
-	path = interfaces/webinterface/websocketServer
-	url = https://github.com/stylpen/WSS.git
