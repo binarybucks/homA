@@ -27,7 +27,7 @@ var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + argv.systemId + "/refreshToken";
 })();
 
 
-homa.mqttHelper.on('connected', function(packet) {
+homa.mqttHelper.on('connect', function(packet) {
 	homa.mqttHelper.subscribe(MQTT_TOPIC_SYS);
 });
 
