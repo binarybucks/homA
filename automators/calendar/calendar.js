@@ -18,7 +18,7 @@ var calendarQueryInterval = argv.calendarQueryInterval*60*1000;
 
 
 // Changing these might break things
-var MQTT_TOPIC_SYS = "/sys/"+homa.argv.systemId + "/#"
+var MQTT_TOPIC_SYS = "/sys/"+ argv.systemId + "/#"
 var MQTT_TOPIC_CALENDAR_ID = "/sys/" + argv.systemId + "/calendarId";
 var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + argv.systemId + "/refreshToken";
 
