@@ -13,4 +13,4 @@ Fork the repository on GitHub, add your own improvements, push it to a branch in
 You can also file bugs or feature requests in our [issue tracker](https://github.com/binarybucks/homA/issues)
 
 ### License
-HomA is currently licensed under the GPL3 license
+If not stated otherwise explicitly, any code in this repository is licensed under the GPL v3 license.
