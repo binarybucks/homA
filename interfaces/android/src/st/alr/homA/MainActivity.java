@@ -218,9 +218,7 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public int getCount() {
-            Integer i = App.getRoomCount();
-            Log.v(this.toString(), "Room count: " + i);
-            return i;
+            return App.getRoomCount();
         }
 
         @Override
@@ -230,12 +228,8 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            Log.v(this.toString(), "Getting pagerTitle for posiiton: " + position);
-            if(position<getCount()) {               
-                return App.getRoom(position).getId().toUpperCase(Locale.ENGLISH);                
-            } else {
-                return "";
-            }
+            // Checking if the requested position is valid fixes derp from Google. See https://github.com/binarybucks/homA/issues/67
+            return position<getCount() ? App.getRoom(position).getId().toUpperCase(Locale.ENGLISH) : "";
         }
     }
 
