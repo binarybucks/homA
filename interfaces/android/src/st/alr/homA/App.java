@@ -37,15 +37,20 @@ public class App extends Application {
     }
 
     public static Room getRoom(String id) {
+        synchronized (rooms) {
+
         return rooms.get(id);
+        }
     }
 
     public static Room getRoom(int index) {
-        return rooms.get(index);
+        synchronized (rooms) {
+            return rooms.get(index);
+        }
     }
 
     public static Integer getRoomCount() {
-        return rooms.size();
+         return rooms.size();
     }
 
     public static void addRoom(Room room) {
@@ -56,13 +61,12 @@ public class App extends Application {
     public static void removeRoom(Room room) {
         rooms.remove(room.getId());
         EventBus.getDefault().post(new Events.RoomRemoved(room));
+        
     }
 
     public static void removeAllRooms() {        
-        for (Room room : rooms.values()) {
-            EventBus.getDefault().post(new Events.RoomRemoved(room));
-        }
-        rooms.clear();
+            rooms.clear();
+            EventBus.getDefault().post(new Events.RoomsCleared());
     }
 
     public static Device getDevice(String id) {

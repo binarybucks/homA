@@ -160,12 +160,18 @@ public class MainActivity extends FragmentActivity {
 
     }
 
+    public void onEventMainThread(Events.RoomsCleared event) {
+        Log.v(this.toString(), "Rooms cleared");
+        mViewPager.getAdapter().notifyDataSetChanged();
+    }
+        
     public void onEventMainThread(Events.RoomRemoved event) {
         Log.v(this.toString(), "Room removed: " + event.getRoom().getId());
+        DeviceMapAdapter m = deviceMapAdapter.get(event.getRoom().getId());
+        if(m != null)
+            m.clearItems();
+        
         mViewPager.getAdapter().notifyDataSetChanged();
-        DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
-        m.clearItems();
-
     }
 
     public void onEventMainThread(Events.DeviceAddedToRoom event) {
@@ -212,7 +218,9 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public int getCount() {
-            return App.getRoomCount();
+            Integer i = App.getRoomCount();
+            Log.v(this.toString(), "Room count: " + i);
+            return i;
         }
 
         @Override
@@ -222,7 +230,12 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return App.getRoom(position).getId().toUpperCase(Locale.ENGLISH);
+            Log.v(this.toString(), "Getting pagerTitle for posiiton: " + position);
+            if(position<getCount()) {               
+                return App.getRoom(position).getId().toUpperCase(Locale.ENGLISH);                
+            } else {
+                return "";
+            }
         }
     }
 

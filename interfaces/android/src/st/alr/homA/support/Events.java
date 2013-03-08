@@ -5,6 +5,10 @@ import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 
 public class Events {
+    public static class RoomsCleared {
+
+    }
+
     public static class DeviceRenamed {
         Device device;
 
