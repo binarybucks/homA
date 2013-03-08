@@ -98,9 +98,6 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
 
-//        String foo = null;
-//        foo.contains("asdf");
-        
         setContentView(R.layout.activity_main);
 
         disconnectedLayout = (RelativeLayout) findViewById(R.id.disconnectedLayout);
@@ -131,8 +128,6 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // outState.putString("id", room.getId());
-
     }
 
     @Override
@@ -246,7 +241,7 @@ public class MainActivity extends FragmentActivity {
         }
         public void onEventMainThread(MqttConnectivityChanged event) {
             if(event.getConnectivity() != MqttService.MQTT_CONNECTIVITY.CONNECTED) {
-                this.dismiss();
+                this.dismissAllowingStateLoss();
             }
         }
         
@@ -261,12 +256,7 @@ public class MainActivity extends FragmentActivity {
             device = getArguments() != null ? room.getDevices().get(
                     getArguments().getString("deviceId")) : null;
                     
-                    
-                    Log.v(this.toString(), "onCreateDialog with savedInstance:  " + savedInstanceState);
-
-                    
-              
-                    
+            Log.v(this.toString(), "onCreateDialog with savedInstance:  " + savedInstanceState);
                     
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
