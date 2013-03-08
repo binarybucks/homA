@@ -566,13 +566,16 @@ public class MqttService extends Service implements MqttCallback
         @Override
         public void onReceive(Context ctx, Intent intent)
         {
+            Log.v(this.toString(), "NetworkConnectionIntentReceiver: onReceive");
             PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
             WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
             wl.acquire();
 
-            if (isOnline(true) && !isConnected() && !isConnecting())
+            if (isOnline(true) && !isConnected() && !isConnecting()) {
+                Log.v(this.toString(), "NetworkConnectionIntentReceiver: triggerting doStart(null, -1)");
                 doStart(null, 1);
-
+            
+            }
             wl.release();
         }
     }

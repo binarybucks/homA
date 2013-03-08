@@ -24,6 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
@@ -248,22 +249,43 @@ public class MainActivity extends FragmentActivity {
         }
         public void onEventMainThread(MqttConnectivityChanged event) {
             if(event.getConnectivity() != MqttService.MQTT_CONNECTIVITY.CONNECTED) {
-                this.dismissAllowingStateLoss();
+                Log.v(this.toString(), "Lost connection, closing currently open dialog");
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.remove(this);
+                fragmentTransaction.commit();
             }
         }
         
         public void onSaveInstanceState (Bundle outState) {
             super.onSaveInstanceState(outState);
-            Log.v(this.toString(), "savingInstance");
+            outState.putString("roomId", room.getId());
+            outState.putString("deviceId", device.toString());
         }
 
         @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            room = getArguments() != null ? App.getRoom(getArguments().getString("roomId")) : null;
-            device = getArguments() != null ? room.getDevices().get(
-                    getArguments().getString("deviceId")) : null;
-                    
+        public Dialog onCreateDialog(Bundle savedInstanceState) {            
             Log.v(this.toString(), "onCreateDialog with savedInstance:  " + savedInstanceState);
+
+            
+            Bundle b; 
+            if(savedInstanceState != null) {
+                b = savedInstanceState;
+                Log.v(this.toString(), "onCreateDialog from savedInstance");
+            } else if(getArguments() !=null) {
+                b = getArguments();
+                Log.v(this.toString(), "onCreateDialog from arguments");
+            } else {
+                b = null;
+                Log.v(this.toString(), "onCreateDialog create from nothing. App will now self-destroy");
+
+            }
+            
+            room = App.getRoom(b.getString("roomId"));
+            device = room.getDevices().get(b.getString("deviceId"));
+            
+            EventBus.getDefault().register(this);
                     
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
