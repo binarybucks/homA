@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,13 +55,10 @@ public class ValueSortedMap<K, V> implements Map<K, V> {
     public V put(K key, V value) {
         synchronized (dataSorted) {
 
-            // TODO: Optimize inserts
+            // TODO: Optimize by avoiding recreating of dataSorted list on every insert
             dataMap.put(key, value);
-
-            if (!dataSorted.contains(value)) {
-                dataSorted.add(value);
-            }
-
+            dataSorted = new ArrayList<V>(dataMap.values());
+            
             sortDataset();
             return value;
         }

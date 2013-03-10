@@ -255,7 +255,9 @@ public class MainActivity extends FragmentActivity {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.remove(this);
                 fragmentTransaction.commit();
+
             }
+            
         }
         
         public void onSaveInstanceState (Bundle outState) {
@@ -266,8 +268,6 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {            
-            Log.v(this.toString(), "onCreateDialog with savedInstance:  " + savedInstanceState);
-
             
             Bundle b; 
             if(savedInstanceState != null) {
@@ -333,7 +333,8 @@ public class MainActivity extends FragmentActivity {
                 control.removeValueChangedObserver();
                 
             }
-            
+            Log.v(this.toString(), "DeviceFragment: onDestroyView");
+            EventBus.getDefault().unregister(this);
 
         }
     }
@@ -370,7 +371,6 @@ public class MainActivity extends FragmentActivity {
         }
 
         
-        @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_room, container, false);
