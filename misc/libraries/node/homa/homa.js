@@ -48,8 +48,8 @@ var MqttHelper = function() {
 	    process.exit(-1);
 	  });
 
-	 	self.mqttClient.on('message', function(topic, payload) {
-	 		self.emit('message', {topic: topic, payload: payload, qos: 0, retain: false, messageId: 0 });
+	 	self.mqttClient.on('message', function(topic, message, etc) {
+	 		self.emit('message', {topic: topic, payload: message, qos: etc.qos, retain: etc.retain, messageId: etc.messageId });
 		});
 	}
 
