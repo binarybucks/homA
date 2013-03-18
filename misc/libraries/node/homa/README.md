@@ -1,4 +1,4 @@
-# HomA - Node modly
+# HomA - Node module
 This is a small module that provides wrapper functions and tools for components of the HomA smart home framework 
 
 ## Functionality 
