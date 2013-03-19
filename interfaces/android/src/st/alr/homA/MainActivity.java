@@ -1,6 +1,7 @@
 
 package st.alr.homA;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -23,6 +24,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -44,7 +46,7 @@ public class MainActivity extends FragmentActivity {
     private RoomsFragmentPagerAdapter roomsFragmentPagerAdapter;
     private static ViewPager mViewPager;
     private static Room currentRoom;
-    private static HashMap<String, DeviceMapAdapter> deviceMapAdapter = new HashMap<String, DeviceMapAdapter>();
+
     RelativeLayout disconnectedLayout;
     LinearLayout connectedLayout;
 
@@ -97,7 +99,6 @@ public class MainActivity extends FragmentActivity {
         
         
         super.onCreate(savedInstanceState);
-        EventBus.getDefault().register(this);
 
         setContentView(R.layout.activity_main);
 
@@ -108,7 +109,7 @@ public class MainActivity extends FragmentActivity {
 
         roomsFragmentPagerAdapter = new RoomsFragmentPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
-
+        mViewPager.setAdapter(roomsFragmentPagerAdapter);
         mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
             @Override
             public void onPageSelected(int index) {
@@ -123,7 +124,8 @@ public class MainActivity extends FragmentActivity {
             public void onPageScrolled(int arg0, float arg1, int arg2) {
             }
         });
-        mViewPager.setAdapter(roomsFragmentPagerAdapter);
+        EventBus.getDefault().register(this);
+
     }
 
     @Override
@@ -149,11 +151,10 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void onEventMainThread(Events.RoomAdded event) {
-        Log.v(this.toString(), "Room added: " + event.getRoom().getId());
+
+        Log.v(this.toString(), "Room added : " + event.getRoom().getId());
         int currentItem = mViewPager.getCurrentItem();
         mViewPager.getAdapter().notifyDataSetChanged();
-        DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
-        m.notifyDataSetChanged();
 
         if (currentRoom != null && currentRoom.compareTo(App.getRoom(currentItem)) > 0) {
             mViewPager.setCurrentItem(currentItem + 1, false);
@@ -167,46 +168,15 @@ public class MainActivity extends FragmentActivity {
     }
         
     public void onEventMainThread(Events.RoomRemoved event) {
-        Log.v(this.toString(), "Room removed: " + event.getRoom().getId());
-        DeviceMapAdapter m = deviceMapAdapter.get(event.getRoom().getId());
-        if(m != null)
-            m.clearItems();
-        
+        Log.v(this.toString(), "Room removed: " + event.getRoom().getId());        
         mViewPager.getAdapter().notifyDataSetChanged();
     }
 
-    public void onEventMainThread(Events.DeviceAddedToRoom event) {
-        Log.v(this.toString(), "DeviceAddedToRoom: " + event.getDevice().toString() + " "
-                + event.getRoom().getId());
-        DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
 
-        m.addItem(event.getDevice());
-    }
 
-    public void onEventMainThread(Events.DeviceRenamed event) {
-        Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
-        DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getDevice().getRoom());
-        m.sortDataset();
-    }
 
-    public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
-        Log.v(this.toString(), "DeviceRemovedFromRoom: " + event.getDevice().toString() + " "
-                + event.getRoom().toString());
-        DeviceMapAdapter m = lazyloadDeviceMapAdapter(this, event.getRoom());
-        m.removeItem(event.getDevice());
-    }
-
-    public static DeviceMapAdapter lazyloadDeviceMapAdapter(Context context, Room room) {
-        DeviceMapAdapter m = deviceMapAdapter.get(room.getId());
-        if (m == null) {
-            m = new DeviceMapAdapter(context, room.getDevices());
-            deviceMapAdapter.put(room.getId(), m);
-        }
-        return m;
-    }
-
-    public static class RoomsFragmentPagerAdapter extends FragmentStatePagerAdapter {
-
+    public static class RoomsFragmentPagerAdapter extends  FragmentStatePagerAdapter {
+        private ArrayList<RoomFragment> fragments = new ArrayList<MainActivity.RoomFragment>();
         public RoomsFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
             Log.v(this.toString(), "RoomsFragmentPagerAdapter instantiated ");
@@ -221,10 +191,23 @@ public class MainActivity extends FragmentActivity {
         public int getCount() {
             return App.getRoomCount();
         }
+        private RoomFragment lazyload(int position) {
+            RoomFragment f;
+            if(position >= fragments.size() || (f = fragments.get(position))  == null) {
+               f = MainActivity.RoomFragment.newInstance(App.getRoom(position).getId());
+                fragments.add(position, f);
+            }
+            return f;
+            
+            
+        }
+        
+        
 
         @Override
         public Fragment getItem(int position) {
-            return MainActivity.RoomFragment.newInstance(App.getRoom(position).getId());
+            Log.v(this.toString(), "New fragment for room at pos: " + App.getRoom(position).getId() +":" + position);
+            return lazyload(position);
         }
 
         @Override
@@ -260,31 +243,38 @@ public class MainActivity extends FragmentActivity {
             
         }
         
+
         public void onSaveInstanceState (Bundle outState) {
             super.onSaveInstanceState(outState);
             outState.putString("roomId", room.getId());
             outState.putString("deviceId", device.toString());
         }
 
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {            
-            
+        private void setArgs(Bundle savedInstanceState){
             Bundle b; 
             if(savedInstanceState != null) {
                 b = savedInstanceState;
-                Log.v(this.toString(), "onCreateDialog from savedInstance");
-            } else if(getArguments() !=null) {
-                b = getArguments();
-                Log.v(this.toString(), "onCreateDialog from arguments");
+                Log.v(this.toString(), "getArgs from savedInstance");
             } else {
-                b = null;
-                Log.v(this.toString(), "onCreateDialog create from nothing. App will now self-destroy");
-
+                b = getArguments();
+                Log.v(this.toString(), "getArgs from arguments");
             }
             
             room = App.getRoom(b.getString("roomId"));
+            if(room == null) {
+                Log.v(this.toString(), "Room for id "+ b.getString("roomId") +" was not found. CRAP");
+            }
+            
+            
             device = room.getDevices().get(b.getString("deviceId"));
             
+            
+        }
+        
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {            
+            
+            setArgs(savedInstanceState);
             EventBus.getDefault().register(this);
                     
             // Use the Builder class for convenient dialog construction
@@ -337,45 +327,81 @@ public class MainActivity extends FragmentActivity {
             EventBus.getDefault().unregister(this);
 
         }
+        
+
+
     }
 
     public static class RoomFragment extends Fragment {
         Room room;
-
+        DeviceMapAdapter m;
+        String roomId;
+        
         static RoomFragment newInstance(String id) {
+            Log.v("newInstance", id);
             RoomFragment f = new RoomFragment();
             Bundle args = new Bundle();
-            args.putString("id", id);
+            args.putString("roomId", id);
             f.setArguments(args);
             return f;
         }
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            String id = getArguments().getString("id");
-            if (id == null && savedInstanceState != null) {
-                Log.d(this.toString(), "restoring room id from savedInstanceState");
-                id = savedInstanceState.getString("id");
+        
+        private void setArgs(Bundle savedInstanceState){
+            Bundle b; 
+            if(savedInstanceState != null) {
+                b = savedInstanceState;
+                Log.v(this.toString(), "getArgs from savedInstance");
+            } else {
+                b = getArguments();
+                Log.v(this.toString(), "getArgs from arguments");
             }
             
-            room = App.getRoom(id);
+            room = App.getRoom(b.getString("roomId"));
+            roomId = b.getString("roomId");
+            Log.v(this.toString(), "Called for id: " + roomId);
+            if(room == null) {
+                Log.v(this.toString(), "Room for id "+ b.getString("roomId") +" was not found. CRAP");
+            }
+            
+            
+        }
+        
+        
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+
+            super.onCreate(savedInstanceState);
+            setArgs(savedInstanceState);
+
         }
 
         
   
         @Override
         public void onSaveInstanceState(Bundle outState) {
+
             super.onSaveInstanceState(outState);
-            outState.putString("id", room.getId());
+            outState.putString("roomId", roomId);
+
         }
 
         
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
+            setArgs(savedInstanceState);
             View v = inflater.inflate(R.layout.fragment_room, container, false);
+            Log.e(this.toString(), "onCreateView " + roomId);
+
+            if(room == null){
+                Log.e(this.toString(), "No room for id " + roomId);
+                return v;
+            }
+            
+            m = new DeviceMapAdapter(getActivity(), room.getDevices());
             ListView lv = (ListView) v.findViewById(R.id.devices_list);
-            lv.setAdapter(MainActivity.lazyloadDeviceMapAdapter(getActivity(), room));
+            lv.setAdapter(m);
+            m.notifyDataSetChanged();
 
             lv.setOnItemClickListener(new OnItemClickListener() {
                 @Override
@@ -385,9 +411,51 @@ public class MainActivity extends FragmentActivity {
                     d.show(getFragmentManager(), "tag");
                 }
             });
+            
+            
+            EventBus.getDefault().register(this);
+
 
             return v;
         }
 
+        
+        public void onEventMainThread(Events.DeviceAddedToRoom event) {
+            if(event.getRoom() != room) {
+                return;
+            }
+            Log.v(this.toString(), "DeviceAddedToRoom: " + event.getDevice().toString() + " "
+                    + event.getRoom().getId());
+            m.addItem(event.getDevice());
+            m.notifyDataSetChanged();
+        }
+
+        public void onEventMainThread(Events.DeviceRenamed event) {
+            if(event.getDevice().getRoom() != room) {
+                return;
+            }
+
+            Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
+            m.sortDataset();
+            m.notifyDataSetChanged();
+
+        }
+
+        public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
+            if(event.getRoom() != room) {
+                return;
+            }
+
+            Log.v(this.toString(), "DeviceRemovedFromRoom: " + event.getDevice().toString() + " "
+                    + event.getRoom().toString());
+            m.removeItem(event.getDevice());
+            m.notifyDataSetChanged();
+        }
+        
+        @Override
+        public void onDestroy(){
+            EventBus.getDefault().unregister(this);
+            super.onDestroy();
+        }
     }
 }
