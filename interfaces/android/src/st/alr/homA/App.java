@@ -1,7 +1,9 @@
 
 package st.alr.homA;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
@@ -53,6 +55,9 @@ public class App extends Application {
          return rooms.size();
     }
 
+    public static Set<String> getRoomIds() {
+        return rooms.keySet();
+    }
     public static void addRoom(Room room) {
         rooms.put(room.getId(), room);
         EventBus.getDefault().post(new Events.RoomAdded(room));
@@ -81,6 +86,8 @@ public class App extends Application {
     public static App getInstance() {
         return instance;
     }
+    
+    
     
     public void onEvent(MqttConnectivityChanged event) {
         

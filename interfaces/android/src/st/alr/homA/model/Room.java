@@ -11,16 +11,25 @@ import android.util.Log;
 
 
 public class Room implements Comparable<Room>{
+    private static int counter = -1;
 	private String id;
 	private ValueSortedMap<String, Device> devices;
-	
+	private int stableId = counter++;
 	
 	public Room(Context context, String id) {
 		this.id = id;
 		devices = new ValueSortedMap<String, Device>();
 	}
 
-	public String getId() {
+	
+	
+	public int getStableId() {
+        return stableId;
+    }
+
+
+
+    public String getId() {
 		return id;
 	}
 

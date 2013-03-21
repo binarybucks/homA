@@ -4,7 +4,7 @@ package st.alr.homA;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Vector;
+import java.util.Set;
 
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Control;
@@ -22,17 +22,13 @@ import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,9 +42,9 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 public class MainActivity extends FragmentActivity {
+    private Room currentRoom;
     private RoomPagerAdapter roomPagerAdapter;
     private static ViewPager mViewPager;
-    private static Room currentRoom;
 
     RelativeLayout disconnectedLayout;
     LinearLayout connectedLayout;
@@ -176,7 +172,20 @@ public class MainActivity extends FragmentActivity {
         }
         
         public int getItemPosition (Object object) {
-            return POSITION_NONE; //TODO CHANGE
+            if(App.getRoom((String)object) == null) {
+                return POSITION_NONE;
+            }
+
+            int i = 0;
+            for (String s : App.getRoomIds()) {
+                if(object.equals(s)) {
+                    break;
+                }
+                i++;
+            }
+            return i;
+            
+//            return POSITION_NONE;
         }
 
 
@@ -209,6 +218,8 @@ public class MainActivity extends FragmentActivity {
                    ft.commit();                  
                }
            });
+         } else {
+             ((ViewGroup)page.getParent()).removeView(page);
          }
 
          container.addView(page);
@@ -243,6 +254,36 @@ public class MainActivity extends FragmentActivity {
         public void onEventMainThread(Events.RoomAdded event) {
             Log.v(this.toString(), "Room added : " + event.getRoom().getId());
             notifyDataSetChanged();
+
+////            String currentId = currentRoom.getId();
+////            Log.v(this.toString(), "currentId: " + currentId);
+//
+//
+////            // Check if it was an insert before
+////            if (roomAtCurrentItemPositionBefore.compareTo(event.getRoom()) > 0) {
+////                mViewPager.setCurrentItem(i, false);
+////            }
+//
+//                
+////            int currentItem = mViewPager.getCurrentItem();
+////            Room roomAtCurrentItemPositionBefore = App.getRoom(currentItem);
+//            
+//            if(currentRoom != null) {
+//            int i;
+//            for (i = 0; i < App.getRoomCount(); i++){
+//                Log.v(this.toString(), "i: " + i);
+//
+//                if(App.getRoom(i).getId().equals(currentRoom.getId()));
+//                    break;
+//            }
+////            Room roomAtCurrentItemPositionAfter = App.getRoom(currentItem);
+////
+////            // Check if it was an insert before
+////            if (roomAtCurrentItemPositionBefore.compareTo(roomAtCurrentItemPositionAfter) <= 0) {
+//             mViewPager.setCurrentItem(i, false);}
+////            }
+//
+            
 
         }
 
