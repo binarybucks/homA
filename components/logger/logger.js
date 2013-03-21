@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 var homa = require('homa');
 var argv = homa.paramHelper.argv;
-var messages = {};
 
 homa.mqttHelper.on('connect', function(packet) {
 	homa.mqttHelper.subscribe('#');
