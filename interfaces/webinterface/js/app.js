@@ -666,8 +666,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-      console.log("-----------RECEIVED-----------");
-      console.log("Received: "+topic+":"+payload);    
+      // console.log("-----------RECEIVED-----------");
+      // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -714,7 +714,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-     console.log("-----------/ RECEIVED-----------");
+     // console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {

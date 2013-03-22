@@ -25,7 +25,7 @@ Socket* getSocket(String id, String group);
 // Settings 
 byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0xFF };
 byte broker[] = { 192, 168, 8, 2 };
-unsigned int ctr = 0;
+unsigned int connectCtr = 0;
 Socket* firstSocket = NULL;
 Socket* lastSocket = NULL;
 String clientId = "158212-Socket";
@@ -36,12 +36,12 @@ PubSubClient mqttClient = PubSubClient(broker, 1883, receive, ethernetClient);
 
 void loop() {
   mqttClient.loop();  // Mqtt loop
-  if (ctr % 65000 == 0) {
+  if (connectCtr % 65000 == 0) {
     if (!mqttClient.connected())
       connect();
-    ctr = 0;
+    connectCtr = 0;
   }
-  ctr++;
+  connectCtr++;
 }
 
 
