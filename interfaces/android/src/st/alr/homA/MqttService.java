@@ -2,9 +2,6 @@ package st.alr.homA;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -59,7 +56,6 @@ public class MqttService extends Service implements MqttCallback
     private MqttClient mqttClient;
     private NetworkConnectionIntentReceiver netConnReceiver;
     private PingSender pingSender;
-    private ThreadPoolExecutor executor;
     private static SharedPreferences sharedPreferences;
     private static NotificationCompat.Builder notificationBuilder;
     private static MqttService instance;
@@ -80,7 +76,6 @@ public class MqttService extends Service implements MqttCallback
         workerThread = null;
         changeMqttConnectivity(MQTT_CONNECTIVITY.INITIAL);
         mBinder = new LocalBinder<MqttService>(this);
-        executor = new ThreadPoolExecutor(2, 2, Long.MAX_VALUE, TimeUnit.NANOSECONDS,  new SynchronousQueue<Runnable>());
         notificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(App.getInstance());
         keepAliveSeconds = 15 * 60;
@@ -228,7 +223,7 @@ public class MqttService extends Service implements MqttCallback
             scheduleNextPing();
 
             return true;
-        } catch (MqttException e)
+        } catch (Exception e) // Paho tends to throw NPEs in some cases. 
         {
             Log.e(this.toString(), e.toString());
             changeMqttConnectivity(MQTT_CONNECTIVITY.DISCONNECTED);
@@ -259,9 +254,9 @@ public class MqttService extends Service implements MqttCallback
         } else {
             try
             {
-                mqttClient.subscribe("/devices/+/controls/+/type", 0);
-                mqttClient.subscribe("/devices/+/controls/+", 0);
                 mqttClient.subscribe("/devices/+/meta/#", 0);
+                mqttClient.subscribe("/devices/+/controls/+/meta/#", 0);
+                mqttClient.subscribe("/devices/+/controls/+", 0);
 
             } catch (IllegalArgumentException e)
             {
@@ -386,8 +381,10 @@ public class MqttService extends Service implements MqttCallback
                 device.moveToRoom(getString(R.string.defaultsRoomName));
 
             }
-
+            
             // Topic parsing
+            //  /devices/$uniqueDeviceId/controls/$deviceUniqueControlId/meta/type
+            // 0/      1/              2/       3/                     4/   5/   6
             if (splitTopic[3].equals("controls")) {
                 String controlName = splitTopic[4];
                 Control control = device.getControlWithId(controlName);
@@ -396,17 +393,13 @@ public class MqttService extends Service implements MqttCallback
                     control = new Control(this, controlName, topicStr.replace("/type", ""), device);
                     device.addControl(control);
                 }
-                if (splitTopic.length < 6) { // Control value
+                if (splitTopic.length == 5) { // Control value
                     control.setValue(payloadStr);
-                } else { // Control type
-                    control.setType(payloadStr);
+                } else if(splitTopic.length == 7){ // Control meta
+                    control.setMeta(splitTopic[6], payloadStr);
                 }
             } else if (splitTopic[3].equals("meta")) {
-                if (splitTopic[4].equals("room")) { // Device Room
-                    device.moveToRoom(payloadStr);
-                } else if (splitTopic[4].equals("name")) { // Device name
-                    device.setName(payloadStr);
-                }
+                device.setMeta(splitTopic[4], splitTopic[4]); // Device Meta
             }
 
         } catch (MqttException e)
@@ -707,12 +700,7 @@ public class MqttService extends Service implements MqttCallback
     }
 
     @Override
-    public void deliveryComplete(MqttDeliveryToken arg0) {
-        // TODO Auto-generated method stub
-        
-    }
-
-
+    public void deliveryComplete(MqttDeliveryToken arg0) { }
 }
 
 

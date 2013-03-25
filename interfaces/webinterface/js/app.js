@@ -398,6 +398,10 @@ $(function(){
       var tmpl = this.templateByType("range");
       this.$el.html(tmpl(this.model.toJSON()));
       this.input = this.$('input');
+      console.log("max is: " + this.model.get("max"));
+            console.log(this.model);
+
+      this.input.attr('max', this.model.get("max") || 255)
       return this;
     },
 
@@ -651,7 +655,7 @@ $(function(){
     console.log("Connection established");
     Settings.set("connectionStatus", "connected");
 
-    mqttSocket.subscribe('/devices/+/controls/+/type', 0);
+    mqttSocket.subscribe('/devices/+/controls/+/meta/+', 0);
     mqttSocket.subscribe('/devices/+/controls/+', 0);
     mqttSocket.subscribe('/devices/+/meta/#', 0);
   };
@@ -666,8 +670,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-      // console.log("-----------RECEIVED-----------");
-      // console.log("Received: "+topic+":"+payload);    
+       console.log("-----------RECEIVED-----------");
+       console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -693,6 +697,8 @@ $(function(){
 
 
     // Topic parsing
+    //  /devices/$uniqueDeviceId/controls/$deviceUniqueControlId/meta/type
+    // 0/      1/              2/       3/                     4/   5/   6
     if(splitTopic[3] == "controls") {
       var controlName = splitTopic[4];  
       var control = device.controls.get(controlName);
@@ -704,17 +710,17 @@ $(function(){
 
       if(splitTopic[5] == null) {                                       // Control value        
         control.set("value", payload);
-      } else {                                                          // Control type 
-        control.set("type", payload);
+      } else if (splitTopic[5] == "meta" && splitTopic[6] != null){     // Control meta 
+        control.set(splitTopic[6], payload);
       } 
-    } else if(splitTopic[3] == "meta" ) { 
+    } else if(splitTopic[3] == "meta" ) { // Could be moved to the setter to facilitate parsing
       if (splitTopic[4] == "room") {                                    // Device Room
         device.moveToRoom(payload);
       } else if(splitTopic[4] == "name") {                              // Device name
         device.set('name', payload);
       }
     }
-     // console.log("-----------/ RECEIVED-----------");
+     console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {

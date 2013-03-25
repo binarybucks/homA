@@ -1,7 +1,6 @@
 
 package st.alr.homA.view;
 
-import st.alr.homA.R;
 import st.alr.homA.model.Control;
 import st.alr.homA.support.ValueChangedObserver;
 import android.app.Activity;

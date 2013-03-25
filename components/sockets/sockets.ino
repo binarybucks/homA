@@ -147,7 +147,7 @@ void addSocket(String id, String group, String type) {
   }
 
   String base = "/devices/"+clientId+"-"+group+"-"+id+"/controls/Power";
-  publish(base+"/type","switch");
+  publish(base+"/meta/type","switch");
   subscribe(base+"/on");
 }
 

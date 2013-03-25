@@ -15,8 +15,8 @@ var argv = homa.paramHelper.describe("latitude", "Latitude at current location")
 })();
 
 homa.mqttHelper.on('connect', function(packet) {
-	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset/type", "text", true);
-	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise/type", "text", true);
+	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset/meta/type", "text", true);
+	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise/meta/type", "text", true);
 
 	homa.scheduler.scheduleJob('0 0 * * *', querySuntimes); // Query every day at midnight
 	querySuntimes();

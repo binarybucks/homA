@@ -2,6 +2,7 @@ package st.alr.homA.view;
 
 import st.alr.homA.MqttService;
 import st.alr.homA.R;
+import st.alr.homA.model.Control;
 import android.app.Activity;
 import android.util.Log;
 import android.widget.SeekBar;
@@ -12,15 +13,23 @@ public class RangeControlView extends ControlView {
         super(activity, R.layout.fragment_device_range, R.id.seekControlValue, R.id.seekControlName);
     }
 
+    public ControlView attachToControl(Control control) {
+        int max;
+        try {
+            max = Integer.parseInt(control.getMeta("max", "255"));
+        }catch (NumberFormatException e) {
+            max = 255;
+        }
+        ((SeekBar) _value).setMax(max);
+        Log.v(this.toString(), "Setting seekbar max to " + max);
+
+        return super.attachToControl(control);
+    }
+
     public void setContent(String name, String value) {
         _name.setText(name);
 
-        ((SeekBar) _value).setSaveEnabled(false);
-        ((SeekBar) _value).setSaveFromParentEnabled(false);
-
-        ((SeekBar) _value).setMax(255);
         ((SeekBar) _value).setProgress(Integer.parseInt(value));
-        Log.v(this.toString(), "Setting seekbar " + name  + " to " + value);
         Log.v(this.toString(), "Setting seekbar " + name  + " to " + value);
 
     }

@@ -15,6 +15,7 @@ public class Device implements Comparable<Device> {
     private TreeMap<String, Control> controls;
     private ValueChangedObserver controlAddedObserver;
 
+    
     public Room getRoom() {
         return room;
     }
@@ -70,7 +71,7 @@ public class Device implements Comparable<Device> {
         this.room.removeDevice(this);
         this.name = name;  
         this.room.addDevice(this);
-//        EventBus.getDefault().post(new Events.DeviceRenamed(this));
+        //  EventBus.getDefault().post(new Events.DeviceRenamed(this));
 
         
     }
@@ -106,6 +107,13 @@ public class Device implements Comparable<Device> {
     @Override
     public int compareTo(Device another) {
         return this.getName().compareToIgnoreCase(another.getName());
+    }
+
+    public void setMeta(String key, String value) {
+        if (key.equals("room"))
+            this.moveToRoom(value);
+        else if (key.equals("name"))
+            this.setName(value);
     }
 
 }

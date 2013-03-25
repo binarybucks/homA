@@ -1,10 +1,8 @@
 
 package st.alr.homA;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Set;
 
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Control;
@@ -328,40 +326,6 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
        
     }
 
-    
-    
-    
-
-
-//    public static class RoomsFragmentPagerAdapter extends  FragmentStatePagerAdapter {
-//        public RoomsFragmentPagerAdapter(FragmentManager fm) {
-//            super(fm);
-//        }
-//
-//        @Override
-//        public int getItemPosition(Object object) {
-//            return POSITION_NONE;
-//        }
-//
-//        @Override
-//        public int getCount() {
-//            return App.getRoomCount();
-//        }
-//        
-//        
-//
-//        @Override
-//        public Fragment getItem(int position) {
-//            return null; //TODO 
-//        }
-//
-//        @Override
-//        public CharSequence getPageTitle(int position) {
-//            return position<getCount() ? App.getRoom(position).getId().toUpperCase(Locale.ENGLISH) : "";
-//        }
-//    }
-//    
-
     public static class DeviceFragment extends DialogFragment {
         Room room;
         Device device;
@@ -448,16 +412,16 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
         
         public ControlView getControlView(Control control) {
             ControlView v = null;
+            
+            if(control.getMeta("type", "text").equals("switch")) {
+                v = new st.alr.homA.view.SwitchControlView(getActivity());
 
-            switch (control.getType()) {
-                case SWITCH:
-                    v = new st.alr.homA.view.SwitchControlView(getActivity());
-                    break;
-                case RANGE:
-                    v = new st.alr.homA.view.RangeControlView(getActivity());
-                    break;
-                default:
-                    v = new st.alr.homA.view.TextControlView(getActivity());
+            } else if (control.getMeta("type", "text").equals("range")) {
+                v = new st.alr.homA.view.RangeControlView(getActivity());
+
+            } else {
+                v = new st.alr.homA.view.TextControlView(getActivity());
+
             }
 
             return v;
