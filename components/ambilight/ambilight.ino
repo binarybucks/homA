@@ -88,7 +88,7 @@ void connect() {
 			 subscribe("/devices/"+clientId+"/controls/meta/Fading/on");
 
 			 publish("/devices/"+clientId+"/controls/Color/meta/type", "range");
-       publish("/devices/"+clientId+"/controls/Brightness/meta/max", "360");
+                         publish("/devices/"+clientId+"/controls/Brightness/meta/max", "360");
 			 subscribe("/devices/"+clientId+"/controls/Color/on");
 
 			 publish("/devices/"+clientId+"/controls/Brightness/meta/type", "range");
