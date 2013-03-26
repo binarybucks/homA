@@ -327,6 +327,7 @@ $(function(){
     initialize: function() {
       this.model.on('change:type', this.modelTypeChanged, this);  
       this.model.on('change:value', this.modelValueChanged, this);  
+
       this.specialize();
       this.model.view = this;
       this.allowInputUpdates();
@@ -342,6 +343,7 @@ $(function(){
       this.dynamicAllowInputUpdates = this.methodNotImplemented;
       this.dynamicModelValueChanged = this.methodNotImplemented;
 
+      console.log("model: " + this.model.get("type"));
       if (this.model.get("type") == "switch") {
         this.dynamicRender = this.switchRender;
         this.dynamicInputValueChanged = this.switchInputValueChanged;
@@ -358,6 +360,8 @@ $(function(){
         this.dynamicRender = this.textRender;
         this.dynamicModelValueChanged = this.textModelValueChanged;
       } else {
+        console.error("is undefined");
+        console.log(this.model);
         this.dynamicRender = this.undefinedRender;
       }
     },
@@ -667,8 +671,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-    //console.log("-----------RECEIVED-----------");
-    //console.log("Received: "+topic+":"+payload);    
+    console.log("-----------RECEIVED-----------");
+    console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -699,16 +703,23 @@ $(function(){
     if(splitTopic[3] == "controls") {
       var controlName = splitTopic[4];  
       var control = device.controls.get(controlName);
+                  console.log(device.controls);
+
       if (control == null) {
+            console.log("control is null");
+
         control = new Control({id: controlName});
         device.controls.add(control);
         control.set("topic", splitTopic.slice(0,5).join("/"));
       }
 
-      if(splitTopic[5] == null) {                                       // Control value        
+      if(splitTopic[5] == null) {                                       // Control value   
+      console.log("setting value");     
         control.set("value", payload);
       } else if (splitTopic[5] == "meta" && splitTopic[6] != null){     // Control meta 
         control.set(splitTopic[6], payload);
+              console.log("setting meta for " + control.get("id") + " to "+ payload);     
+
       } 
     } else if(splitTopic[3] == "meta" ) { // Could be moved to the setter to facilitate parsing
       if (splitTopic[4] == "room") {                                    // Device Room
@@ -717,7 +728,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-    //console.log("-----------/ RECEIVED-----------");
+    console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {
