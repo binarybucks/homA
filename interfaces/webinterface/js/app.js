@@ -1,7 +1,6 @@
 $(function(){
   var mqttSocket = new Mosquitto();
-
-
+  
   Backbone.View.prototype.close = function() {
     this.off();
     this.remove();
@@ -658,6 +657,7 @@ $(function(){
     mqttSocket.subscribe('/devices/+/controls/+/meta/+', 0);
     mqttSocket.subscribe('/devices/+/controls/+', 0);
     mqttSocket.subscribe('/devices/+/meta/#', 0);
+    window.onbeforeunload = function () { mqttSocket.disconnect(); debugger; };
   };
 
   mqttSocket.ondisconnect = function(rc){ 
