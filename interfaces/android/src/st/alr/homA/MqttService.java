@@ -399,7 +399,7 @@ public class MqttService extends Service implements MqttCallback
                     control.setMeta(splitTopic[6], payloadStr);
                 }
             } else if (splitTopic[3].equals("meta")) {
-                device.setMeta(splitTopic[4], splitTopic[4]); // Device Meta
+                device.setMeta(splitTopic[4], payloadStr); // Device Meta
             }
 
         } catch (MqttException e)
