@@ -657,7 +657,7 @@ $(function(){
     mqttSocket.subscribe('/devices/+/controls/+/meta/+', 0);
     mqttSocket.subscribe('/devices/+/controls/+', 0);
     mqttSocket.subscribe('/devices/+/meta/#', 0);
-    window.onbeforeunload = function () { mqttSocket.disconnect(); debugger; };
+    window.onbeforeunload = function () { mqttSocket.disconnect();};
   };
 
   mqttSocket.ondisconnect = function(rc){ 
