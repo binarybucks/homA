@@ -397,9 +397,6 @@ $(function(){
       var tmpl = this.templateByType("range");
       this.$el.html(tmpl(this.model.toJSON()));
       this.input = this.$('input');
-      console.log("max is: " + this.model.get("max"));
-            console.log(this.model);
-
       this.input.attr('max', this.model.get("max") || 255)
       return this;
     },
@@ -670,8 +667,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-       console.log("-----------RECEIVED-----------");
-       console.log("Received: "+topic+":"+payload);    
+    //console.log("-----------RECEIVED-----------");
+    //console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -720,7 +717,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-     console.log("-----------/ RECEIVED-----------");
+    //console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {
