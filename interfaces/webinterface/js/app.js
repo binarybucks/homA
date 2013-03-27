@@ -671,8 +671,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-    console.log("-----------RECEIVED-----------");
-    console.log("Received: "+topic+":"+payload);    
+    // console.log("-----------RECEIVED-----------");
+    // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -683,8 +683,6 @@ $(function(){
       Devices.add(device);
       device.moveToRoom(undefined);
     } else if (device != null && payload == "") {   
-      console.log("Removing device with id: " + deviceId);
-      console.log(payload);
       // Remove the device when any received topic under that device tree is "" (actually this also removes the device when just a control should be removed, but 
       // right now there is no usecase to remove a single control only.)
       // This just removes the device when the webinterface is loaded and a "" is received. This does not ensure persistent removal during reloads. 
@@ -703,23 +701,16 @@ $(function(){
     if(splitTopic[3] == "controls") {
       var controlName = splitTopic[4];  
       var control = device.controls.get(controlName);
-                  console.log(device.controls);
-
       if (control == null) {
-            console.log("control is null");
-
         control = new Control({id: controlName});
         device.controls.add(control);
-        control.set("topic", splitTopic.slice(0,5).join("/"));
+        control.set("topic", "/devices/"+ deviceId + "/controls/" + controlName);
       }
 
       if(splitTopic[5] == null) {                                       // Control value   
-      console.log("setting value");     
         control.set("value", payload);
       } else if (splitTopic[5] == "meta" && splitTopic[6] != null){     // Control meta 
         control.set(splitTopic[6], payload);
-              console.log("setting meta for " + control.get("id") + " to "+ payload);     
-
       } 
     } else if(splitTopic[3] == "meta" ) { // Could be moved to the setter to facilitate parsing
       if (splitTopic[4] == "room") {                                    // Device Room
@@ -728,7 +719,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-    console.log("-----------/ RECEIVED-----------");
+    // console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {
