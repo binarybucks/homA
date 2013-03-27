@@ -390,7 +390,7 @@ public class MqttService extends Service implements MqttCallback
                 Control control = device.getControlWithId(controlName);
 
                 if (control == null) {
-                    control = new Control(this, controlName, topicStr.replace("/type", ""), device);
+                    control = new Control(this, controlName, device);
                     device.addControl(control);
                 }
                 if (splitTopic.length == 5) { // Control value
