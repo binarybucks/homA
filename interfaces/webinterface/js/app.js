@@ -705,7 +705,7 @@ $(function(){
       if (control == null) {
         control = new Control({id: controlName});
         device.controls.add(control);
-        control.set("topic", topic.replace("/type", ""));
+         control.set("topic", splitTopic.slice(0,5).join("/"));
       }
 
       if(splitTopic[5] == null) {                                       // Control value        
