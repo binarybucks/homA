@@ -6,7 +6,7 @@
 #define AMBILIGHTBLUEEPIN 6
 #define AMBILIGHTREDPIN 5
 #define AMBILIGHTGREENPIN 3
-
+#define CLIENTID "465632-Ambilight" 
 
 
 struct _Sk{String id; String group; int type; struct _Sk* next;};
@@ -27,11 +27,11 @@ void setLedColor(int red, int green, int blue);
 // Settings 
 byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01 };
 byte broker[] = { 192, 168, 8, 2 };
-String clientId = "465632-Ambilight";
+String clientId = CLIENTID;
 
 unsigned int connectCtr = 0;
 unsigned int fadeCtr = 0;
-double ambilightValue = 1.0;
+int ambilightValue = 1;
 int ambilightHue = 359;
 boolean fade = false;
 
@@ -61,11 +61,8 @@ void loop() {
 // Continuously Fades values on HSV spectrum
 void fadeLoop() {
   ambilightHue = ambilightHue < 359 ? ambilightHue+1 : 0;
-  setLedColorHSV(ambilightHue, 1, ambilightValue);
-  char buffer[6];
-  float val =  (1.0*ambilightHue*(255.0/359.0));
-  dtostrf(val,3,2,buffer);
-  publish("/devices/"+clientId+"/controls/Color/on", buffer);
+  setLedColorHSV(ambilightHue, 1, ambilightValue);  
+  publish("/devices/"+clientId+"/controls/Color/on", String(ambilightHue));
 }
 
 
@@ -83,16 +80,16 @@ void setup() {
 void connect() {
   Serial.println("Connecting to mqtt server");
   
-    if (mqttClient.connect(broker)) {
+    if (mqttClient.connect(CLIENTID)) {
 			 publish("/devices/"+clientId+"/controls/Fading/meta/type", "switch");
 			 subscribe("/devices/"+clientId+"/controls/meta/Fading/on");
 
 			 publish("/devices/"+clientId+"/controls/Color/meta/type", "range");
-                         publish("/devices/"+clientId+"/controls/Brightness/meta/max", "360");
+                         publish("/devices/"+clientId+"/controls/Brightness/meta/max", "359");
 			 subscribe("/devices/"+clientId+"/controls/Color/on");
 
 			 publish("/devices/"+clientId+"/controls/Brightness/meta/type", "range");
-       publish("/devices/"+clientId+"/controls/Brightness/meta/type", "360");
+                         publish("/devices/"+clientId+"/controls/Brightness/meta/type", "359");
 			 subscribe("/devices/"+clientId+"/controls/Brightness/on");
     }
 }
@@ -103,24 +100,19 @@ void receive(char* topic, byte* payload, unsigned int length) {
   String p = String((char*)payload);
   Serial.println("Received " + t + ":" + p); 
 
-  if (topic == "/devices/"+clientId+"/controls/Brightness/on") {
-    int value;
-    sscanf(payload, "%d", &value);
-    ambilightValue = (1.0*value)/255.0;
+  if (t == "/devices/"+clientId+"/controls/Brightness/on") {
+    sscanf((char*)payload, "%d", &ambilightValue);
     setLedColorHSV(ambilightHue, ambilightValue);
     publish(t.substring(0, t.length()-3), p);
 
-  } else if (topic == "/devices/"+clientId+"/controls/Color/on")) {
-    int hue;
-    sscanf(payload, "%d", &hue);
-    ambilightHue = round(1.0*hue*(359.0/255.0)) ;
+  } else if (t == "/devices/"+clientId+"/controls/Color/on") {
+    sscanf((char*)payload, "%d", &ambilightHue);
     setLedColorHSV(ambilightHue, ambilightValue);
     publish(t.substring(0, t.length()-3), p);
-
-  } else if(topic == "/devices/"+clientId+"/controls/Fading/on")
-    fade = p == '1';
+  } else if(t == "/devices/"+clientId+"/controls/Fading/on") {
+    fade = p == "1";
     publish(t.substring(0, t.length()-3), p);
-	}
+  }
 }
 
 
@@ -199,15 +191,15 @@ void setLedColorHSV(int h, double s, double v) {
 
 
 void publish(String topic, String payload) {
-  char p[payload.length()];
-  payload.toCharArray(p, payload.length());
-  publish(topic, (uint8_t*)p, payload.length(), true);
+  char p[payload.length()+1];
+  payload.toCharArray(p, payload.length()+1);
+  publish(topic, p);
 }
-void publish(String topic, char* payload, int payloadLength) {
-   char t[topic.length()];
-   topic.toCharArray(t, topic.length());
+void publish(String topic, char* payload) {
+   char t[topic.length()+1];
+   topic.toCharArray(t, topic.length()+1);
 
-   mqttClient.publish(t, (uint8_t*)p, payloadLength, true);
+   mqttClient.publish(t, (uint8_t*)payload, strlen(payload), true);
 } 
 
 void subscribe(String topic) {

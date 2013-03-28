@@ -327,6 +327,7 @@ $(function(){
     initialize: function() {
       this.model.on('change:type', this.modelTypeChanged, this);  
       this.model.on('change:value', this.modelValueChanged, this);  
+
       this.specialize();
       this.model.view = this;
       this.allowInputUpdates();
@@ -342,6 +343,7 @@ $(function(){
       this.dynamicAllowInputUpdates = this.methodNotImplemented;
       this.dynamicModelValueChanged = this.methodNotImplemented;
 
+      console.log("model: " + this.model.get("type"));
       if (this.model.get("type") == "switch") {
         this.dynamicRender = this.switchRender;
         this.dynamicInputValueChanged = this.switchInputValueChanged;
@@ -358,6 +360,8 @@ $(function(){
         this.dynamicRender = this.textRender;
         this.dynamicModelValueChanged = this.textModelValueChanged;
       } else {
+        console.error("is undefined");
+        console.log(this.model);
         this.dynamicRender = this.undefinedRender;
       }
     },
@@ -397,9 +401,6 @@ $(function(){
       var tmpl = this.templateByType("range");
       this.$el.html(tmpl(this.model.toJSON()));
       this.input = this.$('input');
-      console.log("max is: " + this.model.get("max"));
-            console.log(this.model);
-
       this.input.attr('max', this.model.get("max") || 255)
       return this;
     },
@@ -670,8 +671,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-       console.log("-----------RECEIVED-----------");
-       console.log("Received: "+topic+":"+payload);    
+    // console.log("-----------RECEIVED-----------");
+    // console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -682,8 +683,6 @@ $(function(){
       Devices.add(device);
       device.moveToRoom(undefined);
     } else if (device != null && payload == "") {   
-      console.log("Removing device with id: " + deviceId);
-      console.log(payload);
       // Remove the device when any received topic under that device tree is "" (actually this also removes the device when just a control should be removed, but 
       // right now there is no usecase to remove a single control only.)
       // This just removes the device when the webinterface is loaded and a "" is received. This does not ensure persistent removal during reloads. 
@@ -705,10 +704,10 @@ $(function(){
       if (control == null) {
         control = new Control({id: controlName});
         device.controls.add(control);
-         control.set("topic", splitTopic.slice(0,5).join("/"));
+        control.set("topic", "/devices/"+ deviceId + "/controls/" + controlName);
       }
 
-      if(splitTopic[5] == null) {                                       // Control value        
+      if(splitTopic[5] == null) {                                       // Control value   
         control.set("value", payload);
       } else if (splitTopic[5] == "meta" && splitTopic[6] != null){     // Control meta 
         control.set(splitTopic[6], payload);
@@ -720,7 +719,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-     console.log("-----------/ RECEIVED-----------");
+    // console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {

@@ -98,14 +98,18 @@ void receive(char* topic, byte* payload, unsigned int length) {
 }
 
 void publish(String topic, String payload) {
-  char t[topic.length()];
-  char p[payload.length()];
-  
-  topic.toCharArray(t, topic.length());
-  payload.toCharArray(p, payload.length());
-
-  mqttClient.publish(t, (uint8_t*)p, payload.length(), true);
+  char p[payload.length()+1];
+  payload.toCharArray(p, payload.length()+1);
+  publish(topic, p);
 }
+void publish(String topic, char* payload) {
+   char t[topic.length()+1];
+   topic.toCharArray(t, topic.length()+1);
+
+   mqttClient.publish(t, (uint8_t*)payload, strlen(payload), true);
+} 
+
+
 Socket* getSocket(String id, String group) {
   Socket* s = firstSocket;
   while(s != NULL) {
@@ -167,8 +171,16 @@ void removeSocket(String id, String group) {
   // Memory cleanup
   // TODO: FIXME
   Socket* socket = getSocket(id, group);  
-  Socket* before = firstSocket;    
-  while(before->next != NULL && before->next != socket)
+  if(socket != null) {
+    socket->id = socket->next->id;
+    socket->group = socket->next->group;
+    socket->type = socket->next->type;
+        
+    Socket* tmp = socket->next->next;
+    free(socket->next);    
+    node->Next = temp;
+
+
     before = before->next;
 
   if(before->next == socket) {
@@ -178,8 +190,8 @@ void removeSocket(String id, String group) {
              
     if(socket == lastSocket) 
       lastSocket = before;
+  
   }
-  free(socket);    
 }
 
 void subscribe(String topic) {
