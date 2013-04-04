@@ -81,38 +81,48 @@ void connect() {
   Serial.println("Connecting to mqtt server");
   
     if (mqttClient.connect(CLIENTID)) {
+     
 			 publish("/devices/"+clientId+"/controls/Fading/meta/type", "switch");
-			 subscribe("/devices/"+clientId+"/controls/meta/Fading/on");
+			 subscribe("/devices/"+clientId+"/controls/Fading/on");
 
 			 publish("/devices/"+clientId+"/controls/Color/meta/type", "range");
-                         publish("/devices/"+clientId+"/controls/Brightness/meta/max", "359");
+                         publish("/devices/"+clientId+"/controls/Color/meta/max", "359");
 			 subscribe("/devices/"+clientId+"/controls/Color/on");
 
 			 publish("/devices/"+clientId+"/controls/Brightness/meta/type", "range");
-                         publish("/devices/"+clientId+"/controls/Brightness/meta/type", "359");
 			 subscribe("/devices/"+clientId+"/controls/Brightness/on");
     }
 }
 
 
-void receive(char* topic, byte* payload, unsigned int length) {  
+void receive(char* topic, byte* rawPayload, unsigned int length) {  
+    char  payload[length+1+3];
+  memset(payload, 0, length+1+3);
+  memcpy(payload, rawPayload, length);
+
   String t = String(topic);
   String p = String((char*)payload);
-  Serial.println("Received " + t + ":" + p); 
+  //Serial.println("Received " + t + ":" + p); 
 
   if (t == "/devices/"+clientId+"/controls/Brightness/on") {
-    sscanf((char*)payload, "%d", &ambilightValue);
+    //sscanf((char*)payload, "%d", &ambilightValue);
+    //setLedColorHSV(ambilightHue, ambilightValue);
+    
+    int value;
+    sscanf(payload, "%d", &value);
+    ambilightValue = (1.0*value)/255.0;
     setLedColorHSV(ambilightHue, ambilightValue);
-    publish(t.substring(0, t.length()-3), p);
 
   } else if (t == "/devices/"+clientId+"/controls/Color/on") {
+    
     sscanf((char*)payload, "%d", &ambilightHue);
+    Serial.println(ambilightHue);
     setLedColorHSV(ambilightHue, ambilightValue);
-    publish(t.substring(0, t.length()-3), p);
   } else if(t == "/devices/"+clientId+"/controls/Fading/on") {
     fade = p == "1";
-    publish(t.substring(0, t.length()-3), p);
   }
+    publish(t.substring(0, t.length()-3), p);
+
 }
 
 
@@ -192,24 +202,30 @@ void setLedColorHSV(int h, double s, double v) {
 
 void publish(String topic, String payload) {
   char p[payload.length()+1];
+    memset(p, 0, payload.length()+1);
+
   payload.toCharArray(p, payload.length()+1);
   publish(topic, p);
 }
 void publish(String topic, char* payload) {
    char t[topic.length()+1];
+   memset(t, 0, topic.length()+1);
    topic.toCharArray(t, topic.length()+1);
-
    mqttClient.publish(t, (uint8_t*)payload, strlen(payload), true);
 } 
 
 void subscribe(String topic) {
-  char t[topic.length()];
-  topic.toCharArray(t, topic.length());
+  char t[topic.length()+1];
+  memset(t, 0, topic.length()+1);
+  topic.toCharArray(t, topic.length()+1);
+  Serial.print("Subscribing to: ");
+  Serial.println(t);
   mqttClient.subscribe(t);
 }
 
 void unsubscribe(String topic) {
-  char t[topic.length()];
-  topic.toCharArray(t, topic.length());
+  char t[topic.length()+1];
+  memset(t, 0, topic.length()+1);
+  topic.toCharArray(t, topic.length()+1);
   mqttClient.unsubscribe(t);
 }

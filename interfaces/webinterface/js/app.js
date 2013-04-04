@@ -581,7 +581,7 @@ $(function(){
 
     publishMqtt: function(topic, value) {
       if(Settings.get("devMode")) {
-        console.log("DEV: Simulating publishing of " + topic + ":" + value);
+        console.log("DEV: Simulating publishing of " + topic + "/on:" + value);
       } else {
        
         mqttSocket.publish(topic+"/on", value, 0, true);
