@@ -16,10 +16,10 @@ public class Control {
     HashMap<String, String> meta;
 
 
-    public Control(Context context, String id, String topic, Device device) {
+    public Control(Context context, String id, Device device) {
         this.id = id;
         this.value = "0";
-        this.topic = topic + "/on";
+        this.topic = "/devices/"+ device.toString() + "/controls/" + id + "/on";
         this.device = device;
         this.context = context;
         this.meta = new HashMap<String, String>();

@@ -170,20 +170,21 @@ public class MainActivity extends FragmentActivity {
         }
         
         public int getItemPosition (Object object) {
-            if(App.getRoom((String)object) == null) {
-                return POSITION_NONE;
-            }
-
-            int i = 0;
-            for (String s : App.getRoomIds()) {
-                if(object.equals(s)) {
-                    break;
-                }
-                i++;
-            }
-            return i;
-            
-//            return POSITION_NONE;
+//  This seems to cause https://github.com/binarybucks/homA/issues/79
+//            if(App.getRoom((String)object) == null) {
+//                return POSITION_NONE;
+//            }
+//
+//            int i = 0;
+//            for (String s : App.getRoomIds()) {
+//                if(object.equals(s)) {
+//                    break;
+//                }
+//                i++;
+//            }
+//            return i;
+//            
+            return POSITION_NONE;
         }
 
 

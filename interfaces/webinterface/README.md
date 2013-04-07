@@ -11,4 +11,4 @@ The only required component is a websocket server that translates the interface'
 ### Start
 Open the ```index.html``` with a browser of your choice and enter the adress of the websocket server in the interface settings. Settings are saved locally in the browser. 
 
-The browser establishes an own connection to the websocketServer that relays it to the broker. Thus, no security problem arises even when the interface is exposed to the interner, as long as the websocket server cannot be reached. 
+The browser establishes an own connection to the websocketServer that relays it to the broker. Thus, no security problem arises even when the interface is exposed to the internet, as long as the websocket server cannot be reached. 

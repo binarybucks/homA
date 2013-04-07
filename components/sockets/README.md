@@ -1,27 +1,35 @@
 # HomA - Sockets
-This component allows the control of generic 433Mhz wireless power sockets.
+This component allows the control of generic 433Mhz wireless power sockets. 
+If you have access to etching equipment, a schematic for a custom Arduino shield is included in the ```pcb``` directory. 
 
-### Requirements
-* Arduino 
+
+### Basic Requirements
+* Arduino Uno or compatible
 * Ethernet Shield (Anything with a W5100 Ethernet Chip)
-* 433Mhz transmitter that is compatible with the [RC-Switch](https://code.google.com/p/rc-switch/) library
+* 433Mhz transmitter that is compatible with the [RC-Switch](https://code.google.com/p/rc-switch/) library. 
+
+### Arduino Shield requirements
+* Etching equipment
+* 7805 Linear regulator
+* SMA Jack
+* 100nF Capacitor
+* 330nF Capacitor
+* Power Jack
 
 ### Installation
-Adapt the Arduino Sketch to your needs and flash it to your Arduino. 
-Use a different CLIENT_ID if you are running more than one instance.
+* Adapt the Arduino Sketch to your needs and flash it to your Arduino. 
+* Adapt the MAC adress to something unique in your network
+* Use a different CLIENTID if you are running more than one instance.
+
 
 ### Usage
-To add a new wireless power socket
+To add a new typeA (10 Dip) wireless power socket
 ```
-$ node publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/158293-433MhzBridge/devices/Switch-X" --payload "A;11011"
+$ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/CLIENTID/11011-01000" --payload "typeA"
 ```
-Where X is is a device unique number, A corresponds to the ID of the power socket and 11011 is the positions of the five group toggles
+Where 11011 is the position of the physical socket's group DIP switches, 01000 is the position of the socket's device DIP switches.
 
-
-==> WORKING AREA <==
-/sys/158212-Socket/11011-010000:typeA // 10dip switchOn("11011", "01000");
-/sys/158212-Socket/4-2:typeB // rotary switchOn(4, 2)
-/sys/158212-Socket/11011-3:typeC // intertechno switchOn('a', 1, 2)
-
-=> /devices/158212-Sockets-11011-010000/controls/power/on
-
+To add a new typeA (10 Dip) wireless power socket
+```
+$ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/CLIENTID/4-2" --payload "typeA"
+```
