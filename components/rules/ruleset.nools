@@ -4,9 +4,9 @@ rule away {
     }
     then {      
         log.info("RULES", "Rule triggered: away ");
-        publish("/devices/158293-433MhzSwitch-02/controls/Power/on", "0", true);    //Amp off
-        publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);    //Campusboard off
-        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);    //Desk off
+        publish("/devices/158212-Socket-11011-00010/controls/Power/on", "0", true);    //Amp off
+        publish("/devices/158212-Socket-11011-00100/controls/Power/on", "0", true);    //Campusboard off
+        publish("/devices/158212-Socket-11011-01000/controls/Power/on", "0", true);    //Desk off
         forget(m1);
     }
 }
@@ -18,9 +18,9 @@ rule home {
     }
     then {
             log.info("RULES", "Rule triggered: home");
-            publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);    //Desk on
+            publish("/devices/158212-Socket-11011-01000/controls/Power/on", "1", true);    //Desk on
             if(c.isAfternoon || c.isEvening || c.isNight) {
-                publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);  //Campusboard on
+                publish("/devices/158212-Socket-11011-00100/controls/Power/on", "1", true);  //Campusboard on
             }
             forget(m1);
     }
@@ -33,8 +33,8 @@ rule night {
     }
     then {      
         log.info("RULES", "Rule triggered: night");
-       	publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "0", true);	//Campusboard off
-      	publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "0", true);	//Desk off
+       	publish("/devices/158212-Socket-11011-00100/controls/Power/on", "0", true);	//Campusboard off
+      	publish("/devices/158212-Socket-11011-01000/controls/Power/on", "0", true);	//Desk off
       	forget(m1);
     }
 }
@@ -47,7 +47,7 @@ rule desk {
     }
     then {      
         log.info("RULES", "Rule triggered: desk ");
-        publish("/devices/158293-433MhzSwitch-04/controls/Power/on", "1", true);	//Desk on
+        publish("/devices/158212-Socket-11011-01000/controls/Power/on", "1", true);	//Desk on
         forget(m1);
     }
 }
@@ -68,7 +68,7 @@ rule sunset {
     }
     then {      
         log.info("RULES", "Rule triggered: sunset ");
-        publish("/devices/158293-433MhzSwitch-03/controls/Power/on", "1", true);    //Campusboard on
+        publish("/devices/158212-Socket-11011-00100/controls/Power/on", "1", true);    //Campusboard on
         forget(m1);
     }
 }
