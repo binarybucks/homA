@@ -4337,7 +4337,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 </classes>
 <parts>
 <part name="X1" library="con-conrad" deviceset="73398?" device="0-62"/>
-<part name="AURORA" library="pinhead" deviceset="PINHD-1X4" device=""/>
+<part name="TRANSMITTER" library="pinhead" deviceset="PINHD-1X4" device=""/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="JP1" library="pinhead" deviceset="PINHD-1X8" device=""/>
 <part name="JP2" library="pinhead" deviceset="PINHD-1X8" device=""/>
@@ -4354,7 +4354,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 </plain>
 <instances>
 <instance part="X1" gate="G$1" x="-38.1" y="63.5" rot="R180"/>
-<instance part="AURORA" gate="A" x="22.86" y="81.28" rot="R90"/>
+<instance part="TRANSMITTER" gate="A" x="22.86" y="81.28" rot="R90"/>
 <instance part="GND1" gate="1" x="-20.32" y="68.58" rot="R180"/>
 <instance part="JP1" gate="A" x="81.28" y="33.02"/>
 <instance part="JP2" gate="A" x="81.28" y="10.16"/>

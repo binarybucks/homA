@@ -1659,7 +1659,7 @@ design rules under a new name.</description>
 <element name="IC1" library="linear" package="TO220H" value="7805T" x="56.7" y="26.3" rot="MR90"/>
 <element name="C1" library="rcl" package="C025-050X050" value="330n" x="36.7" y="27.8"/>
 <element name="C2" library="rcl" package="C025-050X050" value="100n" x="42.1" y="27.7" rot="R90"/>
-<element name="ANT" library="pinhead" package="1X01" value="" x="42.1" y="32.2"/>
+<element name="ANT" library="pinhead" package="1X01" value="" x="42.1" y="33"/>
 </elements>
 <signals>
 <signal name="GND">
@@ -1928,12 +1928,9 @@ design rules under a new name.</description>
 <signal name="N$8">
 <contactref element="TRANSMITTER" pad="1"/>
 <contactref element="ANT" pad="1"/>
-<wire x1="46.52" y1="37.53" x2="45.7" y2="37.53" width="1.5" layer="16"/>
-<wire x1="45.7" y1="37.53" x2="45.7" y2="37.3" width="1.5" layer="16"/>
-<wire x1="42.1" y1="32.2" x2="42.2" y2="32.2" width="1.5" layer="16"/>
-<wire x1="42.2" y1="32.2" x2="42.2" y2="37.3" width="1.5" layer="16"/>
-<wire x1="42.2" y1="37.3" x2="46.52" y2="37.3" width="1.5" layer="16"/>
-<wire x1="46.52" y1="37.3" x2="46.52" y2="37.53" width="1.5" layer="16"/>
+<wire x1="42.1" y1="33" x2="42" y2="33" width="1.5" layer="16"/>
+<wire x1="42" y1="33" x2="42" y2="37.53" width="1.5" layer="16"/>
+<wire x1="46.52" y1="37.53" x2="42" y2="37.53" width="1.5" layer="16"/>
 </signal>
 </signals>
 </board>

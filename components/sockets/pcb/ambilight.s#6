@@ -4396,6 +4396,9 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <wire x1="-27.94" y1="50.8" x2="-20.32" y2="50.8" width="0.1524" layer="91"/>
 <pinref part="C2" gate="G$1" pin="1"/>
 <junction x="-27.94" y="50.8"/>
+<pinref part="TRANSMITTER" gate="A" pin="2"/>
+<wire x1="-20.32" y1="63.5" x2="20.32" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="20.32" y1="63.5" x2="20.32" y2="78.74" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="JP1" gate="A" pin="2"/>
@@ -4417,11 +4420,11 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 </net>
 <net name="N$7" class="0">
 <segment>
+<pinref part="JP1" gate="A" pin="7"/>
+<wire x1="25.4" y1="27.94" x2="78.74" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="TRANSMITTER" gate="A" pin="3"/>
 <wire x1="22.86" y1="78.74" x2="25.4" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="25.4" y1="78.74" x2="25.4" y2="27.94" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="A" pin="7"/>
-<wire x1="25.4" y1="27.94" x2="78.74" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

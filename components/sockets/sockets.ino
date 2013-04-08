@@ -1,8 +1,7 @@
 #include <SPI.h>
 #include "RCSwitch.h"
 #include <Ethernet.h>
-#include "PubSubClient.h"
-#include <vector>
+#include "PubSubClient.h" // Included in misc/libraries/arduino/pubsubclient
 
 #define WIFIPIN 9
 #define CLIENTID "158212-Socket"
@@ -79,13 +78,15 @@ void connect() {
 
 
 void receive(char* topic, byte* rawPayload, unsigned int length) {  
-  char  payload[length+1+3];
-  memset(payload, 0, length+1+3);
-  memcpy(payload, rawPayload, length);
+  // 0 Terminate payload
+  char  payload[length+1];
+  memset(payload, 0, length+1);
+  memcpy(payload, rawPayload, length); 
+  
   Serial.print("Received: ");
-Serial.print(topic);
-Serial.print(":");
-Serial.println(payload);
+  Serial.print(topic);
+  Serial.print(":");
+  Serial.println(payload);
   // T is: /sys/158212-Socket/11011-01000:typeA
   //      /devices/158212-Socket-11011-01000/controls/Power/on:1
   // Info starts is the beginning of: 11011-01000
@@ -95,9 +96,6 @@ Serial.println(payload);
   memset(id, 0, 6);
   memset(group, 0, 6);
 
-
-
-
   char* infoStarts = strstr(topic, clientId)+clientIdSize+1;
   char* delimiter = strrchr(infoStarts, '-');
   
@@ -106,10 +104,10 @@ Serial.println(payload);
     strncpy(group, infoStarts, delimiter-infoStarts);
     strcpy(id, delimiter+1);
 
-  Serial.print("ID: ");
-  Serial.println(id);
-  Serial.print("G: ");
-  Serial.println(group);
+    Serial.print("ID: ");
+    Serial.println(id);
+    Serial.print("G: ");
+    Serial.println(group);
     if((strcmp(topic, "") == 0) || (topic == NULL))
       removeSocket(id, group);
     else 
@@ -119,17 +117,17 @@ Serial.println(payload);
     strncpy( group, infoStarts, delimiter-infoStarts);
     strncpy(id, delimiter+1,  infoEnd-(delimiter+1));
 
-  Serial.print("ID: ");
-  Serial.println(id);
-  Serial.print("G: ");
-  Serial.println(group);
+    Serial.print("ID: ");
+    Serial.println(id);
+    Serial.print("G: ");
+    Serial.println(group);
     setSocket(getSocket(id, group), payload);
     
     // Echo back state
     char buffer[strlen(topic)];
     memset(buffer, 0, strlen(topic));
-   snprintf(buffer, strlen(topic),"/devices/%s-%s-%s/controls/Power", clientId, group, id);
-   publish(buffer, payload); 
+    snprintf(buffer, strlen(topic),"/devices/%s-%s-%s/controls/Power", clientId, group, id);
+    publish(buffer, payload); 
   }
 }
 
@@ -216,7 +214,7 @@ void addSocket(char* id, char*  group, char* type) {
 
 
 void removeSocket(char* id, char* group) {
-
+// TODO
 //  //Topic cleaup   
 //  String base = "/devices/"+clientId+"-"+group+"-"+id;
 //  unsubscribe(base+"controls/Power/on");

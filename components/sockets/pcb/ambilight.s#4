@@ -4416,6 +4416,9 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <pinref part="C1" gate="G$1" pin="1"/>
 <wire x1="-27.94" y1="58.42" x2="-27.94" y2="60.96" width="0.1524" layer="91"/>
 <junction x="-27.94" y="60.96"/>
+<pinref part="TRANSMITTER" gate="A" pin="4"/>
+<wire x1="25.4" y1="78.74" x2="25.4" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="60.96" x2="-12.7" y2="60.96" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$7" class="0">

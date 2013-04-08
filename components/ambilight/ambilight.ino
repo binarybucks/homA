@@ -1,18 +1,12 @@
 #include <SPI.h>
 #include "RCSwitch.h"
 #include <Ethernet.h>
-#include "PubSubClient.h"
-#include <String>
+#include "PubSubClient.h" // Included in misc/libraries/arduino/pubsubclient
 #define AMBILIGHTBLUEEPIN 6
 #define AMBILIGHTREDPIN 5
 #define AMBILIGHTGREENPIN 3
 #define CLIENTID "465632-Ambilight" 
 
-
-struct _Sk{String id; String group; int type; struct _Sk* next;};
-typedef struct _Sk Socket;
-
- 
 // Prototypes
 void connect();
 void cleanup();
@@ -31,8 +25,10 @@ String clientId = CLIENTID;
 
 unsigned int connectCtr = 0;
 unsigned int fadeCtr = 0;
-int ambilightValue = 1;
-int ambilightHue = 359;
+double ambilightBrightness = 1.0;
+int ambilightColor = 359;
+double ambilightSaturation = 1.0;
+
 boolean fade = false;
 
 // Classes
@@ -60,9 +56,9 @@ void loop() {
 
 // Continuously Fades values on HSV spectrum
 void fadeLoop() {
-  ambilightHue = ambilightHue < 359 ? ambilightHue+1 : 0;
-  setLedColorHSV(ambilightHue, 1, ambilightValue);  
-  publish("/devices/"+clientId+"/controls/Color/on", String(ambilightHue));
+  ambilightColor = ambilightColor < 359 ? ambilightColor+1 : 0;
+  setLedColorHSV(ambilightColor, ambilightSaturation, ambilightBrightness);  
+  publish("/devices/"+clientId+"/controls/Color/on", String(ambilightColor));
 }
 
 
@@ -91,51 +87,43 @@ void connect() {
 
 			 publish("/devices/"+clientId+"/controls/Brightness/meta/type", "range");
 			 subscribe("/devices/"+clientId+"/controls/Brightness/on");
+
+			 publish("/devices/"+clientId+"/controls/Saturation/meta/type", "range");
+			 subscribe("/devices/"+clientId+"/controls/Saturation/on");
     }
 }
 
 
 void receive(char* topic, byte* rawPayload, unsigned int length) {  
-    char  payload[length+1+3];
-  memset(payload, 0, length+1+3);
+  char  payload[length+1];
+  memset(payload, 0, length+1);
   memcpy(payload, rawPayload, length);
 
   String t = String(topic);
   String p = String((char*)payload);
   //Serial.println("Received " + t + ":" + p); 
 
-  if (t == "/devices/"+clientId+"/controls/Brightness/on") {
-    //sscanf((char*)payload, "%d", &ambilightValue);
-    //setLedColorHSV(ambilightHue, ambilightValue);
-    
-    int value;
-    sscanf(payload, "%d", &value);
-    ambilightValue = (1.0*value)/255.0;
-    setLedColorHSV(ambilightHue, ambilightValue);
 
-  } else if (t == "/devices/"+clientId+"/controls/Color/on") {
-    
-    sscanf((char*)payload, "%d", &ambilightHue);
-    Serial.println(ambilightHue);
-    setLedColorHSV(ambilightHue, ambilightValue);
+ if (t == "/devices/"+clientId+"/controls/Color/on") {
+    sscanf((char*)payload, "%d", &ambilightColor);
+    Serial.println(ambilightColor);
+    setLedColorHSV(ambilightColor, ambilightSaturation, ambilightBrightness);
+ } else if (t == "/devices/"+clientId+"/controls/Brightness/on") {    
+    int brightness;
+    sscanf(payload, "%d", &brightness);
+    ambilightBrightness = (1.0*brightness)/255.0;
+    setLedColorHSV(ambilightColor, ambilightSaturation, ambilightBrightness);
+  } else if (t == "/devices/"+clientId+"/controls/Saturation/on") {   
+    int saturation;
+    sscanf(payload, "%d", &saturation);
+    ambilightSaturation = (1.0*saturation)/255.0;
+    setLedColorHSV(ambilightColor, ambilightSaturation, ambilightBrightness);
   } else if(t == "/devices/"+clientId+"/controls/Fading/on") {
     fade = p == "1";
   }
-    publish(t.substring(0, t.length()-3), p);
-
+  
+  publish(t.substring(0, t.length()-3), p);
 }
-
-
-void setLedColor(int red, int green, int blue) {  
-  analogWrite(AMBILIGHTREDPIN, red);
-  analogWrite(AMBILIGHTGREENPIN, green);
-  analogWrite(AMBILIGHTBLUEEPIN, blue);
-}
-
-void setLedColorHSV(int h, double v) {
-  setLedColorHSV(h,1.0, v);
-}
-
 
 
 void setLedColorHSV(int h, double s, double v) {
@@ -191,19 +179,15 @@ void setLedColorHSV(int h, double s, double v) {
     break;
   }
 
-  //set each component to a integer value between 0 and 255
-  int red=constrain((int)255*r,0,255);
-  int green=constrain((int)255*g,0,255);
-  int blue=constrain((int)255*b,0,255);
-
-  setLedColor(red,green,blue);
+  analogWrite(AMBILIGHTREDPIN, constrain((int)255*r,0,255));
+  analogWrite(AMBILIGHTGREENPIN, constrain((int)255*g,0,255));
+  analogWrite(AMBILIGHTBLUEEPIN, constrain((int)255*b,0,255));
 }
 
 
 void publish(String topic, String payload) {
   char p[payload.length()+1];
-    memset(p, 0, payload.length()+1);
-
+  memset(p, 0, payload.length()+1);
   payload.toCharArray(p, payload.length()+1);
   publish(topic, p);
 }
@@ -218,14 +202,5 @@ void subscribe(String topic) {
   char t[topic.length()+1];
   memset(t, 0, topic.length()+1);
   topic.toCharArray(t, topic.length()+1);
-  Serial.print("Subscribing to: ");
-  Serial.println(t);
   mqttClient.subscribe(t);
-}
-
-void unsubscribe(String topic) {
-  char t[topic.length()+1];
-  memset(t, 0, topic.length()+1);
-  topic.toCharArray(t, topic.length()+1);
-  mqttClient.unsubscribe(t);
 }
