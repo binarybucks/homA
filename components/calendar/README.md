@@ -8,11 +8,12 @@ $ npm install
 
 ### Start
 ``` 
-$ node calendar.js [--brokerHost 127.0.0.1] [--brokerPort 1883] [--brokerClientId 458293-GoogleCalendarBridge] [--queryIntervall 60]
+$ node calendar.js [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID] [--queryIntervall 60]
 ```
 ```
-$ node publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/458293-GoogleCalendarBridge/calendarId" --payload "xxx@group.calendar.google.com"
+$ node publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/$SYSTEMID/calendarId" --payload "xxx@group.calendar.google.com"
 ```
+Thereby replace $SYSTEMID with a unique name of your choice
 
 To grant the application access to the Google Calendar, open the adress displayed by the application with a browser of your choice while logged in to a Google account that has access to the calendar. 
 When you are running the application on an other host than your local computer, the automatic redirect will fail. In that case, copy the URL you have been redirected to and open it on the host that is running the application. 
