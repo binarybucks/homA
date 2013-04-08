@@ -581,7 +581,7 @@ $(function(){
 
     publishMqtt: function(topic, value) {
       if(Settings.get("devMode")) {
-        console.log("DEV: Simulating publishing of " + topic + ":" + value);
+        console.log("DEV: Simulating publishing of " + topic + "/on:" + value);
       } else {
        
         mqttSocket.publish(topic+"/on", value, 0, true);
@@ -671,8 +671,8 @@ $(function(){
 
   mqttSocket.onmessage = function(topic, payload, qos){
 
-    // console.log("-----------RECEIVED-----------");
-    // console.log("Received: "+topic+":"+payload);    
+    console.log("-----------RECEIVED-----------");
+     console.log("Received: "+topic+":"+payload);    
     var splitTopic = topic.split("/");
 
     // Ensure the device for the message exists
@@ -719,7 +719,7 @@ $(function(){
         device.set('name', payload);
       }
     }
-    // console.log("-----------/ RECEIVED-----------");
+   console.log("-----------/ RECEIVED-----------");
   };
 
   function mqttSocketConnect() {

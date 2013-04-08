@@ -1,3 +1,9 @@
 [submodule "interfaces/webinterface/websocket-server"]
 	path = interfaces/webinterface/websocket-server
 	url = git://github.com/stylpen/WSS.git
+[submodule "components/sockets/libraries/pubsubclient"]
+	path = components/sockets/libraries/pubsubclient
+	url = https://github.com/knolleary/pubsubclient
+[submodule "misc/libraries/arduino/pubsubclient"]
+	path = misc/libraries/arduino/pubsubclient
+	url = https://github.com/knolleary/pubsubclient
