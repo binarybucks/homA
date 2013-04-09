@@ -28,8 +28,3 @@ To add a new typeA (10 Dip) wireless power socket
 $ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/CLIENTID/11011-01000" --payload "typeA"
 ```
 Where 11011 is the position of the physical socket's group DIP switches, 01000 is the position of the socket's device DIP switches.
-
-To add a new typeA (10 Dip) wireless power socket
-```
-$ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/CLIENTID/4-2" --payload "typeA"
-```
