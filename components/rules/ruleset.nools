@@ -5,7 +5,8 @@ rule away {
     then {
         log.info("RULES", "Rule triggered: away ");
         publish("/devices/158212-Socket-11011-00010/controls/Power/on", "0", true);    //Amp off
-        publish("/devices/158212-Socket-11011-00100/controls/Power/on", "0", true);    //Campusboard off          publish("/devices/158212-Socket-11011-01000/controls/Power/on", "0", true);    //Desk off
+        publish("/devices/158212-Socket-11011-00100/controls/Power/on", "0", true);    //Campusboard off          
+        publish("/devices/158212-Socket-11011-01000/controls/Power/on", "0", true);    //Desk off
         forget(m1);
     }
 }
@@ -27,7 +28,7 @@ rule home {
 
 rule night {
     when {
-        c: Clock isTrue(c.isAfternoon) ||  isTrue(c.isEvening);
+        c: Clock isTrue(c.isAfternoon) ||  isTrue(c.isEvening) || isTrue(c.isNight);
         m1: Message m1.t == '/events/tag' && m1.p == 'bed';
     }
     then {
