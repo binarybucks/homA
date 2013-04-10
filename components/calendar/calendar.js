@@ -133,7 +133,6 @@ function calendarQuery() {
   			var item = items[i];
   			try {
 					item.description = (item.description.substring(0,1) != '{' ? '{' : '') + item.description + (item.description.substring(item.description.length-1,item.description) != '}' ? '}' : '');
-										console.log("item.description: " + item.description);
 					try {
 						var payload = JSON.parse(item.description);
 					} catch (e) {
@@ -141,9 +140,6 @@ function calendarQuery() {
 						homa.logger.error("CALENDAR", e);
 						continue
 					}
-
-					console.log("item.start.dateTime: " + item.start.dateTime);
-					console.log("item.end.dateTime: " + item.end.dateTime);
 					// Schedule start events
 					for(key in payload.start){
 						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
