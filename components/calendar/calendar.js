@@ -132,8 +132,18 @@ function calendarQuery() {
 			for(i=0;i<items.length;i++){
   			var item = items[i];
   			try {
-					var payload = JSON.parse('{'+item.description+'}');
+					item.description = (item.description.substring(0,1) != '{' ? '{' : '') + item.description + (item.description.substring(item.description.length-1,item.description) != '}' ? '}' : '');
+										console.log("item.description: " + item.description);
+					try {
+						var payload = JSON.parse(item.description);
+					} catch (e) {
+						homa.logger.error("CALENDAR", "Unable to parse event description: %s", item.description);
+						homa.logger.error("CALENDAR", e);
+						continue
+					}
 
+					console.log("item.start.dateTime: " + item.start.dateTime);
+					console.log("item.end.dateTime: " + item.end.dateTime);
 					// Schedule start events
 					for(key in payload.start){
 						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
@@ -144,7 +154,7 @@ function calendarQuery() {
 						homa.mqttHelper.schedulePublish(new Date(item.end.dateTime), key, payload.end[key], true); 
 					}
 				} catch (e) {
-					homa.logger.error("CALENDAR", "Error: %s", e); 
+					homa.logger.error("CALENDAR", "%s", e); 
 					continue;
 				}
     	}
