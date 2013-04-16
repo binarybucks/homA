@@ -2,31 +2,58 @@
 var date = require("datejs")
 var suncalc = require('suncalc');
 var homa = require('homa');
-var argv = homa.paramHelper.describe("latitude", "Latitude at current location")
-												.describe("longitude", "Longitude at current location")
-												.demand("latitude")
-												.demand("longitude")
-												.alias("latitude", "lat")
-												.alias("longitude", "long")
-												.argv;
+var argv = homa.paramHelper.default("systemId", "294028-solar").argv;
 
+// describe("latitude", "Latitude at current location")
+// 												.describe("longitude", "Longitude at current location")
+// 												.demand("latitude")
+// 												.demand("longitude")
+// 												.alias("latitude", "lat")
+// 												.alias("longitude", "long")
+												
+var settings = {};
+var MQTT_TOPIC_LONGITUDE = "/sys/"+ argv.systemId + "/longitude"
+var MQTT_TOPIC_LATITUDE = "/sys/" + argv.systemId + "/latitude";
+var bootstrapCompleted = false;
+
+homa.mqttHelper.on('message', function(packet) {
+	settings[packet.topic] = packet.payload;
+	if (bootstrapComplete() && !bootstrapCompleted) {
+		bootstrapCompleted = true;
+		homa.logger.info("SOLAR", "Bootstrap completed.");
+	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Sunset/meta/type", "text", true);
+	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Sunrise/meta/type", "text", true);
+
+	homa.scheduler.scheduleJob('0 0 * * *', querySuntimes); // Query every day at midnight
+	querySuntimes();
+	}
+});
+
+function bootstrapComplete() {
+		var pass = true
+		var requiredItems = [MQTT_TOPIC_LONGITUDE, MQTT_TOPIC_LATITUDE];
+		for(i=0;i<requiredItems.length;i++){
+			if(settings[requiredItems[i]] == undefined || settings[requiredItems[i]] == ""){
+				homa.logger.info("SOLAR", "Waiting to receive setting: " + requiredItems[i] );
+				pass = false;
+			}
+		}
+		return pass;
+}
 (function(){
 	homa.mqttHelper.connect();
 })();
 
 homa.mqttHelper.on('connect', function(packet) {
-	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset/meta/type", "text", true);
-	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise/meta/type", "text", true);
-
-	homa.scheduler.scheduleJob('0 0 * * *', querySuntimes); // Query every day at midnight
-	querySuntimes();
+	homa.mqttHelper.subscribe("/sys/"+ argv.systemId + "/latitude");
+	homa.mqttHelper.subscribe("/sys/"+ argv.systemId + "/longitude");
 });
 
 function querySuntimes(){
-	homa.logger.info("SOLAR", "Querying solar positions for " + argv.latitude + ":"+ argv.longitude);
-	var times = suncalc.getTimes(new Date(), argv.latitude, argv.longitude);
-	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunrise", homa.stringHelper.pad(times.sunrise.getHours(), 2, "0") +":"+homa.stringHelper.pad(times.sunrise.getMinutes(), 2, "0"), true);
-	homa.mqttHelper.publish("/devices/294028-solar/controls/Sunset", homa.stringHelper.pad(times.sunset.getHours(), 2, "0")+":"+homa.stringHelper.pad(times.sunset.getMinutes(), 2, "0"), true);
+	homa.logger.info("SOLAR", "Querying solar positions for " + settings[latitude + ":"+ longitude);
+	var times = suncalc.getTimes(new Date(), latitude, longitude);
+	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Sunrise", homa.stringHelper.pad(times.sunrise.getHours(), 2, "0") +":"+homa.stringHelper.pad(times.sunrise.getMinutes(), 2, "0"), true);
+	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Sunset", homa.stringHelper.pad(times.sunset.getHours(), 2, "0")+":"+homa.stringHelper.pad(times.sunset.getMinutes(), 2, "0"), true);
 
 	homa.mqttHelper.unschedulePublishes();
 	var currentDate = new Date();
