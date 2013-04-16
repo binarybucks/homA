@@ -20,7 +20,6 @@ var bootstrapCompleted = false;
 var scheduled = false;
 var calendarQueryInterval = argv.calendarQueryInterval*60*1000;
 
-
 // Changing these might break things
 var MQTT_TOPIC_SYS = "/sys/"+ argv.systemId + "/#"
 var MQTT_TOPIC_CALENDAR_ID = "/sys/" + argv.systemId + "/calendarId";
@@ -58,11 +57,10 @@ function bootstrapComplete() {
 
 function oauth2bootstrap() {
 	oa = new oauth.OAuth2(clientId, clientSecret, "https://accounts.google.com/o", "/oauth2/auth", "/oauth2/token");
-	if(settings[MQTT_TOPIC_REFRESH_TOKEN] == undefined || settings[MQTT_TOPIC_REFRESH_TOKEN] == "" ) {
+	if(settings[MQTT_TOPIC_REFRESH_TOKEN] == undefined || settings[MQTT_TOPIC_REFRESH_TOKEN] == "" )
 		oauth2authorize();
-	} else {
+	else
 		oauth2refreshAccessToken();
-	}
 }
 
 function oauth2authorize(){
@@ -92,8 +90,6 @@ function oauth2authorize(){
 					secondaryRequest.on('error', function(e) {homa.logger.error('Secondary request returned: %s', e.message);});
 					secondaryRequest.write(secondaryRequestData);  
 					secondaryRequest.end();  
-
-
 	  		}
 	  		query();
 	  });
@@ -116,31 +112,19 @@ function oauth2parseAccessToken(results) {
   homa.logger.info("OAUTH", "Refresh token: " + settings[MQTT_TOPIC_REFRESH_TOKEN]);
  	homa.logger.info("OAUTH", "Token type: " + results.token_type);
  	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
- 	if(!scheduled) {
- 		 	process.nextTick(calendarScheduleQuery);
- 	}
+ 	if(!scheduled)
+ 		process.nextTick(calendarScheduleQuery);
 }
-
 
 function oauth2refreshAccessToken() {
 	homa.logger.info("OAUTH", "Refreshing access token");
   oa.getOAuthAccessToken(settings[MQTT_TOPIC_REFRESH_TOKEN], {grant_type:'refresh_token'}, function(err, access_token, refresh_token, results) {
-		if (err) {
-		    homa.logger.error("OAUTH", "Error: %s", JSON.stringify(err));
-		} else {
-				oauth2parseAccessToken(results);
-		}
-  });
+		if (err)
+		  homa.logger.error("OAUTH", "Error: %s", JSON.stringify(err));
+		else
+			oauth2parseAccessToken(results);
+		});
 }
-
-
-
-
-
-
-
-
-
 
 function calendarScheduleQuery(){
 	setTimeout(calendarQuery, calendarQueryInterval);
@@ -161,7 +145,6 @@ function calendarQuery() {
 				if (items == undefined) {
 					return;
 				}
-
 				homa.mqttHelper.unschedulePublishes();
 
 			} catch (e) {
