@@ -6,7 +6,7 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=Homa Solar service
+Description=HomA - Solar.js
 Requires=mosquitto.service
 
 [Service]
