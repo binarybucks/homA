@@ -10,3 +10,7 @@ $ npm install
 ``` 
 $ node logger.js [--brokerHost 127.0.0.1] [--brokerPort 1883]
 ```
+
+```
+$ sudo systemctl enable $HOMA_BASEDIR/components/logger/homa-logger.service
+```
