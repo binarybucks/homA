@@ -13,3 +13,7 @@ Requires=mosquitto.service
 Type=simple
 EnvironmentFile=/etc/conf.d/homa
 ExecStart=/usr/bin/env node ${HOMA_BASEDIR}/components/calendar/calendar.js --brokerHost ${HOMA_BROKER_HOST} --brokerPort ${HOMA_BROKER_PORT}
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
