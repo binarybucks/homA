@@ -1,3 +1,0 @@
-export HOMA_BASEDIR="/homA"
-export HOMA_BROKER_PORT="1883"
-export HOMA_BROKER_HOST="192.168.8.2"
