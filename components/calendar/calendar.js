@@ -2,6 +2,8 @@
 var express = require('express');
 var oauth = require('oauth');
 var os = require("os");
+var https= require('https');
+var querystring = require('querystring');
 
 var homa = require('homa');
 var argv = homa.paramHelper.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
@@ -9,11 +11,13 @@ var argv = homa.paramHelper.describe("systemId", "The unique client ID that dete
 												.default("systemId", "458293-GoogleCalendarBridge")
 												.default("calendarQueryInterval", 30).argv;
 
-var clientId = "127336077993-68nj95v0g50cmp51ijcto80o3pfvmnfh.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
-var clientSecret	 = "SXiWh51Q9otWN4_CjY0Mtcm0";
+var clientId = "456464392453-ca2n79hj54jdqoana5oqh5rl632rvcu5.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
+var clientSecret	 = "W5SxdDqrlovnkf7f1WNwm4qw";
 var accessToken, accessTokenRefreshIn, oa;
 var settings = {};
+var deviceCode;
 var bootstrapCompleted = false;
+var scheduled = false;
 var calendarQueryInterval = argv.calendarQueryInterval*60*1000;
 
 
@@ -36,7 +40,7 @@ homa.mqttHelper.on('message', function(packet) {
 	if (bootstrapComplete() && !bootstrapCompleted) {
 		bootstrapCompleted = true;
 		homa.logger.info("CALENDAR", "Bootstrap completed. Waiting 5 seconds for refresh token");
-		setTimeout(function () {oauth2expressBotstrap(); oauth2bootstrap();} , 5*1000); // 5 seconds grace period to receive refresh token. Otherwise request authentication from user 
+		setTimeout(function () {oauth2bootstrap();} , 5*1000); // 5 seconds grace period to receive refresh token. Otherwise request authentication from user 
 	}
 });
 
@@ -55,52 +59,88 @@ function bootstrapComplete() {
 function oauth2bootstrap() {
 	oa = new oauth.OAuth2(clientId, clientSecret, "https://accounts.google.com/o", "/oauth2/auth", "/oauth2/token");
 	if(settings[MQTT_TOPIC_REFRESH_TOKEN] == undefined || settings[MQTT_TOPIC_REFRESH_TOKEN] == "" ) {
-		homa.logger.info("OAUTH", "Requesting new access- and refresh token");
-		homa.logger.info("OAUTH", "No refresh token provided. \n            Please point your browser to: " +os.hostname()+":8553/");
+		oauth2authorize();
 	} else {
 		oauth2refreshAccessToken();
 	}
 }
 
-function oauth2getAccessTokenCallback(err, access_token, refresh_token, results){
-	if (err) {
-	    homa.logger.error("OAUTH", "Error: %s", JSON.stringify(err));
-	} else {
-	    accessToken = access_token;
-	    accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
-	    settings[MQTT_TOPIC_REFRESH_TOKEN] = !!refresh_token ? refresh_token : settings[MQTT_TOPIC_REFRESH_TOKEN];
+function oauth2authorize(){
+	homa.logger.info("OAUTH2", "No refresh token provided. Requesting authorization from user.");
 
-	    homa.mqttHelper.publish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
+	var initialRequestData = querystring.stringify({'client_id' : clientId, 'scope' : 'https://www.googleapis.com/auth/calendar'}); 
+	var initialRequestOptions = {host: 'accounts.google.com', port : 443, path: '/o/oauth2/device/code', method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': initialRequestData.length}};
+	var initialRequest = https.request(initialRequestOptions, function(response) {
+	  response.setEncoding('utf8');
+	  response.on('data', function (chunk) {
+	    	var initialResponse = JSON.parse(chunk);
+	  		var query = function() {
+					var secondaryRequestData = querystring.stringify({'client_id' : clientId, 'client_secret' : clientSecret, 'code' : initialResponse.device_code, 'grant_type' : 'http://oauth.net/grant_type/device/1.0'}); 
+					var secondaryRequestOptions = {host: 'accounts.google.com', port : 443, path: '/o/oauth2/token', method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': secondaryRequestData.length}};						
+					var secondaryRequest = https.request(secondaryRequestOptions, function(response) {
+	  				response.setEncoding('utf8');
+	  				response.on('data', function (chunk) {
+	  						var secondaryResponse = JSON.parse(chunk);
+	  						if(secondaryResponse.error) {
+	  							setTimeout(query, initialResponse.interval*1000+5000);
+									homa.logger.info("OAUTH2", "Authorization pending. Please go to %s and enter the code: %s", initialResponse.verification_url, initialResponse.user_code);
+	  						} else {
+									oauth2parseAccessToken(secondaryResponse);
+	  						}
+						});
+	  			});
+					secondaryRequest.on('error', function(e) {homa.logger.error('Secondary request returned: %s', e.message);});
+					secondaryRequest.write(secondaryRequestData);  
+					secondaryRequest.end();  
 
-	    homa.logger.info("OAUTH", "Access token: " + accessToken);
-	   	homa.logger.info("OAUTH", "Access token refresh in: " + accessTokenRefreshIn+"ms");
-	    homa.logger.info("OAUTH", "Refresh token: " + settings[MQTT_TOPIC_REFRESH_TOKEN]);
-	   	homa.logger.info("OAUTH", "Token type: " + results.token_type);
-	   	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
-	   	process.nextTick(calendarQuery);
-	}
-}
 
-function oauth2refreshAccessToken() {
-		homa.logger.info("OAUTH", "Refreshing access token");
-	  	oa.getOAuthAccessToken(settings[MQTT_TOPIC_REFRESH_TOKEN], {grant_type:'refresh_token'}, oauth2getAccessTokenCallback);
-}
-
-
-function oauth2expressBotstrap() {
-	e = express();
-	e.listen(8553);
-	e.get('/callback', function(req, res) {
-	  oa.getOAuthAccessToken(req.query.code, {grant_type:'authorization_code', redirect_uri:'http://localhost:8553/callback'}, oauth2getAccessTokenCallback); 
-		res.send("OAUTH     Ok. To re authenticate, simply point your browser to "+os.hostname()+":8553/");
-
+	  		}
+	  		query();
+	  });
 	});
 
-	e.get('/', function(req, res) {
-		url = oa.getAuthorizeUrl({scope:"https://www.google.com/calendar/feeds", approval_prompt:'force', access_type:'offline', response_type:'code', redirect_uri:'http://localhost:8553/callback'})
-		res.redirect(url);
-	});	
+	initialRequest.on('error', function(e) {homa.logger.error('Initial request returned: %s', e.message);});
+	initialRequest.write(initialRequestData);  
+	initialRequest.end();  
 }
+
+function oauth2parseAccessToken(results) {
+  accessToken = results.access_token;
+  accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
+  settings[MQTT_TOPIC_REFRESH_TOKEN] = !!results.refresh_token ? results.refresh_token : settings[MQTT_TOPIC_REFRESH_TOKEN];
+
+  homa.mqttHelper.publish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
+
+  homa.logger.info("OAUTH", "Access token: " + accessToken);
+ 	homa.logger.info("OAUTH", "Access token refresh in: " + accessTokenRefreshIn+"ms");
+  homa.logger.info("OAUTH", "Refresh token: " + settings[MQTT_TOPIC_REFRESH_TOKEN]);
+ 	homa.logger.info("OAUTH", "Token type: " + results.token_type);
+ 	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
+ 	if(!scheduled) {
+ 		 	process.nextTick(calendarScheduleQuery);
+ 	}
+}
+
+
+function oauth2refreshAccessToken() {
+	homa.logger.info("OAUTH", "Refreshing access token");
+  oa.getOAuthAccessToken(settings[MQTT_TOPIC_REFRESH_TOKEN], {grant_type:'refresh_token'}, function(err, access_token, refresh_token, results) {
+		if (err) {
+		    homa.logger.error("OAUTH", "Error: %s", JSON.stringify(err));
+		} else {
+				oauth2parseAccessToken(results);
+		}
+  });
+}
+
+
+
+
+
+
+
+
+
 
 function calendarScheduleQuery(){
 	setTimeout(calendarQuery, calendarQueryInterval);
