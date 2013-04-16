@@ -15,3 +15,8 @@ $ publish.js -t "/sys/294028-solar/longitude" -p "9.226254" -r
 ```
 
 The latitude and longitude values of your home can easily be obtained with the help of Google Maps. Just point it to the desired location, right-click the map and select _What is here?_. 
+
+Enable service on systems that run systemd
+```
+$ sudo systemctl enable $HOMA_BASEDIR/components/solar/homa-solar.service
+```
