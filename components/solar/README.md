@@ -9,7 +9,9 @@ $ npm install
 
 ### Start
 ``` 
-$ node rules.js (--latitude "latitude"] [--longitude "longitude"]
+$ node rules.js [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID]
+$ publish.js -t "/sys/294028-solar/latitude" -p "48.802545" -r
+$ publish.js -t "/sys/294028-solar/longitude" -p "9.226254" -r
 ```
 
 The latitude and longitude values of your home can easily be obtained with the help of Google Maps. Just point it to the desired location, right-click the map and select _What is here?_. 

@@ -8,13 +8,9 @@ $ npm install
 ```
 
 ### Usage
-Start the application.
+Start the application and publish the calendar id of the calendar that contains your automation events.
 ``` 
 $ calendar.js [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID] [--queryIntervall 60]
-```
-
-Publish the calendar id of the calendar that contains your automation events.
-```
 $ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/$SYSTEMID/calendarId" --payload "xxx@group.calendar.google.com" --retained
 ```
 

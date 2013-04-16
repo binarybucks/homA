@@ -50,8 +50,8 @@ homa.mqttHelper.on('connect', function(packet) {
 });
 
 function querySuntimes(){
-	homa.logger.info("SOLAR", "Querying solar positions for " + settings[latitude + ":"+ longitude);
-	var times = suncalc.getTimes(new Date(), latitude, longitude);
+	homa.logger.info("SOLAR", "Querying solar positions for " + settings[MQTT_TOPIC_LATITUDE] + ":"+ settings[MQTT_TOPIC_LONGITUDE]);
+	var times = suncalc.getTimes(new Date(), settings[MQTT_TOPIC_LATITUDE], settings[MQTT_TOPIC_LONGITUDE]);
 	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Sunrise", homa.stringHelper.pad(times.sunrise.getHours(), 2, "0") +":"+homa.stringHelper.pad(times.sunrise.getMinutes(), 2, "0"), true);
 	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Sunset", homa.stringHelper.pad(times.sunset.getHours(), 2, "0")+":"+homa.stringHelper.pad(times.sunset.getMinutes(), 2, "0"), true);
 
