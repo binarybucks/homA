@@ -159,7 +159,7 @@ function calendarQuery() {
 				if (items == undefined) {
 					return;
 				}
-				homa.mqttHelper.unschedulePublishes();
+				//homa.mqttHelper.unschedulePublishes();
 
 			} catch (e) {
 				return;
