@@ -10,7 +10,7 @@ A list of official components and instructions to add your own components is ava
 
 ### Contribute
 Fork the repository on GitHub, add your own improvements, push it to a branch in your fork and send us a pull request.
-You can also file bugs or feature requests in our [issue tracker](https://github.com/binarybucks/homA/issues)
+You can also file bugs or feature requests in our [issue tracker](https://github.com/binarybucks/homA/issues) or say hi in our [Google+ Community](https://plus.google.com/u/0/communities/111676474572375715081)
 
 ### License
 If not stated otherwise explicitly, any code in this repository is licensed under the GPL v3 license.
