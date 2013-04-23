@@ -146,8 +146,12 @@ function calendarScheduleQuery(){
 
 // Queries the calendar API and schedules publishes depending on the returned events that start during the specified query intervall
 function calendarQuery() {
-	var timeMax = encodeURIComponent(new Date((new Date()).getTime()+ (calendarQueryInterval + (5*60*1000))).toISOString());
-	var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(new Date().toISOString())+"&timeMax="+timeMax;	
+	// Note, according to the Google Calendar Api definition timeMin and timeMax are not necessarily what one might expect: 
+	// timeMin == Lower bound (inclusive) for an event's end time to filter by. Optional. The default is not to filter by end time. (string)
+	// timeMax == Upper bound (exclusive) for an event's start time to filter by. Optional. The default is not to filter by start time. (string)
+		var timeMax = encodeURIComponent(new Date((new Date()).getTime()+ (calendarQueryInterval + (5*60*1000))).toISOString());
+		var timeMin = new Date();
+		var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(timeMin.toISOString())+"&timeMax="+timeMax;	
 	
 	homa.logger.info("CALENDAR", "Executing query: " + query); 
 	oa.get( query, accessToken, function (error, result, response) {
@@ -159,9 +163,9 @@ function calendarQuery() {
 				if (items == undefined) {
 					return;
 				}
-				//homa.mqttHelper.unschedulePublishes();
 
 			} catch (e) {
+				homa.logger.error("CALENDAR", "%s", e); 
 				return;
 			}
 
@@ -170,13 +174,20 @@ function calendarQuery() {
   			var item = items[i];
   			try {
 					item.description = (item.description.substring(0,1) != '{' ? '{' : '') + item.description + (item.description.substring(item.description.length-1,item.description) != '}' ? '}' : '');
-					try {
+					try { // Try to parse event payload. Continue with next item if description is broken
 						var payload = JSON.parse(item.description);
 					} catch (e) {
 						homa.logger.error("CALENDAR", "Unable to parse event description: %s", item.description);
 						homa.logger.error("CALENDAR", e);
-						continue
+						continue;
 					}
+
+					// Check if the event started in the past (and thus has been scheduled already)
+					if (new Date(item.start.dateTime) < timeMin) {
+						homa.logger.verbose("CALENDAR", "Ignoring Event From past (start@ " + item.start.dateTime + ")"); 
+						continue;
+					}
+
 					// Schedule start events
 					for(key in payload.start){
 						homa.mqttHelper.schedulePublish(new Date(item.start.dateTime), key, payload.start[key], true); 
