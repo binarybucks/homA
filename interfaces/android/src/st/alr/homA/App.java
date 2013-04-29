@@ -14,6 +14,7 @@ import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.support.ValueSortedMap;
 import de.greenrobot.event.EventBus;
 import android.app.Application;
+import com.bugsnag.android.Bugsnag;
 
 public class App extends Application {
     private static App instance;
@@ -27,7 +28,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        Bugsnag.register(this, "635a508c10fa87191e33662dd3c08512");
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new ValueSortedMap<String, Room>();
