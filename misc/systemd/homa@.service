@@ -6,14 +6,15 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=HomA - Rules.js
-Requires=mosquitto.service
+Description=HomA component
+After=network.target
 
 [Service]
 Type=simple
 EnvironmentFile=/etc/homa/homa.conf
-ExecStart=/usr/bin/env node ${HOMA_BASEDIR}/components/rules/rules.js --brokerHost ${HOMA_BROKER_HOST} --brokerPort ${HOMA_BROKER_PORT}
+#/..${HOMA_BASEDIR}
+ExecStart=/bin/sh -c "/homA/components/%i/%i --brokerHost ${HOMA_BROKER_HOST} --brokerPort ${HOMA_BROKER_PORT}"
 Restart=on-abort
 
-[Install]
-WantedBy=multi-user.target
+#[Install]
+#WantedBy=multi-user.target
