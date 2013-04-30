@@ -1,19 +1,41 @@
 # HomA - Rules.js
-This is a small Node.js command-line utility that evaluates rules in order to automate MQTT publishes based on conditions. 
+This component evaluates rules defined in ```ruleset.nools``` in order to automate MQTT publishes based on conditions. 
 
 ### Installation
-```
+Install the required dependencies through npm
+```none
 $ npm install
 ```
 
-### Start
+### Usage
 ``` 
-$ node rules.js [--brokerHost 127.0.0.1] [--brokerPort 1883]
+$ ./rules [--brokerHost 127.0.0.1] [--brokerPort 1883]
 ```
 
-Rules can be defined in the ruleset.nools file. Further documentation about rule syntax and usage is available at https://github.com/C2FO/nools.
+Alternatively, you can start the application automatically from systemd by using the provided template.
+```none
+$ sudo ln -s $HOMA_BASEDIR/misc/systemd/homa@.service /etc/systemd/system/multi-user.target.wants/homa@rules.service
+$ sudo systemctl enable homa@rules.service
+$ sudo systemctl --system daemon-reload
+$ sudo systemctl start homa@rules.service
+```
 
-Enable service on systems that run systemd
+Logs are then availble in the systemd journal 
 ```
-$ sudo systemctl enable $HOMA_BASEDIR/components/rules/homa-rules.service
+$ sudo journalctl -u homa@rules.service -n 100 -f
 ```
+
+Rules are defined in the ruleset.nools file.
+Further documentation about the rule syntax and usage is available at https://github.com/C2FO/nools.
+New messages that are received on the MQTT bus are automatically asserted into the knowledge base so that your rules may act on them. 
+
+In the ruleset, you have access to ```Message``` objects with the properties 
+   * ```p``` : the payload of the message
+   * ```t``` : the topic to which the payload was published
+   * ```changed``` : whether the topic had a different value before
+   * ```retained``` : wheter the message was a retained and originally published earlier 
+
+Matched rules can be used to e.g. publish new messages by using the ```publish()``` function to trigger actions in different components of the system.
+When a rule matches, it is a good idea to use the ````forget()``` function to retract the knowledge that made that rule fire from the knowledgebase, so that the rule does not match again immideately when new knowledge is asserted. 
+Also, each time a new message is received, the ```Clock``` object is updated.
+
