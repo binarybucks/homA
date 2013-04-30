@@ -27,6 +27,7 @@ $ sudo journalctl -u homa@rules.service -n 100 -f
 
 Rules are defined in the ruleset.nools file.
 Further documentation about the rule syntax and usage is available at https://github.com/C2FO/nools.
+
 New messages that are received on the MQTT bus are automatically asserted into the knowledge base so that your rules may act on them. 
 
 In the ruleset, you have access to ```Message``` objects with the properties 
@@ -36,6 +37,6 @@ In the ruleset, you have access to ```Message``` objects with the properties
    * ```retained``` : wheter the message was a retained and originally published earlier 
 
 Matched rules can be used to e.g. publish new messages by using the ```publish()``` function to trigger actions in different components of the system.
-When a rule matches, it is a good idea to use the ````forget()``` function to retract the knowledge that made that rule fire from the knowledgebase, so that the rule does not match again immideately when new knowledge is asserted. 
+When a rule matches, it is a good idea to use the ```forget()``` function to retract the knowledge that made that rule fire from the knowledgebase, so that the rule does not match again immideately when new knowledge is asserted. 
 Also, each time a new message is received, the ```Clock``` object is updated.
 
