@@ -17,6 +17,7 @@ Alternatively, you can start the application automatically from systemd by using
 ```none
 $ sudo ln -s $HOMA_BASEDIR/misc/systemd/homa@.service /etc/systemd/system/multi-user.target.wants/homa@logger.service
 $ sudo systemctl enable homa@logger.service
+$ sudo systemctl --system daemon-reload
 $ sudo systemctl start homa@logger.service
 ```
 
