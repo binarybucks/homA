@@ -1,4 +1,4 @@
-# HomA - Rules.js
+# HomA - Rules
 This component evaluates rules defined in ```ruleset.nools``` in order to automate MQTT publishes based on conditions. 
 
 ### Installation
