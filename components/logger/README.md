@@ -1,4 +1,4 @@
-# HomA - Logger.js
+# HomA - Logger
 This is a simple component that logs published messages. It can be used to monitor other components or as a starting point for custom components.  
 
 ### Installation
