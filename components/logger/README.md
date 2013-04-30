@@ -1,5 +1,5 @@
 # HomA - Logger.js
-This is a command-line utility that logs published messages. 
+This is a simple component that logs published messages. It can be used to monitor other components or as a starting point for custom components.  
 
 ### Installation
 Install the required dependencies through npm
