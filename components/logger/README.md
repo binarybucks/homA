@@ -13,10 +13,11 @@ Start the application manually to output published messages to the current termi
 $ ./logger [--brokerHost 127.0.0.1] [--brokerPort 1883]
 ```
 
-Alternatively, you can start the application automatically from systemd by using the provided homa@.service template.
+Alternatively, you can start the application automatically from systemd by using the provided template.
 ```none
 $ sudo ln -s $HOMA_BASEDIR/misc/systemd/homa@.service /etc/systemd/system/multi-user.target.wants/homa@logger.service
 $ sudo systemctl enable homa@logger.service
+$ sudo systemctl --system daemon-reload
 $ sudo systemctl start homa@logger.service
 ```
 
