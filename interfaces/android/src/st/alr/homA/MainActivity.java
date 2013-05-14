@@ -3,6 +3,7 @@ package st.alr.homA;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.TreeMap;
 
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Control;
@@ -431,11 +432,13 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
         @Override
         public void onDestroyView() {
             super.onDestroyView();
-            for (Control control : device.getControls().values()) {
-                control.removeValueChangedObserver();
-                
-            }
             Log.v(this.toString(), "DeviceFragment: onDestroyView");
+            
+            TreeMap<String, Control> controls = device.getControls();
+            if (controls != null) 
+                for (Control control : controls.values())
+                    control.removeValueChangedObserver();
+
             EventBus.getDefault().unregister(this);
 
         }
