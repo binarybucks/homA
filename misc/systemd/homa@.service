@@ -12,5 +12,5 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/homa/homa.conf
-ExecStart=/bin/sh -c "${HOMA_BASEDIR}/components/%i/%i --brokerHost ${HOMA_BROKER_HOST} --brokerPort ${HOMA_BROKER_PORT}"
+ExecStart=/bin/sh -c "${HOMA_BASEDIR}/components/%i/%i --brokerHost ${HOMA_BROKER_HOST} --brokerPort ${HOMA_BROKER_PORT} ${HOMA_COMPONENT_OPTS_%i}"
 Restart=on-failure
