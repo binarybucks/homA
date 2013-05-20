@@ -1,6 +1,7 @@
 $(function(){
   var mqttSocket = new Mosquitto();
-  
+  $('.card').wookmark();
+
   Backbone.View.prototype.close = function() {
     this.off();
     this.remove();
@@ -266,7 +267,7 @@ $(function(){
       this.model.devices.on('add', this.addDevice, this);
       this.model.devices.on('remove', this.removeDevice, this);
        // this.model.bind('remove', this.remove, this);
-     this.model.bind('remove', this.removeSelf, this);
+      this.model.bind('remove', this.removeSelf, this);
 
       this.model.view = this;
 
@@ -521,7 +522,7 @@ $(function(){
 
   var DeviceView = Backbone.View.extend({
     template: $("#device-template").html(),
-    className: "device", 
+    className: "device card", 
 
     initialize: function() {
       this.model.on('change', this.render, this);
