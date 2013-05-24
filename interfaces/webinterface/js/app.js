@@ -1,6 +1,5 @@
-$(function(){
+(function(){
   var mqttSocket = new Mosquitto();
-  $('.card').wookmark();
 
   Backbone.View.prototype.close = function() {
     this.off();
@@ -19,7 +18,7 @@ $(function(){
       this.collection.off(null, null, this);
     }
   }
-
+Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
 
 
@@ -266,50 +265,50 @@ $(function(){
     initialize: function() {
       this.model.devices.on('add', this.addDevice, this);
       this.model.devices.on('remove', this.removeDevice, this);
-       // this.model.bind('remove', this.remove, this);
       this.model.bind('remove', this.removeSelf, this);
-
       this.model.view = this;
-
     },
 
     onClose: function() {
       this.model.devices.off();
     },
 
-    render: function () {
-        var tmpl = _.template(this.template);
-        this.$el.html(tmpl(this.model.toJSON()));
-        for (var i = 0, l = this.model.devices.length; i < l; i++) {
-            this.addDevice(this.model.devices.models[i]);
-        }
+    // As wookmark needs DOM elements to work with, this method only does things after the inital render is finished 
+    // and everything has been inserted into the DOM to trigger relayouts when new cards are added.
+    layoutCards: function(){},
 
-        return this;
+    finish: function(){ // Called when the view has been inserted into the DOM
+      this.layoutCardsOptions = {autoResize:true, container:this.$('.devices'),offset:25,itemWidth:432};
+      this.layoutCards=function(){this.$('.card').wookmark(this.layoutCardsOptions);};
+      this.layoutCards();
+    },
+
+    render: function () {
+      var tmpl = _.template(this.template);
+      this.$el.html(tmpl(this.model.toJSON()));
+      for (var i = 0, l = this.model.devices.length; i < l; i++)
+          this.addDevice(this.model.devices.models[i]);
+      
+      return this;
     },
 
     addDevice: function(device) {
-
       var deviceView = new DeviceView({model: device});
       this.$(".devices").append(deviceView.render().el);
+      this.layoutCards(); 
     },
 
     removeDevice: function(device) {
       console.log("Removing device from room: "+ device.get('id') + " " + this.model.get('id'))
       device.view.close();
-      // $(device.view.el).unbind();
-      // $(device.view.el).remove();
-
       if (this.model.devices.length == 0) {
         console.log("Room is empty, removing it");
         Rooms.remove(this.model);
-
       }
     },
 
     removeSelf: function(room) {
-      // debugger
-      Backbone.history.loadUrl( "rooms/"+room.get("id") ) // Router.navigate does not work to reload route, as the hash did not change
-
+      Backbone.history.loadUrl( "rooms/"+room.get("id") ) // Router.navigate will not work here to reload the route, as the hash did not change
     }
   });
 
@@ -334,9 +333,6 @@ $(function(){
       this.allowInputUpdates();
     },
 
-
-
-
     specialize: function() {
       this.dynamicInputValueChanged = this.methodNotImplemented;
       this.dynamicRender = this.methodNotImplemented;
@@ -344,7 +340,6 @@ $(function(){
       this.dynamicAllowInputUpdates = this.methodNotImplemented;
       this.dynamicModelValueChanged = this.methodNotImplemented;
 
-      console.log("model: " + this.model.get("type"));
       if (this.model.get("type") == "switch") {
         this.dynamicRender = this.switchRender;
         this.dynamicInputValueChanged = this.switchInputValueChanged;
@@ -361,12 +356,9 @@ $(function(){
         this.dynamicRender = this.textRender;
         this.dynamicModelValueChanged = this.textModelValueChanged;
       } else {
-        console.error("is undefined");
-        console.log(this.model);
         this.dynamicRender = this.undefinedRender;
       }
     },
-
 
     // Wrapper methods
     render: function() {
@@ -529,7 +521,6 @@ $(function(){
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
       this.model.controls.on('remove', this.render, this);
-
       this.model.view = this;
     },  
 
@@ -577,17 +568,11 @@ $(function(){
     renderToplevelView: function(view) {
       this.$el.html(view.render().$el);
       view.delegateEvents();
-
+      view.finish();
     },
 
     publishMqtt: function(topic, value) {
-      if(Settings.get("devMode")) {
-        console.log("DEV: Simulating publishing of " + topic + "/on:" + value);
-      } else {
-       
         mqttSocket.publish(topic+"/on", value, 0, true);
-      }
-
     }
 
   });
@@ -693,9 +678,6 @@ $(function(){
       return;
     }
 
-
-
-
     // Topic parsing
     //  /devices/$uniqueDeviceId/controls/$deviceUniqueControlId/meta/type
     // 0/      1/              2/       3/                     4/   5/   6
@@ -745,4 +727,4 @@ $(function(){
 
 
 
-});
+})();

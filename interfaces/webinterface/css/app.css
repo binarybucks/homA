@@ -27,11 +27,12 @@ html, body {
     line-height: 45px;
     font-weight: bold;
     font-size: 14px;
+    z-index: 99;
 }
 
 #container {
-    width: 100%;
-    padding-top:45px;
+    width: auto;
+    padding-top:90px;
 }
 
 .view-header {/*TODO*/
@@ -46,7 +47,6 @@ html, body {
     border-color: #d8d8d8;
     border-width: 0px 1px 3px 1px;
     border-style: solid;
-    margin: 50px;
 }
 
 h1 {
@@ -67,7 +67,16 @@ h2 {
     display: block;
     margin-bottom: 15px;
 }
+.devices {
+    position: relative;
+    width: auto; 
+        margin: 0 auto;
 
+margin-left: 100px;
+
+margin-right: 100px;}
+
+}
 .device:last-child, .setting:last-child {
     margin-bottom: 0;
 }
@@ -149,13 +158,14 @@ input[type="checkbox"]:checked, input[type="range"] {
 .rangeWrapper { 
     display: inline-block;
     overflow: hidden;
-    padding: 0px 2px 4px 0;
+    padding: 0;
 }
 .rangeWrapper, input[type="range"], input[type="range"]::-webkit-slider-thumb::before {
-    width: 185px;
+    width: 250px;
 } 
 input[type="range"] {
     -webkit-appearance: none;
+
     background: #4aafd3;
     border-color: #428ea8;
     display: block;
