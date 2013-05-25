@@ -1,5 +1,5 @@
 (function(){
-  var mqttSocket = new Mosquitto();
+  var mqttClient;
 
   Backbone.View.prototype.close = function() {
     this.off();
@@ -38,7 +38,7 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
    initialize: function() {
       if (!this.get("title")) { 
-        this.set({"server": localStorage.getItem("homA_server") || "127.0.0.1"});
+        this.set({"server": localStorage.getItem("homA_server") || document.location.hostname || "127.0.0.1"});
         this.set({"devMode": localStorage.getItem("homA_devMode") == 1 });
       }
     },
@@ -173,43 +173,6 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
 
 
-  var RoomListView = ToplevelView.extend({
-    idName: "room-list", 
-    tagName: "div",
-    template: $("#room-list-template").html(),
-
-    initialize: function() {
-        this.model.on('add', this.addRoom, this);
-        this.model.on('remove', this.removeRoom, this);
-        _.bindAll(this, 'addRoom', 'removeRoom', 'render');
-
-    },
-
-    addRoom: function(room) {
-      console.log("Room added: " + room.get("id"));
-      var detailViewLink = new RoomDetailLinkView({model: room});
-      this.$('#room-detail-links').append(detailViewLink.render().$el);
-    },
-
-    render: function () {
-        var tmpl = _.template(this.template);
-        this.$el.html(tmpl());
-
-        // According to http://jsperf.com/backbone-js-collection-iteration for iteration with collection.models is pretty fast
-        for (var i = 0, l = this.model.length; i < l; i++) {
-            this.addRoom(this.model.models[i]);
-        }
-
-        return this;
-    },
-    removeRoom: function(room) {
-      console.log("Room removed, removing detail link view");
-       room.detailViewLink.close();
-    },
-
-
-
-  });
 
 
 
@@ -493,7 +456,7 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
     publishValue: function(e, type) {
       var value = e.target.value;
-      mqttSocket.publish("/devices/"+this.model.get("id")+"/meta/"+type, value ? value : "", 0, true);
+      mqttClient.publish("/devices/"+this.model.get("id")+"/meta/"+type, value ? value : "", 0, true);
     },
 
     publishNameInput: function(e) {
@@ -546,14 +509,11 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
 
 
-  // Manages view transition 
+  // Manages view transition in the #container element
   var AppView = Backbone.View.extend({
     el: $("#container"),
 
     initialize: function() {
-      if(Settings.get("devMode")) {
-        console.log("Starting in developer mode");
-      }
     },
 
     showView: function(view) {
@@ -572,7 +532,10 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
     },
 
     publishMqtt: function(topic, value) {
-        mqttSocket.publish(topic+"/on", value, 0, true);
+      message = new Messaging.Message(value);
+      message.destinationName = topic+"/on";
+      message.retained = true;
+      mqttClient.send(message); 
     }
 
   });
@@ -596,8 +559,9 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
   },
 
   index: function() {
-    var roomListView = new RoomListView({model: Rooms});
-    App.showView(roomListView);
+    //TODO
+    //var roomListView = new RoomListView({model: Rooms});
+    //App.showView(roomListView);
   },
 
   settings: function () {
@@ -637,32 +601,34 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
 
 
-  mqttSocket.onconnect = function(rc){
+  mqttOnConnected = function(response){
     console.log("Connection established");
     Settings.set("connectionStatus", "connected");
 
-    mqttSocket.subscribe('/devices/+/controls/+/meta/+', 0);
-    mqttSocket.subscribe('/devices/+/controls/+', 0);
-    mqttSocket.subscribe('/devices/+/meta/#', 0);
-    window.onbeforeunload = function () { mqttSocket.disconnect();};
+    mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
+    mqttClient.subscribe('/devices/+/controls/+', 0);
+    mqttClient.subscribe('/devices/+/meta/#', 0);
+    window.onbeforeunload = function (){mqttClient.disconnect();};
   };
 
-  mqttSocket.ondisconnect = function(rc){ 
+  mqttOnConnectionLost = function(response){ 
+    if (response.errorCode !== 0)
+      console.log("onConnectionLost:"+responseObject.errorMessage);
+
     Settings.set("connectionStatus", "disconnected");
     console.log("Connection terminated");
-      setTimeout(function () {
-        mqttSocketConnect();
-      }, 5000);
+    setTimeout(function () {mqttConnect();}, 5000);
   };
 
-  mqttSocket.onmessage = function(topic, payload, qos){
-
+  mqttOnMessageArrived = function(message){
+    var payload = message.payloadString;
+    var topic = message.destinationName.split("/");
     //console.log("-----------RECEIVED-----------");
-     //console.log("Received: "+topic+":"+payload);    
-    var splitTopic = topic.split("/");
+    //console.log("Received: "+topic+":"+payload);    
+
 
     // Ensure the device for the message exists
-    var deviceId = splitTopic[2]
+    var deviceId = topic[2]
     var device = Devices.get(deviceId);
     if (device == null && payload != "") {
       device = new Device({id: deviceId});
@@ -681,8 +647,8 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
     // Topic parsing
     //  /devices/$uniqueDeviceId/controls/$deviceUniqueControlId/meta/type
     // 0/      1/              2/       3/                     4/   5/   6
-    if(splitTopic[3] == "controls") {
-      var controlName = splitTopic[4];  
+    if(topic[3] == "controls") {
+      var controlName = topic[4];  
       var control = device.controls.get(controlName);
       if (control == null) {
         control = new Control({id: controlName});
@@ -690,30 +656,28 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
         control.set("topic", "/devices/"+ deviceId + "/controls/" + controlName);
       }
 
-      if(splitTopic[5] == null) {                                       // Control value   
+      if(topic[5] == null) {                                       // Control value   
         control.set("value", payload);
-      } else if (splitTopic[5] == "meta" && splitTopic[6] != null){     // Control meta 
-        control.set(splitTopic[6], payload);
+      } else if (topic[5] == "meta" && topic[6] != null){     // Control meta 
+        control.set(topic[6], payload);
       } 
-    } else if(splitTopic[3] == "meta" ) { // Could be moved to the setter to facilitate parsing
-      if (splitTopic[4] == "room") {                                    // Device Room
+    } else if(topic[3] == "meta" ) { // Could be moved to the setter to facilitate parsing
+      if (topic[4] == "room") {                                    // Device Room
         device.moveToRoom(payload);
-      } else if(splitTopic[4] == "name") {                              // Device name
+      } else if(topic[4] == "name") {                              // Device name
         device.set('name', payload);
       }
     }
    //console.log("-----------/ RECEIVED-----------");
   };
 
-  function mqttSocketConnect() {
-            console.log("Connecting")
-
-    mqttSocket.connect("ws://" + Settings.get("server") + ":1337"); 
-    // console.log("socket:");
-    // console.log(mqttSocket);   
+  function mqttConnect() {
+    console.log("Connecting")
+    mqttClient = new Messaging.Client(Settings.get("server"), Number(1337), "homa-webinterface");
+    mqttClient.onConnectionLost = mqttOnConnectionLost;
+    mqttClient.onMessageArrived = mqttOnMessageArrived;
+    mqttClient.connect({onSuccess:mqttOnConnected});
   }
-
-
 
   var Settings = new AppSettings;
   Settings.fetch();
@@ -723,8 +687,5 @@ Backbone.View.prototype.finish = function() {/*Overwrite me*/}
 
   var Router = new ApplicationRouter;
   Backbone.history.start({pushState : false});
-  mqttSocketConnect();
-
-
-
+  mqttConnect();
 })();
