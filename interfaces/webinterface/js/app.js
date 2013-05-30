@@ -1,5 +1,4 @@
 (function(){
-  //console.log = function(){};
   /* MODELS */
   Backbone.View.prototype.close = function() {
     this.off();
@@ -14,18 +13,27 @@
   Backbone.View.prototype.finish = function() {}
 
   var ApplicationSettings = Backbone.Model.extend({
-    defaults: function () {return {connectionStatus: "disconnected", debug: false};},
+    defaults: function () {return {connectionStatus: "disconnected", loggerEnabled: false};},
     initialize: function() {
-      if (!this.get("title")) { 
         this.set({"broker": localStorage.getItem("homA_broker") || document.location.hostname || "127.0.0.1"});
-        this.set({"debug": localStorage.getItem("homA_debug") == 1 });
-      }
+        this.set({"loggerEnabled": localStorage.getItem("homA_loggerEnabled") == 1 });
     },
     sync: function() {},// Overwritten to kill default sync behaviour
     save: function() {
-      if( this.get("broker")) 
+      if(this.get("broker")) 
         localStorage.setItem("homA_broker", this.get("broker"))
+      if(this.get("loggerEnabled")) 
+        localStorage.setItem("homA_loggerEnabled", this.get("loggerEnabled"))
     },
+  });
+  var Logger = Backbone.Model.extend({
+    initialize: function(){
+      this.set("logger", console.log); 
+      console.log("Log enabled: %s", Settings.get("loggerEnabled"));
+      Settings.get("loggerEnabled") ? this.enable() : this.disable();
+    },
+    enable: function(){window['console']['log'] = this.get("logger");},
+    disable: function(){console.log=function(){};}
   });
 
   var Control = Backbone.Model.extend({
@@ -385,6 +393,9 @@
       "": "index",
       "/": "index",
     },
+    initialize: function(){
+        Backbone.history.start({pushState : false});
+    },
     index: function() {
       var indexView = new RoomView({model: Devices});
       App.showView(indexView);   
@@ -413,11 +424,10 @@
     },
   });
   var Settings = new ApplicationSettings;
-  Settings.fetch();
+  var Logger = new Logger();
   var Devices = new DeviceCollection;
   var Rooms = new RoomCollection;
   var App = new Application;
   var Router = new ApplicationRouter;
-  Backbone.history.start({pushState : false});
   App.connect();
 })();
