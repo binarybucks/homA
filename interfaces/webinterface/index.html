@@ -8,91 +8,45 @@
     <title>HomA</title>
   </head>
   <body>
-    <div id="header">HomA</div>
+    <div id="header"><div id="logo"></div><div id="room-links"><ul><li id='rooms-all'><a href="#">All</a></li></ul></div><div id="settings"></div></div>
     <div id="container">
 
     </div>
 
     <div id="templates">
+
     <script id="settings-template" type="text/template">
-      <div class="view-header">
-        <h2>
-          <a href="#">
-            Rooms
-          </a>
-        </h2>
-        <h1>
-          Settings
-        </h1>
-      </div>
-        <ul>
-          <li class="setting"> 
-            <h1>
-              Connection Status
-            </h1>
-            <h2 id="connection-status">
-              <%= connectionStatus %>
-            </h2>
-          </li>
-          <li> 
-            <h1>
-              Server
-            </h1>
-            <input id="serverInput" type="text" value="<%= server %>" />
-          </li>
-        </ul>
-      </div>
-      <ul id="room-detail-links">
+      <ul>
+        <li class="setting"> 
+          <h1>
+            Connection Status
+          </h1>
+          <h2 id="connection-status">
+            <%= connectionStatus %>
+          </h2>
+        </li>
+        <li> 
+          <h1>
+            Server
+          </h1>
+          <input id="brokerInput" type="text" value="<%= broker %>" />
+        </li>
       </ul>
     </script>
-    <script id="room-list-template" type="text/template">
-      <div class="view-header">
-        <h1>
-          Rooms
-        </h1>
-      </div>
-      <ul id="room-detail-links">
-      </ul>
-      <div class="view-footer">
-        <a id="settingsLink" href="#/settings">Settings</a>
-      </div>
-    </script>
-    <script id="room-detail-link-template" type="text/template">
-      <h1>
+
+    <script id="room-link-template" type="text/template">
       <a href="#/rooms/<%= id %>">
-        <%= name || id  %>
+        <%= id  %>
       </a>
-      </h1>
     </script>
-    <script id="room-detail-template" type="text/template">
-      <div class="view-header">
-        <h2>
-          <a href="#">
-            Rooms
-          </a>
-        </h2>
-        <h1>
-          <%= id %>
-        </h1>
-      </div>
-      <div class="devices">
-      </div>
-    </script>
+
+
     <script id="view-placeholder-template" type="text/template">
-      <div class="view-header">
-        <h2>
-          <a href="<%= backHref %>">
-            <%= backText %>
-          </a>
-        </h2>
-        <h1>
-          <%= id %>
-        </h1>
-      </div>
       <p>
         This view is empty
       </p>
     </script>
+
     <script id="device-template" type="text/template">
           <h1>
             <a href="#/devices/<%= id %>/settings">
@@ -102,6 +56,7 @@
           <div class="controls">
           </div>
     </script>
+
     <script id="device-settings-template" type="text/template">
       <div class="view-header">
       <h2>
