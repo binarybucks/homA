@@ -340,7 +340,7 @@
         console.log("onConnectionLost:"+response.errorMessage);
       Settings.set("connectionStatus", "disconnected");
       console.log("Connection terminated");
-      setTimeout(function () {mqttConnect();}, 5000);
+      setTimeout(function () {this.connect();}, 5000);
     },
     messageArrived: function(message){
       // Topic array parsing:
