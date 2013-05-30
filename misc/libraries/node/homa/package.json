@@ -1,18 +1,18 @@
 {
   "name": "homa",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "Meta package for the HomA framework",
   "main": "homa.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "mqtt": ">=0.2.6",
+    "mqtt": ">=0.2.9",
     "optimist": ">=0.3.5",
     "node-schedule" : ">=0.1.6",
     "npmlog" : ">=0.0.2"
   },
   "repository": "",
   "author": "Alexander Rust",
-  "license": "MIT"
+  "license": "EPL"
 }

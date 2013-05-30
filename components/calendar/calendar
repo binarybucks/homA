@@ -6,62 +6,40 @@ var https= require('https');
 var querystring = require('querystring');
 
 var homa = require('homa');
-var argv = homa.paramHelper.describe("systemId", "The unique client ID that determines where settings on the /sys topic are received")
-												.describe("calendarQueryInterval", "The number of minutes between queries to the Google Calendar")
-												.default("systemId", "458293-GoogleCalendarBridge")
-												.default("calendarQueryInterval", 30).argv;
-
+var systemId = homa.paramsWithDefaultSystemId("458293-GoogleCalendarBridge");
 var clientId = "456464392453-ca2n79hj54jdqoana5oqh5rl632rvcu5.apps.googleusercontent.com";  // The Google API secrets are yet publicly shared. This might change in the future
 var clientSecret	 = "W5SxdDqrlovnkf7f1WNwm4qw";
-var accessToken, accessTokenRefreshIn, oa;
+var accessToken, accessTokenRefreshIn, oa, deviceCode;
 var settings = {};
-var deviceCode;
-var bootstrapCompleted = false;
 var scheduled = false;
-var calendarQueryInterval = argv.calendarQueryInterval*60*1000;
-
-// Changing these might break things
-var MQTT_TOPIC_SYS = "/sys/"+ argv.systemId + "/#"
-var MQTT_TOPIC_CALENDAR_ID = "/sys/" + argv.systemId + "/calendarId";
-var MQTT_TOPIC_REFRESH_TOKEN = "/sys/" + argv.systemId + "/refreshToken";
+var calendarQueryInterval = 30*60*1000;
 
 // Connects to the broker when the application is started
 (function connect() {
 	homa.mqttHelper.connect();
 })();
 
-// Subscribes to the sys topic to receive config values
+// Set required and optional settings
 homa.mqttHelper.on('connect', function(packet) {
-	homa.mqttHelper.subscribe(MQTT_TOPIC_SYS);
+	homa.settings.require('calendarId'); 
+	homa.settings.optional('refreshToken'); 
 });
 
 // Called when a MQTT message is received. Calls oauth2bootstrap() when all required config parameters are received
 homa.mqttHelper.on('message', function(packet) {
-	settings[packet.topic] = packet.payload;
-	if (bootstrapComplete() && !bootstrapCompleted) {
-		bootstrapCompleted = true;
-		homa.logger.info("CALENDAR", "Bootstrap completed. Waiting 5 seconds for refresh token");
+
+	homa.settings.insert(packet.topic, packet.payload); 
+	if (!homa.settings.isLocked() && homa.settings.isBootstrapCompleted()) {
+		homa.settings.lock();
+		homa.logger.info("CALENDAR", "Waiting 5 seconds for refresh token");
 		setTimeout(function () {oauth2bootstrap();} , 5*1000); // 5 seconds grace period to receive refresh token. Otherwise request authentication from user 
 	}
 });
 
-// Checks if all required config parameters are received
-function bootstrapComplete() {
-		var pass = true
-		var requiredItems = [MQTT_TOPIC_CALENDAR_ID];
-		for(i=0;i<requiredItems.length;i++){
-			if(settings[requiredItems[i]] == undefined || settings[requiredItems[i]] == ""){
-				homa.logger.info("CALENDAR", "Waiting to receive setting: " + requiredItems[i] );
-				pass = false;
-			}
-		}
-		return pass;
-}
-
 // Checks if there is a saved OAuth refresh token or if the application has to be authorized to access the user's calendar
 function oauth2bootstrap() {
 	oa = new oauth.OAuth2(clientId, clientSecret, "https://accounts.google.com/o", "/oauth2/auth", "/oauth2/token");
-	if(settings[MQTT_TOPIC_REFRESH_TOKEN] == undefined || settings[MQTT_TOPIC_REFRESH_TOKEN] == "" )
+	if(homa.settings.get("refreshToken") == undefined || homa.settings.get("refreshToken") == "" )
 		oauth2authorize(); // No refresh token. Request autorization
 	else
 		oauth2refreshAccessToken(); // Refresh token present, Request a OAuth2 access token and start querying the calendar
@@ -114,13 +92,13 @@ function oauth2authorize(){
 function oauth2parseAccessToken(results) {
   accessToken = results.access_token;
   accessTokenRefreshIn = !!results.expires_in ? (results.expires_in-600)*1000: accessTokenRefreshIn;
-  settings[MQTT_TOPIC_REFRESH_TOKEN] = !!results.refresh_token ? results.refresh_token : settings[MQTT_TOPIC_REFRESH_TOKEN];
-
-  homa.mqttHelper.publish(MQTT_TOPIC_REFRESH_TOKEN, settings[MQTT_TOPIC_REFRESH_TOKEN], true); // save refresh token on broker for future starts
+  
+  if(results.refresh_token && (homa.settings.get("refreshToken") != results.refresh_token))	
+  	homa.settings.save("refreshToken", results.refresh_token);
 
   homa.logger.info("OAUTH", "Access token: " + accessToken);
  	homa.logger.info("OAUTH", "Access token refresh in: " + accessTokenRefreshIn+"ms");
-  homa.logger.info("OAUTH", "Refresh token: " + settings[MQTT_TOPIC_REFRESH_TOKEN]);
+  homa.logger.info("OAUTH", "Refresh token: " + homa.settings.get("refreshToken"));
  	homa.logger.info("OAUTH", "Token type: " + results.token_type);
  	setTimeout(oauth2refreshAccessToken, accessTokenRefreshIn);
  	if(!scheduled)
@@ -130,7 +108,7 @@ function oauth2parseAccessToken(results) {
 // Refreshes the OAuth access token with an existing refresh token
 function oauth2refreshAccessToken() {
 	homa.logger.info("OAUTH", "Refreshing access token");
-  oa.getOAuthAccessToken(settings[MQTT_TOPIC_REFRESH_TOKEN], {grant_type:'refresh_token'}, function(err, access_token, refresh_token, results) {
+  oa.getOAuthAccessToken(homa.settings.get("refreshToken"), {grant_type:'refresh_token'}, function(err, access_token, refresh_token, results) {
 		if (err)
 		  homa.logger.error("OAUTH", "Error: %s", JSON.stringify(err));
 		else
@@ -151,7 +129,7 @@ function calendarQuery() {
 	// timeMax == Upper bound (exclusive) for an event's start time to filter by. Optional. The default is not to filter by start time. (string)
 		var timeMax = encodeURIComponent(new Date((new Date()).getTime()+ (calendarQueryInterval + (5*60*1000))).toISOString());
 		var timeMin = new Date();
-		var query = "https://www.googleapis.com/calendar/v3/calendars/"+settings[MQTT_TOPIC_CALENDAR_ID]+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(timeMin.toISOString())+"&timeMax="+timeMax;	
+		var query = "https://www.googleapis.com/calendar/v3/calendars/"+homa.settings.get("calendarId")+"/events?singleEvents=true&fields=items(id%2Cdescription%2Cstart%2Cend%2Csummary)&orderBy=startTime&timeMin="+encodeURIComponent(timeMin.toISOString())+"&timeMax="+timeMax;	
 	
 	homa.logger.info("CALENDAR", "Executing query: " + query); 
 	oa.get( query, accessToken, function (error, result, response) {

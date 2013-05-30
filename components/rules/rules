@@ -2,7 +2,7 @@
 var nools = require("nools");
 var date = require("datejs")
 var homa = require('homa');
-var argv = homa.paramHelper.argv;
+var systemId = homa.paramsWithDefaultSystemId("294028-solar");
 var messages = {};
 
 var Message = function (packet) {

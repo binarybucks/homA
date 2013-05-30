@@ -1,6 +1,6 @@
 { "name": "csm"
 , "version" : "0.1.0"
 , "private":"true"
-, "dependencies" : {"homa" : ">=0.1.0", "request" : ">=2.21.0"}
+, "dependencies" : {"homa" : ">=0.2.0", "request" : ">=2.21.0"}
 }
 

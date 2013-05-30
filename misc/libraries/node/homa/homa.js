@@ -7,11 +7,19 @@ var events = require('events');
 var mqtt = require('mqtt');
 var schedule = require('node-schedule');
 var log = require('npmlog')
-var paramHelper = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT");
-		paramHelper = process.env.HOMA_BROKER_HOST ? paramHelper.default("brokerHost", process.env.HOMA_BROKER_HOST) : paramHelper.demand("brokerHost");
-		paramHelper = process.env.HOMA_BROKER_PORT ? paramHelper.default("brokerPort", process.env.HOMA_BROKER_PORT) : paramHelper.default("brokerPort", 1883);
-
 log.disableColor();
+var global = this; 
+var params = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT").describe("systemId", "The unique client ID that determines where settings on the /sys topic are received");
+		params = process.env.HOMA_BROKER_HOST ? params.default("brokerHost", process.env.HOMA_BROKER_HOST) : params.demand("brokerHost");
+		params = process.env.HOMA_BROKER_PORT ? params.default("brokerPort", process.env.HOMA_BROKER_PORT) : params.default("brokerPort", 1883);
+
+
+// finalizes parameters and sets default systemId
+module.exports.paramsWithDefaultSystemId = function(systemd){
+	params = params.default("systemId", systemd).argv;
+	return params.systemId;
+}
+
 
 var StringHelper = function() {
 	this.pad = function(n, width, symbol, back) {
@@ -25,14 +33,82 @@ var StringHelper = function() {
 	}
 }
 
+var SettingsHelper = function() {
+	var self = this; 
+	self.settings = {}; // key is full topic string of the form /sys/$deviceId/someParameter
+	self.locked = false;
+	self.requiredSettings = []; 
+	self.optionalSettings = [];
+
+	this.keyToSysTopic = function(key) {
+		return "/sys/"+params.systemId+"/"  + key;
+	}
+
+	// Check if a required or optional settings value was received from the MQTT broker. If so, save it for later. 
+	// force allows to store key:value pairs even if they are not required
+	// topic is a complete topic string of the form /sys/$deviceId/someParameter
+	this.insert = function(topic, value, force){
+		if(force || (self.requiredSettings.indexOf(topic) > -1) || self.optionalSettings.indexOf(topic) > -1)
+			self.settings[topic] = value;
+	}
+
+	// Saves value for a parameter to the MQTT /sys topic for the current clientId
+	this.save = function(parameter, value){
+			global.mqttHelper.publish(self.keyToSysTopic(parameter), value, true);
+			self.settings[self.keyToSysTopic(parameter)] = value;
+	}
+
+
+	// parameter is in the form someParameter, without /sys topic string
+	this.require = function(parameter){
+		self.requiredSettings.push(self.keyToSysTopic(parameter));
+		global.mqttHelper.subscribe(self.keyToSysTopic(parameter));
+	}
+
+	this.optional = function(parameter){
+		self.optionalSettings.push(self.keyToSysTopic(parameter));
+		global.mqttHelper.subscribe(self.keyToSysTopic(parameter));
+	}
+
+
+	// parameter is in the form someParameter, without /sys topic string
+	this.get = function(parameter, inputAsSysTopicStr) {
+		return inputAsSysTopicStr ? self.settings[parameter] : self.settings[self.keyToSysTopic(parameter)];
+	}
+
+
+	this.isBootstrapCompleted = function() {
+		var pass = true
+		for(i=0;i<self.requiredSettings.length;i++){
+			if(self.get(self.requiredSettings[i], true) == undefined || self.get(self.requiredSettings[i], true) == ""){
+				log.info("SETTINGS", "Waiting to receive: " + self.requiredSettings[i]);
+				pass = false;
+			}
+		}
+		if(pass) {
+			log.info("SETTINGS", "Bootstrap completed");
+		}
+		return pass;
+	}
+	this.isLocked = function(){
+		return self.locked;
+	}
+	this.lock = function() {
+		self.locked = true; 
+	}
+	this.unlock = function() {
+		self.locked = false;
+	}
+}
+
 var MqttHelper = function() {
 	var self = this;
 	self.mqttClient;
 	self.scheduledPublishes = [];
 
-	this.connect = function(host, port, callback) {
-		self.mqttClient = mqtt.createClient(port || exports.paramHelper.argv.brokerPort, host || exports.paramHelper.argv.brokerHost, {keepalive: 40});
-		log.info("MQTT", "Connecting to %s:%s", host || module.exports.paramHelper.argv.brokerHost, port || exports.paramHelper.argv.brokerPort);
+	this.connect = function(host, port) {
+		self.mqttClient = mqtt.createClient(port || params.brokerPort, host || params.brokerHost, {keepalive: 40});
+		log.info("MQTT", "Connecting to %s:%s", host || params.brokerHost, port || params.brokerPort);
 	
 	  self.mqttClient.on('connect', function() {
          self.emit('connect');
@@ -87,9 +163,10 @@ var MqttHelper = function() {
 }
 util.inherits(MqttHelper, events.EventEmitter);
 
-module.exports.mqttHelper = new MqttHelper();
+module.exports.params = params; 
 module.exports.stringHelper = new StringHelper();
-module.exports.paramHelper = paramHelper; 
-
 module.exports.scheduler = schedule;
 module.exports.logger = log;
+module.exports.mqttHelper = new MqttHelper();
+module.exports.settings = new SettingsHelper();
+

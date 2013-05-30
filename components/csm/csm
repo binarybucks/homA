@@ -1,73 +1,37 @@
 #!/usr/bin/env node
 var homa = require('homa');
-// var argv = homa.paramHelper.describe("getUrl", "The API url of the csm server")
-// 												.default("getUrl", "http://192.168.8.3:8000/csm/stuff/?Test")
 var homa = require('homa');
-var argv = homa.paramHelper.default("systemId", "194729-csm").argv;
+var systemId = homa.paramsWithDefaultSystemId("194729-csm");
 var request = require("request");
 
-
-
-// request("http://www.jspro.com", function(error, response, body) {
-// 3
-//   console.log(body);
-// 4
-// });
-
-
-
-var settings = {};
-var MQTT_TOPIC_API_URL = "/sys/"+ argv.systemId + "/apiUrl"
-var bootstrapCompleted = false;
-
 homa.mqttHelper.on('message', function(packet) {
-	console.log("foo")
-	settings[packet.topic] = packet.payload;
-	if (bootstrapComplete() && !bootstrapCompleted) {
-		bootstrapCompleted = true;
-		homa.logger.info("CSM", "Bootstrap completed.");
-	homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Average/meta/type", "text", true);
+	homa.settings.insert(packet.topic, packet.payload); // Check if a required settings value was received. If so, save it for later. 
 
-	homa.scheduler.scheduleJob('*/10 * * * *', queryConsumption); // Query every day at midnight
-	queryConsumption();
+	if (!homa.settings.isLocked() && homa.settings.isBootstrapCompleted()) {
+		homa.settings.lock();
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Average/meta/type", "text", true);
+		homa.scheduler.scheduleJob('*/10 * * * *', queryConsumption); // Query every day at midnight
+		queryConsumption();
 	}
 });
 
-function bootstrapComplete() {
-		var pass = true
-		var requiredItems = [MQTT_TOPIC_API_URL];
-		for(i=0;i<requiredItems.length;i++){
-			if(settings[requiredItems[i]] == undefined || settings[requiredItems[i]] == ""){
-				homa.logger.info("CSM", "Waiting to receive setting: " + requiredItems[i] );
-				pass = false;
-			}
-		}
-		return pass;
-}
 (function(){
 	homa.mqttHelper.connect();
 })();
 
 homa.mqttHelper.on('connect', function(packet) {
-	homa.mqttHelper.subscribe(MQTT_TOPIC_API_URL);
+	homa.settings.require('apiUrl'); // Set required settings
 });
-
 
 function queryConsumption(){
-	homa.logger.info("CSM", "Querying power consumption from  " + settings[MQTT_TOPIC_API_URL]);
-
-request(settings[MQTT_TOPIC_API_URL], function(error, response, body) {
-	if(!error) {
-		var data = JSON.parse(body);
-		console.log(data);
-		var total = 0;		
-		var i = 0;
-		for(i in data["Sum"]) {total += data["Sum"][i]; }
-		console.log("sum: " + total/(++i));
-		homa.mqttHelper.publish("/devices/"+ argv.systemId + "/controls/Average", Number((total/(++i)).toFixed(2))  + " Wh", true);
-
-	}
-});
-
-
+	homa.logger.info("CSM", "Querying power consumption from  " + homa.settings.get("apiUrl"));
+	request(homa.settings.get("apiUrl"), function(error, response, body) {
+		if(!error) {
+			var data = JSON.parse(body);
+			var total = 0;		
+			var i = 0;
+			for(i in data["Sum"]) {total += data["Sum"][i]; }
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Average", Number((total/(++i)).toFixed(2))  + " Wh", true);
+		}
+	});
 }
