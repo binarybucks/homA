@@ -84,6 +84,10 @@ html, body {
     border-bottom: 3px solid transparent;
     font-weight: 300;
 }
+#room-links ul li.active a {
+    border-bottom-color: #428ea8;
+    /*#4aafd3*/
+}
 
 #container {
     width: auto;

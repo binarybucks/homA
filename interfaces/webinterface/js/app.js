@@ -76,10 +76,7 @@
   var RoomCollection = Backbone.Collection.extend({model: Room});
   var ControlCollection = Backbone.Collection.extend({model: Control});
 
-  /* VIEWS */
-  var ToplevelView = Backbone.View.extend({rerenderToplevelView: function() {App.renderToplevelView(this);}})
-
-  var SettingsView = ToplevelView.extend({
+  var SettingsView = Backbone.View.extend({
     template: $("#settings-template").html(),
     events: {"keypress #brokerInput":  "saveServerOnEnter"},
     initialize: function() {
@@ -105,10 +102,20 @@
     className: "room-link", 
     tagName: "li",
     template: $("#room-link-template").html(),
-    initialize: function() {this.model.roomLink = this; },
+    initialize: function() {this.model.roomLink = this; console.log(this.model) },
     render: function () {
         var tmpl = _.template(this.template);
-        this.$el.html(tmpl(this.model.toJSON()));
+        var id, link; 
+
+        if (this.model instanceof Backbone.Model) { // when model is actually a model, its the view for a room
+          id = this.model.get("id");
+          link = "#rooms/"+id;
+        } else { // When model is a collection, this is the "All" view that has to be treated a bit differently
+          id = "All"
+          link = "#";
+        }
+
+        this.$el.html(tmpl({link: link, id: id}));
         return this;
     },
    });
@@ -121,7 +128,7 @@
     addModel: function(addedObject) {if(addedObject.get("id") == this.id) {Backbone.history.loadUrl(this.options.callbackRoute);}},
   });
 
-  var RoomView = ToplevelView.extend({
+  var RoomView = Backbone.View.extend({
     className: "devices", 
 
     initialize: function() {
@@ -137,9 +144,16 @@
       this.layoutCardsOptions = {autoResize:true, container:this.$el,offset:25};
       _.bindAll(this, 'layoutCards');
     },
-    onClose: function() {this.collection.off();},
+    onClose: function() {this.collection.off(); this.model.roomLink.$el.removeClass("active");
+},
     layoutCards: function(){this.$('.card').wookmark(this.layoutCardsOptions);},
-    finish: function(){this.layoutCards();},
+    finish: function(){this.layoutCards();
+      console.log(this.model)
+      if(this.model.roomLink)
+
+        this.model.roomLink.$el.addClass("active");
+
+    },
     render: function () {
       for (var i = 0, l = this.collection.length; i < l; i++)
           this.addDevice(this.collection.models[i]);
@@ -246,7 +260,7 @@
  });
 
 
-  var DeviceSettingsView = ToplevelView.extend({
+  var DeviceSettingsView = Backbone.View.extend({
     template: $("#device-settings-template").html(),
     className: "device-settings",
     events: {
@@ -254,7 +268,6 @@
       "keypress #roomInput"  : "publishRoomInputOnEnter",
     },
     initialize: function() {
-      this.model.on('change', this.rerenderToplevelView, this);
       this.model.view = this;
     },
     render: function() {
@@ -302,7 +315,8 @@
     initialize: function() {
       Rooms.on('add', this.addRoom, this);
       Rooms.on('remove', this.removeRoom, this);
-      _.bindAll(this, 'connected', 'publish');
+      _.bindAll(this, 'connected', 'publish', 'connectionLost');
+      this.addRoom(Devices);
     },
     addRoom: function(room) {
       var roomLinkView = new RoomLinkView({model: room});

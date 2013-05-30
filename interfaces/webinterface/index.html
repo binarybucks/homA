@@ -8,7 +8,7 @@
     <title>HomA</title>
   </head>
   <body>
-    <div id="header"><div id="logo"></div><div id="room-links"><ul><li id='rooms-all'><a href="#">All</a></li></ul></div><div id="settings"></div></div>
+    <div id="header"><div id="logo"></div><div id="room-links"><ul></ul></div><div id="settings"></div></div>
     <div id="container">
 
     </div>
@@ -35,7 +35,7 @@
     </script>
 
     <script id="room-link-template" type="text/template">
-      <a href="#/rooms/<%= id %>">
+      <a href="<%=link%>">
         <%= id  %>
       </a>
     </script>
