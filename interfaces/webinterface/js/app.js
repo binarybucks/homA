@@ -52,12 +52,14 @@
       } 
     },
     moveToRoom: function(roomName) {
-      console.log("Moving Device to room");
       var cleanedName = roomName || "unassigned";
       var targetRoom = Rooms.get(cleanedName);
-      console.log("Target room: %s", cleanedName);
+
       if(this.hasRoom())
         console.log("Current room: %s", this.get("room").get("id"));
+
+      console.log("Moving Device to room: %s", cleanedName);
+
       if(targetRoom != null && this.hasRoom() && this.get("room").get("id") == cleanedName)// Dont move when current room == target room
         return;
       this.removeFromCurrentRoom();
@@ -77,6 +79,8 @@
   var ControlCollection = Backbone.Collection.extend({model: Control});
 
   var SettingsView = Backbone.View.extend({
+    className: "view", 
+    id: "settings-view",
     template: $("#settings-template").html(),
     events: {"keypress #brokerInput":  "saveServerOnEnter"},
     initialize: function() {
@@ -102,7 +106,7 @@
     className: "room-link", 
     tagName: "li",
     template: $("#room-link-template").html(),
-    initialize: function() {this.model.roomLink = this; console.log(this.model) },
+    initialize: function() {this.model.roomLink = this;},
     render: function () {
         var tmpl = _.template(this.template);
         var id, link; 
@@ -123,13 +127,15 @@
   var PlaceholderView = Backbone.View.extend({
     template: $("#view-placeholder-template").html(),
     className: "view", 
+    id: "placeholder-view",
     initialize: function() {this.model.on('add', this.addModel, this);},
     render: function () {this.$el.html( _.template(this.template)(_.extend(this.model.toJSON(), {id: this.id, backText: this.options.backText, backHref: this.options.backHref})));return this;},
     addModel: function(addedObject) {if(addedObject.get("id") == this.id) {Backbone.history.loadUrl(this.options.callbackRoute);}},
   });
 
   var RoomView = Backbone.View.extend({
-    className: "devices", 
+    className: "view", 
+    id: "room-view",
 
     initialize: function() {
       if(this.model instanceof Backbone.Model) {// this.model == ordinary room
@@ -144,15 +150,12 @@
       this.layoutCardsOptions = {autoResize:true, container:this.$el,offset:25};
       _.bindAll(this, 'layoutCards');
     },
-    onClose: function() {this.collection.off(); this.model.roomLink.$el.removeClass("active");
-},
+    onClose: function() {this.collection.off(); this.model.roomLink.$el.removeClass("active");},
     layoutCards: function(){this.$('.card').wookmark(this.layoutCardsOptions);},
-    finish: function(){this.layoutCards();
-      console.log(this.model)
+    finish: function(){
+      this.layoutCards();
       if(this.model.roomLink)
-
         this.model.roomLink.$el.addClass("active");
-
     },
     render: function () {
       for (var i = 0, l = this.collection.length; i < l; i++)
@@ -171,7 +174,7 @@
   });
 
   var ControlView = Backbone.View.extend({
-    className: "control",
+    className: "subview control-view",
     events: {
       "click input[type=checkbox]" : "inputValueChanged",
       "change input[type=range]" : "inputValueChanged",
@@ -262,7 +265,9 @@
 
   var DeviceSettingsView = Backbone.View.extend({
     template: $("#device-settings-template").html(),
-    className: "device-settings",
+    id: "device-settings-view",
+    className: "view", 
+
     events: {
       "keypress #nameInput"  : "publishNameInputOnEnter",
       "keypress #roomInput"  : "publishRoomInputOnEnter",
@@ -287,7 +292,7 @@
 
   var DeviceView = Backbone.View.extend({
     template: $("#device-template").html(),
-    className: "device card", 
+    className: "card", 
     initialize: function() {
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
@@ -304,7 +309,7 @@
     },
     addControl: function(control) {
       var controlView = new ControlView({model: control});
-      this.$(".controls").append(controlView.render().el);
+      this.$(".subviews").append(controlView.render().el);
     },
   });
 
