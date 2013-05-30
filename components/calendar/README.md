@@ -8,7 +8,8 @@ $ npm install
 ```
 
 ### Start
-Start the application and publish the calendar id of the calendar that contains your automation events.
+Start the application and publish the calendar id of the calendar that contains your automation events. 
+The default $SYSTEMID is ```458293-GoogleCalendarBridge```.
 ``` 
 $ ./calendar [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID] [--queryIntervall 60]
 $ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/$SYSTEMID/calendarId" --payload "xxx@group.calendar.google.com" --retained
