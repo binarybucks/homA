@@ -325,7 +325,7 @@
     },
     addRoom: function(room) {
       var roomLinkView = new RoomLinkView({model: room});
-      $('#room-links ul').append(roomLinkView.render().$el);
+      $('#room-links > ul').append(roomLinkView.render().$el);
     },
     removeRoom: function(room) {room.roomLink.close();},
     showView: function(view) {
