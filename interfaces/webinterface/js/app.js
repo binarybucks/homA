@@ -13,27 +13,33 @@
   Backbone.View.prototype.finish = function() {}
 
   var ApplicationSettings = Backbone.Model.extend({
-    defaults: function () {return {connectionStatus: "disconnected", loggerEnabled: false};},
+    defaults: { connectivity: "disconnected", 
+                logging: "0", 
+                port: "1884", 
+                host: document.location.hostname || "127.0.0.1"
+              },
+
     initialize: function() {
-        this.set({"broker": localStorage.getItem("homA_broker") || document.location.hostname || "127.0.0.1"});
-        this.set({"loggerEnabled": localStorage.getItem("homA_loggerEnabled") == 1 });
+      for (var key in this.defaults)
+        this.set(key, localStorage.getItem(key) || this.defaults[key]);
     },
     sync: function() {},// Overwritten to kill default sync behaviour
-    save: function() {
-      if(this.get("broker")) 
-        localStorage.setItem("homA_broker", this.get("broker"))
-      if(this.get("loggerEnabled")) 
-        localStorage.setItem("homA_loggerEnabled", this.get("loggerEnabled"))
+    save: function(data) {
+      for (var key in data) {
+        this.set(key, data[key]);
+        localStorage.setItem(key, this.get(key));
+      }
     },
   });
   var Logger = Backbone.Model.extend({
     initialize: function(){
       this.set("logger", console.log); 
-      console.log("Log enabled: %s", Settings.get("loggerEnabled"));
-      Settings.get("loggerEnabled") ? this.enable() : this.disable();
+      Settings.get("logging")==='1' ? this.enable() : this.disable();
     },
     enable: function(){window['console']['log'] = this.get("logger");},
-    disable: function(){console.log=function(){};}
+    disable: function(){  
+      console.log("Console.log disabled. Set local storage logging=1 to enable");
+      console.log=function(){};}
   });
 
   var Control = Backbone.Model.extend({
@@ -82,23 +88,23 @@
     className: "view", 
     id: "settings-view",
     template: $("#settings-template").html(),
-    events: {"keypress #brokerInput":  "saveServerOnEnter"},
+    events: {"click .button.save":  "save"},
+    connectOnSave: false, 
+
     initialize: function() {
       this.model.view = this; 
       this.model.on('change', this.render, this);
     },
+
     render: function () {
         var tmpl = _.template(this.template);
         this.$el.html(tmpl(this.model.toJSON()));
         return this;
     },
-    saveServerOnEnter: function(e) { 
+    save: function(e) { 
       console.log("Saving settings");
-      if (e.keyCode == 13) {
-        this.model.set("broker", e.target.value);
-        this.model.save();
-        // TODO: disconnect and connect to new broker if value changed
-      }
+      this.model.save({"host": this.$("#hostInput").attr('value'), "port": this.$("#portInput").attr('value')});
+      App.reconnect();
     },
    });
 
@@ -106,7 +112,9 @@
     className: "room-link", 
     tagName: "li",
     template: $("#room-link-template").html(),
-    initialize: function() {this.model.roomLink = this;},
+
+    initialize: function() {this.model.roomLink = this;
+    },
     render: function () {
         var tmpl = _.template(this.template);
         var id, link; 
@@ -315,17 +323,36 @@
 
   /* BASE APPLICATION LOGIC & MQTT EVENT HANDLING */
   var Application = Backbone.View.extend({
-    el: $("#container"),
+    el: $("body"),
+    container: $("#container"),
+    roomLinks: $("#room-links > ul"),
+    connectivity: $("#connectivity"),
+
     mqttClient: undefined,
+    connectivityTimeoutId: undefined,
+
     initialize: function() {
+      Settings.on('change:connectivity', this.connectivityChanged, this);
       Rooms.on('add', this.addRoom, this);
       Rooms.on('remove', this.removeRoom, this);
       _.bindAll(this, 'connected', 'publish', 'connectionLost');
       this.addRoom(Devices);
     },
+    connectivityChanged: function(e){
+      if(this.connectivityTimeoutId)
+        clearTimeout(this.connectivityTimeoutId);
+      console.log("Connectivity changed to: %s", e.get("connectivity"));
+            this.connectivity.removeClass("visible");
+
+      this.connectivity.html(e.get("connectivity"));
+      this.connectivity.addClass("visible");
+      var that = this; 
+      this.connectivityTimeoutId = setTimeout(function(){that.connectivity.removeClass("visible")}, 5000);
+
+    },
     addRoom: function(room) {
       var roomLinkView = new RoomLinkView({model: room});
-      $('#room-links > ul').append(roomLinkView.render().$el);
+      this.roomLinks.append(roomLinkView.render().$el);
     },
     removeRoom: function(room) {room.roomLink.close();},
     showView: function(view) {
@@ -335,31 +362,50 @@
       this.render(this.currentView);
     },
     render: function(view){
-      this.$el.html(view.render().$el);
+      this.container.html(view.render().$el);
       view.delegateEvents();
       view.finish();
     },
+    reconnect: function(){
+      console.log("Reconnecting");
+      this.disconnect();
+      this.connect(); 
+    },
     connect: function() {
-      console.log("Connecting")
-      this.mqttClient = new Messaging.Client(Settings.get("broker"), Number(1337), "homA-web-"+Math.random().toString(36).substring(6));
+      Settings.set("connectivity", "connecting");
+      this.mqttClient = new Messaging.Client(Settings.get("host"), parseInt(Settings.get("port")), "homA-web-"+Math.random().toString(36).substring(6));
       this.mqttClient.onConnectionLost = this.connectionLost;
       this.mqttClient.onMessageArrived = this.messageArrived;
       this.mqttClient.connect({onSuccess:this.connected});
     },
     connected: function(response){
-      console.log("Connected");
-      Settings.set("connectionStatus", "connected");
+      Settings.set("connectivity", "connected");
       this.mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
       this.mqttClient.subscribe('/devices/+/controls/+', 0);
       this.mqttClient.subscribe('/devices/+/meta/#', 0);
       window.onbeforeunload = function(){/*TODO: this.mqttClient.disconnect();*/};
     },
-    connectionLost: function(response){ 
-      if (response.errorCode !== 0)
-        console.log("onConnectionLost:"+response.errorMessage);
-      Settings.set("connectionStatus", "disconnected");
+    disconnect: function() {
+        this.mqttClient.disconnect(); 
+    },
+    disconnected: function() {
+      Settings.set("connectivity", "disconnected");
       console.log("Connection terminated");
-      setTimeout(function () {this.connect();}, 5000);
+      for (var i = 0, l = Rooms.length; i < l; i++)
+        Devices.remove(Devices.models[i]);
+
+      for (var i = 0, l = Rooms.length; i < l; i++)
+        Rooms.remove(Rooms.models[i]);
+
+      // we should do some cleanup here
+    },
+    connectionLost: function(response){ 
+      if (response.errorCode !== 0) {
+        console.log("onConnectionLost:"+response.errorMessage);
+        setTimeout(function () {App.connect();}, 5000); // Schedule reconnect if this was not a planned disconnect
+      }
+
+      this.disconnected();
     },
     messageArrived: function(message){
       // Topic array parsing:

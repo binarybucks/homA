@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="libs/eventbus.jar"/>
 	<classpathentry kind="lib" path="libs/paho.jar"/>
 	<classpathentry kind="lib" path="libs/bugsnag-android-2.0.9.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

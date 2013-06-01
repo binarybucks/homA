@@ -246,11 +246,53 @@ input[type="text"] {
     vertical-align: center;
     padding-top: 6px;
     padding-bottom: 6px;
-    color: #a2a3a3;
+    color: #6c6c6c;
     font-size: 14px;
+        font-family: Roboto, arial, sans-serif;
+
 }
 input[type="text"]:focus {
     outline: none;
     border-color: #7bbacd;
     -webkit-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1),inset 0 -1px 0 rgba(0,0,0,0.07);
 }
+.button{
+    display: inline-block;
+    padding: 0 15px;
+    background: #4aafd3;
+    color: #fff;
+    border-radius: 2px;
+    border-color: #4aafd3;
+    border-width: 0px 1px 3px 1px;
+    border-style: solid;
+    cursor: pointer;
+        transition: all .25s ease-in-out;
+   -moz-transition: all .25s ease-in-out;
+   -webkit-transition: all .25s ease-in-out;
+
+}
+
+.button:hover{
+    border-color: #428ea8;
+    background: rgb(69, 167, 202);
+}
+
+#connectivity {
+    transition: opacity .5s ease-in-out;
+    position: absolute;
+    right: 65px;
+    top: -45px;
+    font-size: 16px;
+    text-transform: capitalize;
+    color: rgb(153, 153, 153);
+    line-height: 45px;
+   -moz-transition: top .25s ease-out;
+   -webkit-transition: top .25s ease-out;
+    height: 90px;
+
+}
+
+#connectivity.visible, #connectivity:hover {
+        top: 0;
+}
+

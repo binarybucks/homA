@@ -4441,6 +4441,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="IC1" library="linear" deviceset="78*" device="TV" technology="05"/>
 <part name="C1" library="rcl" deviceset="C-EU" device="025-050X050" value="330n"/>
 <part name="C2" library="rcl" deviceset="C-EU" device="025-050X050" value="100n"/>
+<part name="GND2" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -4460,6 +4461,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <instance part="IC1" gate="A1" x="-12.7" y="50.8" rot="R270"/>
 <instance part="C1" gate="G$1" x="-27.94" y="55.88"/>
 <instance part="C2" gate="G$1" x="-27.94" y="48.26"/>
+<instance part="GND2" gate="1" x="68.58" y="50.8" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -4556,6 +4558,12 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <wire x1="-43.18" y1="35.56" x2="15.24" y2="35.56" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="35.56" x2="15.24" y2="63.5" width="0.1524" layer="91"/>
 <junction x="15.24" y="63.5"/>
+</segment>
+<segment>
+<pinref part="JP1" gate="A" pin="2"/>
+<pinref part="GND2" gate="1" pin="GND"/>
+<wire x1="78.74" y1="40.64" x2="68.58" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="40.64" x2="68.58" y2="48.26" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$6" class="0">

@@ -8,7 +8,12 @@
     <title>HomA</title>
   </head>
   <body>
-    <div id="header"><a id="logo" href="#"></a><div id="room-links"><ul><li id="more-button">More<ul id="more"></ul> </li></ul></div><a id="settings" href="#settings"></a></div>
+    <div id="header">
+      <a id="logo" href="#"></a>
+      <div id="room-links"><ul></ul></div>
+      <span id="connectivity">Disconnected</span>
+      <a id="settings" href="#settings"></a>
+    </div>
     <div id="container">
 
     </div>
@@ -22,18 +27,23 @@
         </h1>
 
         <div class="subviews">
+
           <div class="subview">
             <h2>
-              Connection Status
+              Host
             </h2>
-            <span><%= connectionStatus %></span>
+            <input id="hostInput" type="text" value="<%= host %>" />
           </div>
           <div class="subview">
             <h2>
-              Broker
+              Port
             </h2>
-            <input id="brokerInput" type="text" value="<%= broker %>" />
+            <input id="portInput" type="text" value="<%= port %>" />
           </div>
+          <div class="subview">
+            <div class="button save">Save</div>
+          </div>
+
         </div>
       </div>
     </script>
