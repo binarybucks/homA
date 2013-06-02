@@ -1,11 +1,11 @@
 package st.alr.homA.support;
 
+import st.alr.homA.R;
+import st.alr.homA.model.Device;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import st.alr.homA.R;
-import st.alr.homA.model.Device;
 import android.widget.TextView;
 
 public class DeviceMapAdapter extends MapAdapter<String, Device> {

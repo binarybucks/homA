@@ -1,7 +1,6 @@
 
 package st.alr.homA;
 
-import de.greenrobot.event.EventBus;
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
 import android.app.Service;
@@ -14,6 +13,7 @@ import android.nfc.tech.Ndef;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import de.greenrobot.event.EventBus;
 
 public class NfcReadService extends Service
 {

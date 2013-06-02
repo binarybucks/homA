@@ -1,10 +1,10 @@
 
 package st.alr.homA;
 
-import android.nfc.NfcAdapter;
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.nfc.NfcAdapter;
+import android.os.Bundle;
 import android.util.Log;
 
 public class NfcReadActivity extends Activity {

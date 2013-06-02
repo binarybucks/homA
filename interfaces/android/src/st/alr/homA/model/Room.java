@@ -2,11 +2,9 @@ package st.alr.homA.model;
 
 import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueSortedMap;
-
-import de.greenrobot.event.EventBus;
-
 import android.content.Context;
 import android.util.Log;
+import de.greenrobot.event.EventBus;
 
 
 

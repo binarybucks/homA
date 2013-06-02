@@ -35,9 +35,8 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
-import de.greenrobot.event.EventBus; 
+import de.greenrobot.event.EventBus;
 
 
 public class MqttService extends Service implements MqttCallback
@@ -531,7 +530,7 @@ public class MqttService extends Service implements MqttCallback
     
     private void createNotification() {
         Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
-        android.support.v4.app.TaskStackBuilder stackBuilder = TaskStackBuilder.create(App
+        android.support.v4.app.TaskStackBuilder stackBuilder = android.support.v4.app.TaskStackBuilder.create(App
                 .getInstance());
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);

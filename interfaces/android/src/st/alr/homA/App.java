@@ -1,20 +1,19 @@
-
+    
 package st.alr.homA;
 import java.util.HashMap;
 import java.util.Set;
-
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.Events;
-import st.alr.homA.support.NfcRecordAdapter;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
+import st.alr.homA.support.NfcRecordAdapter;
 import st.alr.homA.support.ValueSortedMap;
-import de.greenrobot.event.EventBus;
 import android.app.Application;
-import com.bugsnag.android.Bugsnag;
+import de.greenrobot.event.EventBus;
+import com.bugsnag.android.*;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 
 public class App extends Application {
     private static App instance;

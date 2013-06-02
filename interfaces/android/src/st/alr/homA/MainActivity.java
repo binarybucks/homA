@@ -13,17 +13,13 @@ import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.view.ControlView;
-import de.greenrobot.event.EventBus;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -39,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import de.greenrobot.event.EventBus;
 
 public class MainActivity extends FragmentActivity {
     private Room currentRoom;
@@ -209,8 +206,8 @@ public class MainActivity extends FragmentActivity {
                @Override
                public void onItemClick(AdapterView<?> parent, View view, int position, long it) {
                    
-                   FragmentManager fm = getSupportFragmentManager();
-                   FragmentTransaction ft = fm.beginTransaction();
+                   android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+                   android.support.v4.app.FragmentTransaction ft = fm.beginTransaction();
 
                    fm.beginTransaction();
                    DeviceFragment d = DeviceFragment.newInstance(room.getId(), room.getDevices().values().toArray()[position].toString());
@@ -328,7 +325,7 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
        
     }
 
-    public static class DeviceFragment extends DialogFragment {
+    public static class DeviceFragment extends android.support.v4.app.DialogFragment {
         Room room;
         Device device;
 
@@ -344,8 +341,8 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
         public void onEventMainThread(MqttConnectivityChanged event) {
             if(event.getConnectivity() != MqttService.MQTT_CONNECTIVITY.CONNECTED) {
                 Log.v(this.toString(), "Lost connection, closing currently open dialog");
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
+                android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.remove(this);
                 fragmentTransaction.commit();
             }            
@@ -434,17 +431,14 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
             super.onDestroyView();
             Log.v(this.toString(), "DeviceFragment: onDestroyView");
             
-            TreeMap<String, Control> controls = device.getControls();
-            if (controls != null) 
+            TreeMap<String, Control> controls;
+            
+            if ((device != null) && ((controls = device.getControls()) !=null))
                 for (Control control : controls.values())
                     control.removeValueChangedObserver();
-
+            
             EventBus.getDefault().unregister(this);
-
         }
-        
-
-
     }
 //
 //    public static class RoomFragment extends Fragment {

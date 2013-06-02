@@ -1,14 +1,13 @@
 package st.alr.homA;
 
 import st.alr.homA.support.Events;
-import de.greenrobot.event.EventBus;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.view.Menu;
+import de.greenrobot.event.EventBus;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static Preference serverPreference;
