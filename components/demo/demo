@@ -1,0 +1,48 @@
+#!/usr/bin/env node
+var homa = require('homa'); // Require homA module that contains many helper methods
+var systemId = homa.paramsWithDefaultSystemId("293723-demo"); // Load command-line parameters and set the default SystemId
+												
+(function connect() {
+    homa.mqttHelper.connect();
+})();
+
+homa.mqttHelper.on('connect', function(packet) {	
+
+	// When a user interacts with a component's control through an interface, the value is published to the '/on' subtopic
+	// The component has to echo the value back to the topic without the '/on' so the change is reflected in all other interfaces
+	homa.mqttHelper.subscribe("/devices/"+ systemId + "/controls/Demo-Switch/on"); // Subscribe to changes of the Demo-Switch control
+	homa.mqttHelper.subscribe("/devices/"+ systemId + "/controls/Demo-Range/on"); // Subscribe to changes of the Demo-Range control
+
+	// A switch control
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Switch/meta/type", "switch" , true); // Control type
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Switch", "1" , true); // Value of the control shown in the interface
+
+	// A range control 
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Range/meta/type", "range" , true); // Control type
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Range/meta/max", "42" , true); // Maximum slider value
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Range", "21" , true); // Value of the control shown in the interface
+
+	// A read-only text control
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Text/meta/type", "text" , true); // Control type
+	homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Text", "Some text" , true); // Value of the control shown in the interface
+
+	// Some device meta values
+	homa.mqttHelper.publish("/devices/"+ systemId + "/meta/name", "Demo-Device" , true); // Friendly name of the device that is shown in the interface
+	homa.mqttHelper.publish("/devices/"+ systemId + "/meta/room", "Demo-Room" , true); // Room in which the device is
+
+});
+
+homa.mqttHelper.on('message', function(packet) {
+	
+ 	// Echo back Demo-Switch value
+	if(packet.topic == "/devices/"+ systemId + "/controls/Demo-Switch/on") {
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Switch", packet.payload , true);
+	}
+
+	// Echo back Demo-Switch value
+	if(packet.topic == "/devices/"+ systemId + "/controls/Demo-Range/on") {
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Demo-Range", packet.payload , true);
+	}
+
+	// The text control is read-only
+});
