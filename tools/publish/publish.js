@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var homa = require('homa');
-var argv = homa.paramHelper.describe("topic", "The topic to which the payload will be published")
+homa.params.describe("topic", "The topic to which the payload will be published")
 										.describe("payload", "The payload that will be published to the topic")
 										.describe("retained", "Whether to set the retained flag on the message that will be published")
 										.demand("topic")
@@ -8,10 +8,11 @@ var argv = homa.paramHelper.describe("topic", "The topic to which the payload wi
 										.alias("topic", "t")
 										.alias("payload", "p")
 										.alias("retained", "r")
-										.default("retained", false).argv;
+										.default("retained", false);
+var systemId = homa.paramsWithDefaultSystemId("482924-publish");
 
 homa.mqttHelper.on('connect', function() {
-	homa.mqttHelper.publish(argv.topic, argv.payload === true ? "" : argv.payload, argv.retained);
+	homa.mqttHelper.publish(homa.params.argv.topic, homa.params.argv.payload === true ? "" : homa.params.argv.payload, homa.params.argv.retained);
 	homa.mqttHelper.disconnect();
 });
 

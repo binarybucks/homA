@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var homa = require('homa');
-var argv = homa.paramHelper.argv;
+var systemId = homa.paramsWithDefaultSystemId("492492-cleaner");
+
 var messages = {};
 
 homa.mqttHelper.on('connect', function(packet) {
