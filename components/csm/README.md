@@ -27,7 +27,6 @@ For the smartmeter in question every entry is the average usage on all three pha
 If your system supports it, you can start the application as a daemon from systemd by using the provided template.
 ```none
 $ sudo ln -s $HOMA_BASEDIR/misc/systemd/homa@.service /etc/systemd/system/multi-user.target.wants/homa@csm.service
-$ sudo systemctl enable homa@csm.service
 $ sudo systemctl --system daemon-reload
 $ sudo systemctl start homa@csm.service
 ```

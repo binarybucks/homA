@@ -23,7 +23,6 @@ The latitude and longitude values of your home can easily be obtained with the h
 If your system supports it, you can start the application as a daemon from systemd by using the provided template.
 ```none
 $ sudo ln -s $HOMA_BASEDIR/misc/systemd/homa@.service /etc/systemd/system/multi-user.target.wants/homa@solar.service
-$ sudo systemctl enable homa@solar.service
 $ sudo systemctl --system daemon-reload
 $ sudo systemctl start homa@solar.service
 ```

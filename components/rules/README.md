@@ -32,7 +32,6 @@ Also, each time a new message is received, the ```Clock``` object is updated.
 If your system supports it, you can start the application as a daemon from systemd by using the provided template.
 ```none
 $ sudo ln -s $HOMA_BASEDIR/misc/systemd/homa@.service /etc/systemd/system/multi-user.target.wants/homa@rules.service
-$ sudo systemctl enable homa@rules.service
 $ sudo systemctl --system daemon-reload
 $ sudo systemctl start homa@rules.service
 ```
