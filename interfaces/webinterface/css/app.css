@@ -296,3 +296,13 @@ input[type="text"]:focus {
         top: 0;
 }
 
+#placeholder {
+    height: 200px;
+    width: 200px;
+    margin: 0 auto;
+    background: url('../images/homA_monochrome.png') no-repeat center 0;
+    background-size: contain;
+    opacity: 0.5;
+
+}
+

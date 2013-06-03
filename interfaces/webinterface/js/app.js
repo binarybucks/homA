@@ -137,8 +137,8 @@
     className: "view", 
     id: "placeholder-view",
     initialize: function() {this.model.on('add', this.addModel, this);},
-    render: function () {this.$el.html( _.template(this.template)(_.extend(this.model.toJSON(), {id: this.id, backText: this.options.backText, backHref: this.options.backHref})));return this;},
-    addModel: function(addedObject) {if(addedObject.get("id") == this.id) {Backbone.history.loadUrl(this.options.callbackRoute);}},
+    render: function () {this.$el.html( _.template(this.template)(this.model.toJSON()));return this;},
+    addModel: function(addedObject) {if(this.options.readyComparator(addedObject)) {Backbone.history.loadUrl(this.options.callbackRoute);}},
   });
 
   var RoomView = Backbone.View.extend({
@@ -335,7 +335,7 @@
       Settings.on('change:connectivity', this.connectivityChanged, this);
       Rooms.on('add', this.addRoom, this);
       Rooms.on('remove', this.removeRoom, this);
-      _.bindAll(this, 'connected', 'publish', 'connectionLost');
+      _.bindAll(this, 'connect', 'connected', 'publish', 'connectionLost', 'disconnect', 'disconnected');
       this.addRoom(Devices);
     },
     connectivityChanged: function(e){
@@ -383,21 +383,21 @@
       this.mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
       this.mqttClient.subscribe('/devices/+/controls/+', 0);
       this.mqttClient.subscribe('/devices/+/meta/#', 0);
-      window.onbeforeunload = function(){/*TODO: this.mqttClient.disconnect();*/};
+      window.onbeforeunload = function(){App.disconnect()};
     },
     disconnect: function() {
+      if(Settings.get("connectivity") == "connected")
         this.mqttClient.disconnect(); 
     },
     disconnected: function() {
       Settings.set("connectivity", "disconnected");
       console.log("Connection terminated");
-      for (var i = 0, l = Rooms.length; i < l; i++)
-        Devices.remove(Devices.models[i]);
+
+      for (var i = 0, l = Devices.length; i < l; i++)
+        Devices.pop();        
 
       for (var i = 0, l = Rooms.length; i < l; i++)
-        Rooms.remove(Rooms.models[i]);
-
-      // we should do some cleanup here
+        Rooms.pop();        
     },
     connectionLost: function(response){ 
       if (response.errorCode !== 0) {
@@ -469,7 +469,7 @@
       var room = Rooms.get(id); // Room might not yet exists
       var view; 
       if (room == null)
-        view = new PlaceholderView({model: Rooms, id: id, backText: 'Index', backHref: '#', callbackRoute: Backbone.history.fragment});
+        view = new PlaceholderView({model: Rooms, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == this.id;}});
       else
         view = new RoomView({model: room});
       App.showView(view);
@@ -482,7 +482,7 @@
       var device = Devices.get(id); // Device might not yet exists
       var view; 
       if (device == null)
-        view = new PlaceholderView({model: Devices, id: id, backText: "Index", backHref: '#', callbackRoute: Backbone.history.fragment});
+        view = new PlaceholderView({model: Devices, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == this.id;}});
       else
         view = new DeviceSettingsView({model: device});
       App.showView(view);
