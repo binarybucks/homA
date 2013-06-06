@@ -350,8 +350,13 @@ Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
         
         public void onSaveInstanceState (Bundle outState) {
             super.onSaveInstanceState(outState);
-            outState.putString("roomId", room.getId());
-            outState.putString("deviceId", device.toString());
+            // After long times of inactivity with an open dialog, Android might decide to swap out the room or device 
+            // In this case there is nothing left that we can save.
+            // Restoring the fragment from the bundle will likely return nothing (see setArgs).
+            if(device!= null && room != null) {
+                outState.putString("roomId", room.getId());
+                outState.putString("deviceId", device.toString());                
+            }
         }
 
         private boolean setArgs(Bundle savedInstanceState){
