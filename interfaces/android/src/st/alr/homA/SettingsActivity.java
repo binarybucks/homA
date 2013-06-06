@@ -2,6 +2,8 @@ package st.alr.homA;
 
 import st.alr.homA.support.Events;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -43,8 +45,21 @@ public class SettingsActivity extends PreferenceActivity {
 
 			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.preferences);
+			
+	         PackageManager pm = this.getActivity().getPackageManager();
+			Preference version = findPreference("versionReadOnly");
+
+			try {
+                version.setSummary(pm.getPackageInfo(this.getActivity().getPackageName(), 0).versionName);
+            } catch (NameNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
 			serverPreference = findPreference("serverPreference");
 			setServerPreferenceSummary();
+			
+			
 
 		}
 	}

@@ -23,4 +23,11 @@
             android:negativeButtonText=""  >
         </st.alr.homA.LicenseDialogPreference>
                
+   
+   
+   <Preference 
+ android:key="versionReadOnly"
+ android:title="@string/version" />
+   
+  
 </PreferenceScreen>

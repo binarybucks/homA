@@ -27,7 +27,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Bugsnag.register(this, "635a508c10fa87191e33662dd3c08512");
+        //Bugsnag.register(this, "635a508c10fa87191e33662dd3c08512");
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new ValueSortedMap<String, Room>();
