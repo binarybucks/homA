@@ -28,8 +28,19 @@ public class RangeControlView extends ControlView {
 
     public void setContent(String name, String value) {
         _name.setText(name);
+        
+        int intValue;
+        try {
+            intValue = Integer.parseInt(value);
+        }catch (NumberFormatException e) {
+            try {
+                intValue = Math.round(Float.parseFloat(value));
+            }catch (NumberFormatException f) {
+                intValue = 0; // Value is not an int nor a float. Let's quit guessing. 
+            }
+        }
 
-        ((SeekBar) _value).setProgress(Integer.parseInt(value));
+        ((SeekBar) _value).setProgress(intValue);
         Log.v(this.toString(), "Setting seekbar " + name  + " to " + value);
 
     }
