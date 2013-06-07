@@ -61,13 +61,11 @@
       var cleanedName = roomName || "unassigned";
       var targetRoom = Rooms.get(cleanedName);
 
-      if(this.hasRoom())
-        console.log("Current room: %s", this.get("room").get("id"));
+      if(targetRoom != null && this.hasRoom() && this.get("room").get("id") == cleanedName)// Dont move when current room == target room
+        return;
 
       console.log("Moving Device to room: %s", cleanedName);
 
-      if(targetRoom != null && this.hasRoom() && this.get("room").get("id") == cleanedName)// Dont move when current room == target room
-        return;
       this.removeFromCurrentRoom();
       if (targetRoom == null) {
         console.log("Creating room %s", cleanedName);
@@ -112,13 +110,10 @@
     className: "room-link", 
     tagName: "li",
     template: $("#room-link-template").html(),
-
-    initialize: function() {this.model.roomLink = this;
-    },
+    initialize: function() {this.model.roomLink = this;},
     render: function () {
         var tmpl = _.template(this.template);
         var id, link; 
-
         if (this.model instanceof Backbone.Model) { // when model is actually a model, its the view for a room
           id = this.model.get("id");
           link = "#rooms/"+id;
@@ -126,7 +121,6 @@
           id = "All"
           link = "#";
         }
-
         this.$el.html(tmpl({link: link, id: id}));
         return this;
     },
@@ -277,26 +271,31 @@
     className: "view", 
 
     events: {
-      "keypress #nameInput"  : "publishNameInputOnEnter",
-      "keypress #roomInput"  : "publishRoomInputOnEnter",
+      "click .button.save":  "save",
     },
     initialize: function() {
       this.model.view = this;
+      _.bindAll(this, 'save');
       this.model.on('change', this.render, this);
     },
     render: function() {
       var tmpl = _.template(this.template);
-      var roomName = this.model.get("room") != undefined ? this.model.get("room").get("id") : "unassigned"
-      this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName, rooms: Rooms})));
+      var roomName = this.model.hasRoom() ? this.model.get("room").get("id") : "unassigned"
+      this.$el.html(tmpl(_.extend( this.model.toJSON(), {roomname: roomName})));
       this.delegateEvents();
       return this;
     },
-    publishMeta: function(e, type) {
-      var value = e.target.value;
-      App.publish("/devices/"+this.model.get("id")+"/meta/"+type, value ? value : "", 0, true);
+    save: function(e) { 
+      var arr = this.$el.find('form').serializeArray();
+      console.log(arr);
+      var data = _(arr).reduce(function(acc, field){
+        acc[field.name] = field.value;
+        return acc;
+      }, {});
+
+      for(setting in data)
+        App.publishForDevice(this.model.get("id"), "/meta/"+setting, data[setting]);
     },
-    publishNameInputOnEnter: function(e) { if (e.keyCode == 13) this.publishMeta(e, "name");}, // enter in nameInput
-    publishRoomInputOnEnter: function(e) { if (e.keyCode == 13) this.publishMeta(e, "room");}, // enter in roomInput
   });
 
   var DeviceView = Backbone.View.extend({
@@ -336,15 +335,14 @@
       Settings.on('change:connectivity', this.connectivityChanged, this);
       Rooms.on('add', this.addRoom, this);
       Rooms.on('remove', this.removeRoom, this);
-      _.bindAll(this, 'connect', 'connected', 'publish', 'connectionLost', 'disconnect', 'disconnected');
+      _.bindAll(this, 'connect', 'connected', 'publish', 'publishForDevice', 'connectionLost', 'disconnect', 'disconnected');
       this.addRoom(Devices);
     },
     connectivityChanged: function(e){
       if(this.connectivityTimeoutId)
         clearTimeout(this.connectivityTimeoutId);
       console.log("Connectivity changed to: %s", e.get("connectivity"));
-            this.connectivity.removeClass("visible");
-
+      this.connectivity.removeClass("visible");
       this.connectivity.html(e.get("connectivity"));
       this.connectivity.addClass("visible");
       var that = this; 
@@ -443,12 +441,18 @@
      console.log("-----------/ RECEIVED-----------");
     },
     publish: function(topic, value) {
+      value = value != undefined ? value : "";
+
       console.log("Publishing " + topic+":"+value);
       var message = new Messaging.Message(value);
       message.destinationName = topic+"/on";
       message.retained = true;
       this.mqttClient.send(message); 
+    },
+    publishForDevice: function(deviceId, subtopic, value) {
+      this.publish("/devices/"+deviceId+subtopic, value);
     }
+
   });
 
   var ApplicationRouter = Backbone.Router.extend({
@@ -466,6 +470,7 @@
       var indexView = new RoomView({model: Devices});
       App.showView(indexView);   
     },
+    // TODO: the room and deviceSettings route behave exactly the same. They should be merged to a single method
     room: function(id) {
       var room = Rooms.get(id); // Room might not yet exists
       var view; 
@@ -476,10 +481,6 @@
       else
         view = new RoomView({model: room});
       App.showView(view);
-    },
-    settings: function () {
-      var settingsView = new SettingsView({model: Settings});
-      App.showView(settingsView);
     },
     deviceSettings: function(id) {
       var device = Devices.get(id); // Device might not yet exists
@@ -492,7 +493,13 @@
         view = new DeviceSettingsView({model: device});
       App.showView(view);
     },
+    settings: function () {
+      var settingsView = new SettingsView({model: Settings});
+      App.showView(settingsView);
+    },
+
   });
+
   var Settings = new ApplicationSettings;
   var Logger = new Logger();
   var Devices = new DeviceCollection;

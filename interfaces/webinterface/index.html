@@ -81,18 +81,23 @@
             </h2>
             <span><%= id %></span>
           </div>
-          <div class="subview">
-            <h2>
-              Name
-            </h2>
-            <input id="nameInput" type="text" value="<%= name %>" placeholder="<%= id %>" />
-          </div>
-          <div class="subview">
-            <h2>
-              Room
-            </h2>
-            <input id="roomInput" type="text" value="<%= roomname %>" placeholder="unassigned" />
-          </div>
+          <form>
+            <div class="subview">
+              <h2>
+                Name
+              </h2>
+              <input type="text" value="<%= name %>" placeholder="<%= id %>" name="name"/>
+            </div>
+            <div class="subview">
+              <h2>
+                Room
+              </h2>
+              <input type="text" value="<%= roomname %>" placeholder="unassigned" name="room"/>
+            </div>
+            <div class="subview">
+              <div class="button save">Save</div>
+            </div>
+          </form>
         </div>
       </div>
     </script>
