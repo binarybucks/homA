@@ -4,10 +4,10 @@
 html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{ margin:0; padding:0; border:0; outline:0; font-size:100%; vertical-align:baseline; background:transparent}body{ line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{ display:block} ul{ list-style:none}blockquote,q{ quotes:none}blockquote:before,blockquote:after,q:before,q:after{ content:''; content:none}a{ margin:0; padding:0; font-size:100%; vertical-align:baseline; background:transparent;text-decoration: none; color: inherit;}ins{ background-color:#ff9; color:#000; text-decoration:none}mark{ background-color:#ff9; color:#000; font-style:italic; font-weight:bold}del{ text-decoration:line-through}abbr[title],dfn[title]{ border-bottom:1px dotted; cursor:help}table{ border-collapse:collapse; border-spacing:0}hr{ display:block; height:1px; border:0;  border-top:1px solid #ccc; margin:1em 0; padding:0}input,select{ vertical-align:middle}
 
 /*HomA Stylesheet */
-
 html, body {
     min-height: 100%;
     width: 100%;
+    min-width: 600px;
     margin: 0;
     background: #e5e5e5;
     font-family: Roboto, arial, sans-serif;
@@ -15,19 +15,16 @@ html, body {
     font-weight: 300; 
     line-height: 1.5em;
 }
-
 h1 {
     color: #6a6a6a;
     font-size: 20px;
     font-weight: 300; 
 }
-
 h2 {
     color: #6a6a6a;
     text-transform: capitalize;
     font-weight: 300; 
 }
-
 /* HEADER */ 
 #header {
     position: fixed;
@@ -61,6 +58,7 @@ h2 {
     height: 45px;
     width: auto;
     margin: 0 70px;
+    overflow: hidden;
 }
 #room-links ul{
    clear:left;
@@ -91,7 +89,6 @@ h2 {
     border-bottom-color: #4aafd3;
     font-weight: 400;
 }
-
 /* VIEWS */ 
 #container { /* Holds view*/
     width: auto;
@@ -116,41 +113,17 @@ h2 {
     display: block;
     margin-bottom: 10px;
 }
-
 .card h2 { /* Subview title */
     display: inline-block;
     overflow: hidden;
     width: 100px;
     margin-right: 25px
 }
-.card .subviews { /*Holds subviews (no shit sherlock) */
-}
-
+.card .subviews { }/*Holds subviews (no shit sherlock) */
 .card .subview {
     line-height: 30px;
     margin-bottom: 5px;
 }
-
-/*.device .control {
-    line-height: 24px;
-    margin-bottom: 10px;
-    position: relative;
-    height: 24px;
-}
-.device .control h2 {
-    position: absolute;
-    left: 0;
-    top: 1px; }
-*/
-/*.device .control input[type="checkbox"],  .device .control .rangeWrapper, .device .control span {
-    position: absolute;
-    left: 120px;
-    top: 3px;
-}
-.device .control span {
-    top: 2px;
-}*/
-
 /* CONTROLS */
 input {
     margin: 0; padding: 0; border: 0;
@@ -161,9 +134,7 @@ input[type="checkbox"], input[type="range"] {
     border-style: solid;
     margin-top: -2px;
     -webkit-appearance: none;
-
 }
-
 /* Switch */
 input[type="checkbox"] {
     background: #efefef;
@@ -171,7 +142,6 @@ input[type="checkbox"] {
     cursor: pointer;
     width: 65px;
 }
-
 input[type="checkbox"]:after { 
     display: block;
     position: relative;
@@ -183,21 +153,14 @@ input[type="checkbox"]:after {
     border-width: 0px 0px 2px 0px;
     border-style: solid;
 }
-
-
 input[type="checkbox"]:checked {
     padding-left: 40px;
     padding-right: 0;
 }
-
 input[type="checkbox"]:checked:after {
     background: #4aafd3;
     border-color: #428ea8;
 }
-
-input[type="checkbox"]:checked, input[type="range"] {
-}
-
 /* Range */
 .rangeWrapper { 
     display: inline-block;
@@ -236,7 +199,6 @@ input[type="range"]::-webkit-slider-thumb::before {
     position: absolute;
     width: 400px;
 }
-
 /* Text */
 input[type="text"] {
     height: 22px;
@@ -249,8 +211,7 @@ input[type="text"] {
     padding-bottom: 6px;
     color: #6c6c6c;
     font-size: 14px;
-        font-family: Roboto, arial, sans-serif;
-
+    font-family: Roboto, arial, sans-serif;
 }
 input[type="text"]:focus {
     outline: none;
@@ -260,24 +221,22 @@ input[type="text"]:focus {
 .button{
     display: inline-block;
     padding: 0 15px;
-    background: #4aafd3;
+    background: rgb(42, 140, 175);
     color: #fff;
     border-radius: 2px;
-    border-color: #4aafd3;
-    border-width: 0px 1px 3px 1px;
+    border-color: rgb(42, 140, 175);
+    border-width: 3px 1px 3px 1px;
+    border-top-color: transparent;
     border-style: solid;
     cursor: pointer;
-        transition: all .25s ease-in-out;
+    transition: all .25s ease-in-out;
    -moz-transition: all .25s ease-in-out;
    -webkit-transition: all .25s ease-in-out;
-
 }
-
 .button:hover{
-    border-color: #428ea8;
-    background: rgb(69, 167, 202);
+    border-color: rgb(20, 98, 126);
+    border-top-color: transparent;
 }
-
 #connectivity {
     transition: opacity .5s ease-in-out;
     position: absolute;
@@ -290,13 +249,10 @@ input[type="text"]:focus {
    -moz-transition: top .25s ease-out;
    -webkit-transition: top .25s ease-out;
     height: 90px;
-
 }
-
 #connectivity.visible, #connectivity:hover {
-        top: 0;
+    top: 0;
 }
-
 #placeholder {
     height: 200px;
     width: 200px;
@@ -304,6 +260,4 @@ input[type="text"]:focus {
     background: url('../images/homA_monochrome.png') no-repeat center 0;
     background-size: contain;
     opacity: 0.5;
-
 }
-

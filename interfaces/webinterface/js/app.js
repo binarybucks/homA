@@ -389,7 +389,7 @@
       for (var i = 0, l = Devices.length; i < l; i++)
         Devices.pop();        
 
-      for (var i = 0, l = Rooms.length; i < l; i++)
+      for (i = 0, l = Rooms.length; i < l; i++)
         Rooms.pop();        
     },
     connectionLost: function(response){ 
@@ -436,7 +436,6 @@
     },
     publish: function(topic, value) {
       value = value != undefined ? value : "";
-
       console.log("Publishing " + topic+":"+value);
       var message = new Messaging.Message(value);
       message.destinationName = topic+"/on";
@@ -446,7 +445,6 @@
     publishForDevice: function(deviceId, subtopic, value) {
       this.publish("/devices/"+deviceId+subtopic, value);
     }
-
   });
 
   var ApplicationRouter = Backbone.Router.extend({
@@ -491,9 +489,7 @@
       var settingsView = new SettingsView({model: Settings});
       App.showView(settingsView);
     },
-
   });
-
   var Settings = new ApplicationSettings;
   var Logger = new Logger();
   var Devices = new DeviceCollection;
