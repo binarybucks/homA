@@ -282,6 +282,7 @@
     },
     initialize: function() {
       this.model.view = this;
+      this.model.on('change', this.render, this);
     },
     render: function() {
       var tmpl = _.template(this.template);
@@ -468,8 +469,10 @@
     room: function(id) {
       var room = Rooms.get(id); // Room might not yet exists
       var view; 
+      var matchId = id;
+
       if (room == null)
-        view = new PlaceholderView({model: Rooms, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == this.id;}});
+        view = new PlaceholderView({model: Rooms, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == matchId;}});
       else
         view = new RoomView({model: room});
       App.showView(view);
@@ -481,8 +484,10 @@
     deviceSettings: function(id) {
       var device = Devices.get(id); // Device might not yet exists
       var view; 
+      var matchId = id;
+
       if (device == null)
-        view = new PlaceholderView({model: Devices, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == this.id;}});
+        view = new PlaceholderView({model: Devices, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == matchId;}});
       else
         view = new DeviceSettingsView({model: device});
       App.showView(view);
