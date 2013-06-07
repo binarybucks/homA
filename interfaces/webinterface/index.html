@@ -27,23 +27,23 @@
         </h1>
 
         <div class="subviews">
-
-          <div class="subview">
-            <h2>
-              Host
-            </h2>
-            <input id="hostInput" type="text" value="<%= host %>" />
-          </div>
-          <div class="subview">
-            <h2>
-              Port
-            </h2>
-            <input id="portInput" type="text" value="<%= port %>" />
-          </div>
-          <div class="subview">
-            <div class="button save">Save</div>
-          </div>
-
+          <form>
+            <div class="subview">
+              <h2>
+                Host
+              </h2>
+              <input type="text" value="<%= host %>" name="host"/>
+            </div>
+            <div class="subview">
+              <h2>
+                Port
+              </h2>
+              <input type="text" value="<%= port %>" name="port" />
+            </div>
+            <div class="subview">
+              <div class="button save">Save</div>
+            </div>
+          </form>
         </div>
       </div>
     </script>

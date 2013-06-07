@@ -27,9 +27,9 @@
     save: function(data) {
       for (var key in data) {
         this.set(key, data[key]);
-        localStorage.setItem(key, this.get(key));
+        localStorage.setItem(key, data[key]);
       }
-    },
+    }
   });
   var Logger = Backbone.Model.extend({
     initialize: function(){
@@ -87,11 +87,10 @@
     id: "settings-view",
     template: $("#settings-template").html(),
     events: {"click .button.save":  "save"},
-    connectOnSave: false, 
 
     initialize: function() {
       this.model.view = this; 
-      this.model.on('change', this.render, this);
+      // this.model.on('change', this.render, this);
     },
 
     render: function () {
@@ -100,9 +99,12 @@
         return this;
     },
     save: function(e) { 
-      console.log("Saving settings");
-      this.model.save({"host": this.$("#hostInput").attr('value'), "port": this.$("#portInput").attr('value')});
-      App.reconnect();
+      var arr = this.$el.find('form').serializeArray();
+      var data = _(arr).reduce(function(acc, field){acc[field.name] = field.value;return acc;}, {});
+      var reconnect = (this.model.get("host") != data["host"] || this.model.get("port") != data["port"])
+      this.model.save(data);
+      if(reconnect)
+        App.reconnect();
     },
    });
 
@@ -269,10 +271,7 @@
     template: $("#device-settings-template").html(),
     id: "device-settings-view",
     className: "view", 
-
-    events: {
-      "click .button.save":  "save",
-    },
+    events: {"click .button.save":  "save",},
     initialize: function() {
       this.model.view = this;
       _.bindAll(this, 'save');
@@ -287,12 +286,7 @@
     },
     save: function(e) { 
       var arr = this.$el.find('form').serializeArray();
-      console.log(arr);
-      var data = _(arr).reduce(function(acc, field){
-        acc[field.name] = field.value;
-        return acc;
-      }, {});
-
+      var data = _(arr).reduce(function(acc, field){acc[field.name] = field.value;return acc;}, {});
       for(setting in data)
         App.publishForDevice(this.model.get("id"), "/meta/"+setting, data[setting]);
     },

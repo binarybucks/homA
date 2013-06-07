@@ -100,6 +100,7 @@ h2 {
 .view { /* Holds cards*/
     position: relative;
     width: auto; 
+    min-width: 440px; /* Prevent wookmark from breaking when there is not enough space left for a single column*/
 }
 .card {
     width: 380px;
