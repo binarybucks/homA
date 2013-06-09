@@ -22,7 +22,7 @@
     <string name="menuStartRecording">"Start recording"</string>
     <string name="menuStopRecording">"Stop recording"</string>
     <string name="title_activity_nfc">"Write Tags"</string>
-    <string name="nfcWriteWaitingForTag">"Place your phone about a tag to write"</string>
+    <string name="nfcWriteWaitingForTag">"Place your phone above a tag to write"</string>
     <string name="nfcWritePayloadInput">"Payload"</string>
     <string name="nfcWriteTopicInput">"Topic"</string>
     <string name="nfcWriteRetainedInput">"Retained"</string>
