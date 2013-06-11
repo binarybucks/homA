@@ -1,7 +1,7 @@
 # HomA - Node module
 This is a small module that provides wrapper functions and tools for components of the HomA smart home framework. 
 
-This module provides a common command-line syntex to HomA components that are based on this module. Per default only the broker host and port have to be provided by the user in order to start a component that is based on this module. The parameters can either be supplied with the parameters ```--brokerHost and ```--brokerPort``` or they are read from the environment variables ```HOMA_BROKER_HOST``` and ```HOMA_BROKER_PORT```. If both are provided, the command-line parameters take precedence. 
+This module provides a common command-line syntax to HomA components that are based on this module. Per default only the broker host and port have to be provided by the user in order to start a component that is based on this module. The parameters can either be supplied with the parameters ```--brokerHost``` and ```--brokerPort``` or they are read from the environment variables ```HOMA_BROKER_HOST``` and ```HOMA_BROKER_PORT```. If both are provided, the command-line parameters take precedence. 
 
 According to the [wiki](https://github.com/binarybucks/homA/wiki/Conventions#settings) all further configuration should be saved in an MQTT topic according to the deviceId of the component. The settingsHelper that is provided by this module offers the necessary functions for this task.  
 
@@ -13,7 +13,7 @@ When writing a new component based on this module, the default systemId can be p
 var homa = require('homa');
 var systemId = homa.paramsWithDefaultSystemId("391349-logger");
 ```
-This requires this module, sets the default systemid to 391349-logger and finishes the parameters so that they can later be accessed by through homa.params.paramKey. 
+This requires this module, sets the default systemId to 391349-logger and finishes the parameters so that they can later be accessed through ```homa.params.paramKey```. 
 
 
 ## mqttHelper
