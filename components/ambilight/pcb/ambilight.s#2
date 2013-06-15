@@ -4433,12 +4433,11 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="TB" library="transistor-power" deviceset="IRF740" device="" value="foo"/>
 <part name="X1" library="con-conrad" deviceset="73398?" device="0-62"/>
 <part name="AURORA" library="pinhead" deviceset="PINHD-1X4" device=""/>
-<part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="JP1" library="pinhead" deviceset="PINHD-1X8" device=""/>
 <part name="JP2" library="pinhead" deviceset="PINHD-1X8" device=""/>
 <part name="JP5" library="pinhead" deviceset="PINHD-1X6" device=""/>
 <part name="JP6" library="pinhead" deviceset="PINHD-1X6" device=""/>
-<part name="IC1" library="linear" deviceset="78*" device="TV" technology="05"/>
+<part name="IC1" library="linear" deviceset="78*" device="T" technology="05" value="7805T"/>
 <part name="C1" library="rcl" deviceset="C-EU" device="025-050X050" value="330n"/>
 <part name="C2" library="rcl" deviceset="C-EU" device="025-050X050" value="100n"/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
@@ -4453,7 +4452,6 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <instance part="TB" gate="G$1" x="35.56" y="15.24" rot="R90"/>
 <instance part="X1" gate="G$1" x="-38.1" y="63.5" rot="R180"/>
 <instance part="AURORA" gate="A" x="22.86" y="81.28" rot="R90"/>
-<instance part="GND1" gate="1" x="-20.32" y="68.58" rot="R180"/>
 <instance part="JP1" gate="A" x="81.28" y="33.02"/>
 <instance part="JP2" gate="A" x="81.28" y="10.16"/>
 <instance part="JP5" gate="A" x="-45.72" y="38.1" rot="MR0"/>
@@ -4529,13 +4527,18 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 </net>
 <net name="GND" class="0">
 <segment>
+<pinref part="JP1" gate="A" pin="2"/>
+<pinref part="GND2" gate="1" pin="GND"/>
+<wire x1="78.74" y1="40.64" x2="68.58" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="40.64" x2="68.58" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="40.64" x2="53.34" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="40.64" x2="53.34" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="X1" gate="G$1" pin="2"/>
 <pinref part="X1" gate="G$1" pin="3"/>
 <wire x1="-33.02" y1="66.04" x2="-33.02" y2="63.5" width="0.1524" layer="91"/>
 <junction x="-33.02" y="63.5"/>
 <wire x1="-33.02" y1="63.5" x2="-20.32" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="-20.32" y1="63.5" x2="15.24" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="15.24" y1="63.5" x2="40.64" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="-20.32" y1="63.5" x2="40.64" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="TB" gate="G$1" pin="S"/>
 <wire x1="40.64" y1="17.78" x2="40.64" y2="33.02" width="0.1524" layer="91"/>
 <wire x1="40.64" y1="33.02" x2="40.64" y2="45.72" width="0.1524" layer="91"/>
@@ -4547,23 +4550,13 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <junction x="-20.32" y="63.5"/>
 <wire x1="-20.32" y1="50.8" x2="-20.32" y2="63.5" width="0.1524" layer="91"/>
 <wire x1="-20.32" y1="63.5" x2="-20.32" y2="66.04" width="0.1524" layer="91"/>
-<pinref part="GND1" gate="1" pin="GND"/>
 <pinref part="IC1" gate="A1" pin="GND"/>
 <junction x="-20.32" y="50.8"/>
 <pinref part="C1" gate="G$1" pin="2"/>
 <wire x1="-27.94" y1="50.8" x2="-20.32" y2="50.8" width="0.1524" layer="91"/>
 <pinref part="C2" gate="G$1" pin="1"/>
 <junction x="-27.94" y="50.8"/>
-<pinref part="JP5" gate="A" pin="5"/>
-<wire x1="-43.18" y1="35.56" x2="15.24" y2="35.56" width="0.1524" layer="91"/>
-<wire x1="15.24" y1="35.56" x2="15.24" y2="63.5" width="0.1524" layer="91"/>
-<junction x="15.24" y="63.5"/>
-</segment>
-<segment>
-<pinref part="JP1" gate="A" pin="2"/>
-<pinref part="GND2" gate="1" pin="GND"/>
-<wire x1="78.74" y1="40.64" x2="68.58" y2="40.64" width="0.1524" layer="91"/>
-<wire x1="68.58" y1="40.64" x2="68.58" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="40.64" y1="63.5" x2="53.34" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$6" class="0">

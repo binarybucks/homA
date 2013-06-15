@@ -4428,9 +4428,9 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 </class>
 </classes>
 <parts>
-<part name="TR" library="transistor-power" deviceset="IRF740" device="" value="foo"/>
-<part name="TG" library="transistor-power" deviceset="IRF740" device="" value="foo"/>
-<part name="TB" library="transistor-power" deviceset="IRF740" device="" value="foo"/>
+<part name="TR" library="transistor-power" deviceset="IRF740" device="" value="IRF740"/>
+<part name="TG" library="transistor-power" deviceset="IRF740" device="" value="IRF740"/>
+<part name="TB" library="transistor-power" deviceset="IRF740" device="" value="IRF740"/>
 <part name="X1" library="con-conrad" deviceset="73398?" device="0-62"/>
 <part name="AURORA" library="pinhead" deviceset="PINHD-1X4" device=""/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>

@@ -8,127 +8,96 @@
     <title>HomA</title>
   </head>
   <body>
+    <div id="header">
+      <a id="logo" href="#"></a>
+      <div id="room-links"><ul></ul></div>
+      <span id="connectivity">Disconnected</span>
+      <a id="settings" href="#settings"></a>
+    </div>
     <div id="container">
+
     </div>
 
     <div id="templates">
+
     <script id="settings-template" type="text/template">
-      <div class="view-header">
-        <h2>
-          <a href="#">
-            Rooms
-          </a>
-        </h2>
+      <div class="card">
         <h1>
           Settings
         </h1>
-      </div>
-        <ul>
-          <li class="setting"> 
-            <h1>
-              Connection Status
-            </h1>
-            <h2 id="connection-status">
-              <%= connectionStatus %>
-            </h2>
-          </li>
-          <li> 
-            <h1>
-              Server
-            </h1>
-            <input id="serverInput" type="text" value="<%= server %>" />
-          </li>
-        </ul>
-      </div>
-      <ul id="room-detail-links">
-      </ul>
-    </script>
-    <script id="room-list-template" type="text/template">
-      <div class="view-header">
-        <h1>
-          Rooms
-        </h1>
-      </div>
-      <ul id="room-detail-links">
-      </ul>
-      <div class="view-footer">
-        <a id="settingsLink" href="#/settings">Settings</a>
+
+        <div class="subviews">
+          <form>
+            <div class="subview">
+              <h2>
+                Host
+              </h2>
+              <input type="text" value="<%= host %>" name="host"/>
+            </div>
+            <div class="subview">
+              <h2>
+                Port
+              </h2>
+              <input type="text" value="<%= port %>" name="port" />
+            </div>
+            <div class="subview">
+              <div class="button save">Save</div>
+            </div>
+          </form>
+        </div>
       </div>
     </script>
-    <script id="room-detail-link-template" type="text/template">
-      <h1>
-      <a href="#/rooms/<%= id %>">
-        <%= name || id  %>
+
+    <script id="room-link-template" type="text/template">
+      <a href="<%=link%>">
+        <%= id  %>
       </a>
-      </h1>
     </script>
-    <script id="room-detail-template" type="text/template">
-      <div class="view-header">
-        <h2>
-          <a href="#">
-            Rooms
-          </a>
-        </h2>
-        <h1>
-          <%= id %>
-        </h1>
-      </div>
-      <div class="devices">
-      </div>
-    </script>
+
+
     <script id="view-placeholder-template" type="text/template">
-      <div class="view-header">
-        <h2>
-          <a href="<%= backHref %>">
-            <%= backText %>
-          </a>
-        </h2>
-        <h1>
-          <%= id %>
-        </h1>
-      </div>
-      <p>
-        This view is empty
-      </p>
+    <div id="placeholder"></div>
     </script>
+
     <script id="device-template" type="text/template">
-          <h1>
-            <a href="#/devices/<%= id %>/settings">
-              <%= name || id %>
-            </a>
-          </h1>
-          <div class="controls">
-          </div>
-    </script>
-    <script id="device-settings-template" type="text/template">
-      <div class="view-header">
-      <h2>
-        <a href="#/rooms/<%= roomname %>">
-          <%= roomname %>
-        </a>
-      </h2>
       <h1>
-        <%= name || id %>
+        <a href="#/devices/<%= id %>/settings">
+          <%= name || id %>
+        </a>
       </h1>
+      <div class="subviews">
       </div>
-      <div class="settings">
-        <div class="setting">
-          <h1>
-            Id
-          </h1>
-          <h2><%= id %></h2>
-        </div>
-        <div class="setting">
-          <h1>
-            Room
-          </h1>
-          <input id="roomInput" type="text" value="<%= roomname %>" placeholder="unassigned" />
-        </div>
-        <div class="setting">
-          <h1>
-            Name
-          </h1>
-          <input id="nameInput" type="text" value="<%= name %>" placeholder="<%= id %>" />
+    </script>
+
+    <script id="device-settings-template" type="text/template">
+      <div class="card">
+        <h1>
+            <%= name || id %>
+        </h1>
+        <div class="subviews">
+          <div class="subview">
+            <h2>
+              Id
+            </h2>
+            <span><%= id %></span>
+          </div>
+          <form>
+            <div class="subview">
+              <h2>
+                Name
+              </h2>
+              <input type="text" value="<%= name %>" placeholder="<%= id %>" name="name"/>
+            </div>
+            <div class="subview">
+              <h2>
+                Room
+              </h2>
+              <input type="text" value="<%= roomname %>" placeholder="unassigned" name="room"/>
+            </div>
+            <div class="subview">
+              <div class="button save">Save</div>
+            </div>
+          </form>
         </div>
       </div>
     </script>
@@ -158,8 +127,9 @@
       </h2>
       <span><%= value %></span> 
     </script>
-    <script src="js/mosquitto.js" type="text/javascript"></script>
+    <script src="js/paho.js" type="text/javascript"></script>
     <script src="js/jquery.js" type="text/javascript"></script>
+    <script src="js/wookmark.js" type="text/javascript"></script>
     <script src="js/json2.js" type="text/javascript"></script>
     <script src="js/underscore.js" type="text/javascript"></script>
     <script src="js/backbone.js" type="text/javascript"></script>
