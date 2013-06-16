@@ -37,7 +37,7 @@ homa.mqttHelper.on('connect', function(packet) {
 
 function queryWeather(){
 	homa.logger.info("WEATHER", "Querying weather for " + homa.settings.get("latitude") + ":"+ homa.settings.get("longitude"));
-	var unit = homa.settings.get("metric") == "metric" ? "°C " : "°F "
+	var unit = homa.settings.get("unit") == "metric" ? "°C " : "°F "
 
 
 	request("http://api.openweathermap.org/data/2.5/weather?lat="+homa.settings.get("latitude")+"&lon="+homa.settings.get("longitude")+"&mode=json&units="+ homa.settings.get("units"), function(error, response, body) {
