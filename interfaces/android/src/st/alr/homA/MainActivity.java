@@ -12,6 +12,7 @@ import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
+import st.alr.homA.support.ValueSortedMap;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.view.ControlView;
 import android.app.AlertDialog;
@@ -446,7 +447,7 @@ public class MainActivity extends FragmentActivity {
             super.onDestroyView();
             Log.v(this.toString(), "DeviceFragment: onDestroyView");
 
-            TreeMap<String, Control> controls;
+            ValueSortedMap<String, Control> controls;
 
             if ((device != null) && ((controls = device.getControls()) != null))
                 for (Control control : controls.values())

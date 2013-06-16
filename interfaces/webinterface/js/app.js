@@ -43,7 +43,7 @@
   });
 
   var Control = Backbone.Model.extend({
-    defaults: function() {return {value: 0, type: "undefined", topic: null };},
+    defaults: function() {return {value: 0, type: "undefined", topic: null, order: 0 };}, 
   });
 
   var Device = Backbone.Model.extend({
@@ -80,7 +80,20 @@
   var Room = Backbone.Model.extend({initialize: function() {this.devices = new DeviceCollection;}});
   var DeviceCollection = Backbone.Collection.extend({model: Device});
   var RoomCollection = Backbone.Collection.extend({model: Room});
-  var ControlCollection = Backbone.Collection.extend({model: Control});
+  var ControlCollection = Backbone.Collection.extend({model: Control, initialize: function() {
+    this.sort_key = 'order';
+},
+comparator: function(a, b) {
+    // Assuming that the sort_key values can be compared with '>' and '<',
+    // modifying this to account for extra processing on the sort_key model
+    // attributes is fairly straight forward.
+    a = a.get(this.sort_key);
+    b = b.get(this.sort_key);
+    return a > b ?  1
+         : a < b ? -1
+         :          0;
+} }
+);
 
   var SettingsView = Backbone.View.extend({
     className: "view", 
@@ -300,6 +313,7 @@
       this.model.on('destroy', this.remove, this);
       this.model.controls.on('add', this.addControl, this);
       this.model.controls.on('remove', this.render, this);
+      this.model.controls.on('sort', this.render, this);
       this.model.view = this;
     },  
     render: function() {
@@ -424,8 +438,20 @@
         } 
         if(topic[5] == null)                                       // Control value   
           control.set("value", payload);
-        else if (topic[5] == "meta" && topic[6] != null)           // Control meta 
-          control.set(topic[6], payload);
+        else if (topic[5] == "meta" && topic[6] != null) {           // Control meta 
+
+          if(topic[6] == "order") {
+            control.set("order", parseInt(payload));
+            device.controls.sort();
+            console.log(device.controls);
+
+          } else {
+            control.set(topic[6], payload);
+          }
+          // control.device.controls.sort();
+          // console.log("debug")
+          // console.log(control.device.controls);
+        }
       } else if(topic[3] == "meta" ) {                             // TODO: Could be moved to the setter to facilitate parsing
         if (topic[4] == "room")                                    // Device Room
           device.moveToRoom(payload);

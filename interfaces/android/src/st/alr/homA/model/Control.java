@@ -6,13 +6,15 @@ import java.util.HashMap;
 import st.alr.homA.support.ValueChangedObserver;
 import android.content.Context;
 
-public class Control {
+public class Control implements Comparable<Control> {
     ValueChangedObserver observer;
     Context context;
     Device device;
     String value;
     String topic;
     String id;
+    Integer order;
+
     HashMap<String, String> meta;
 
 
@@ -23,6 +25,7 @@ public class Control {
         this.device = device;
         this.context = context;
         this.meta = new HashMap<String, String>();
+
     }
 
     public String getValue() {
@@ -46,6 +49,9 @@ public class Control {
             meta.put(key, value);
         else
             meta.remove(key);
+        if(key.equals("order")) {
+            this.device.sortControls();
+        }
     }
     
     public String getTopic() {
@@ -69,6 +75,26 @@ public class Control {
     public void removeValueChangedObserver() {
         observer = null;
     }
+    
+    public Integer getOrder(){
+        try {
+            return Integer.parseInt(this.getMeta("order", "0"));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int compareTo(Control other) {
+        int result = 0;
+        
+        if (getOrder() > other.getOrder()) {
+            result = 1;
+        } else if (getOrder() < other.getOrder()) {
+            result = -1;
+        }
+        return result;
+    }
+    
 
     
 }

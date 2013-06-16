@@ -1,0 +1,77 @@
+#!/usr/bin/env node
+var request = require("request");
+var homa = require('homa')
+var systemId = homa.paramsWithDefaultSystemId("383274-weather");
+												
+(function connect() {
+    homa.mqttHelper.connect();
+})();
+
+homa.mqttHelper.on('message', function(packet) {
+	homa.settings.insert(packet.topic, packet.payload); // Check if a required settings value was received. If so, save it for later. 
+	if (!homa.settings.isLocked() && homa.settings.isBootstrapCompleted()) {
+		homa.settings.lock();
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Now/meta/type", "text", true); // Creates device controls in interfaces
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Now/meta/order", "0", true); // Creates device controls in interfaces
+
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today/meta/type", "text", true); // Creates device controls in interfaces
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today/meta/order", "1", true); // Creates device controls in interfaces
+
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Tomorrow/meta/type", "text", true); // Creates device controls in interfaces
+		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today/meta/order", "2", true); // Creates device controls in interfaces
+
+
+		homa.scheduler.scheduleJob('0 * * * *', queryWeather); // Query every day at midnight
+		queryWeather(); // Query once now
+	}
+});
+
+homa.mqttHelper.on('connect', function(packet) {	
+		homa.settings.require('longitude'); // Set required settings
+		homa.settings.require('latitude');
+		homa.settings.require('units');
+
+});
+
+
+
+function queryWeather(){
+	homa.logger.info("WEATHER", "Querying weather for " + homa.settings.get("latitude") + ":"+ homa.settings.get("longitude"));
+	
+
+	request("http://api.openweathermap.org/data/2.5/weather?lat="+homa.settings.get("latitude")+"&lon="+homa.settings.get("longitude")+"&mode=json&units="+ homa.settings.get("units"), function(error, response, body) {
+		if(!error) {
+			var now = JSON.parse(body);
+			// console.log("now: " + now);
+			// console.log(now);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Now", now.main.temp + "°C " + now.weather[0].main , true);
+
+		} else {
+			return;
+		}
+	});
+
+	request("http://api.openweathermap.org/data/2.5/forecast/daily?lat="+homa.settings.get("latitude")+"&lon="+homa.settings.get("longitude")+"&mode=json&units="+ homa.settings.get("units")+"&cnt=2", function(error, response, body) {
+		if(!error) {
+			var forecast = JSON.parse(body);
+			console.log("forecast: ")
+			console.log(forecast);
+
+			console.log(forecast.list[0].temp);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today", forecast.list[0].temp.morn + "°C " + forecast.list[0].temp.day + "°C " + forecast.list[0].temp.eve + "°C ", true);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Tomorrow", forecast.list[1].temp.morn + "°C " + forecast.list[1].temp.day + "°C " + forecast.list[1].temp.eve + "°C ", true);
+
+		} else {
+			return;
+		}
+	});
+
+
+				// homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today", forecast.list[0] + "°C " + now.weather[0].main , true); // Creates device controls in interfaces
+
+
+
+//				homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Now", , true);
+
+
+}

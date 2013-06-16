@@ -39,7 +39,6 @@ public class RangeControlView extends ControlView {
                 intValue = 0; // Value is not an int nor a float. Let's quit guessing. 
             }
         }
-
         ((SeekBar) _value).setProgress(intValue);
         Log.v(this.toString(), "Setting seekbar " + name  + " to " + value);
 

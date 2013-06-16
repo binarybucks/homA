@@ -8,7 +8,7 @@ $ npm install
 
 ### Start
 Start the application and publish the API URL.
-The default $SYSTEMID is ```194729-csm```.
+The default $SYSTEMID is ```383274-weather```.
 
 ``` 
 $ ./solar [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID]

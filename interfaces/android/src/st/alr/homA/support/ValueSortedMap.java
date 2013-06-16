@@ -12,6 +12,7 @@ import java.util.Set;
 public class ValueSortedMap<K, V> implements Map<K, V> {
     ArrayList<V> dataSorted;
     HashMap<K, V> dataMap;
+    String sortfield; 
 
     public ValueSortedMap() {
         this.dataMap = new HashMap<K, V>();

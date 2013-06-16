@@ -1,11 +1,10 @@
 
 package st.alr.homA.model;
 
-import java.util.TreeMap;
-
 import st.alr.homA.App;
 import st.alr.homA.R;
 import st.alr.homA.support.ValueChangedObserver;
+import st.alr.homA.support.ValueSortedMap;
 import android.content.Context;
 import android.util.Log;
 
@@ -13,9 +12,8 @@ public class Device implements Comparable<Device> {
     private String id;
     private String name;
     private Room room;
-    private TreeMap<String, Control> controls;
+    private ValueSortedMap<String, Control> controls;
     private ValueChangedObserver controlAddedObserver;
-
     
     public Room getRoom() {
         return room;
@@ -28,7 +26,7 @@ public class Device implements Comparable<Device> {
     public Device(String id, Context context) {
         this.id = id;
         this.name = null;
-        controls = new TreeMap<String, Control>();
+        controls = new ValueSortedMap<String, Control>();
         this.context = context;
     }
 
@@ -96,7 +94,7 @@ public class Device implements Comparable<Device> {
         controlAddedObserver = null;
     }
 
-    public TreeMap<String, Control> getControls() {
+    public ValueSortedMap<String, Control> getControls() {
         return controls;
     }
 
@@ -115,6 +113,10 @@ public class Device implements Comparable<Device> {
             this.moveToRoom(value);
         else if (key.equals("name"))
             this.setName(value);
+    }
+
+    public void sortControls() {
+        this.controls.sortDataset();
     }
 
 }
