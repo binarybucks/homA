@@ -31,7 +31,7 @@ function queryConsumption(){
 			var total = 0;		
 			var i = 0;
 			for(i in data["Sum"]) {total += data["Sum"][i]; }
-			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Average", Number((total/(++i)).toFixed(2))  + " Wh", true);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Average", Number((total/(++i)).toFixed(2))  + " W", true);
 		}
 	});
 }
