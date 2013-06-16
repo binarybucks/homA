@@ -37,14 +37,16 @@ homa.mqttHelper.on('connect', function(packet) {
 
 function queryWeather(){
 	homa.logger.info("WEATHER", "Querying weather for " + homa.settings.get("latitude") + ":"+ homa.settings.get("longitude"));
-	
+	var unit = homa.settings.get("metric") == "metric" ? "°C " : "°F "
+
 
 	request("http://api.openweathermap.org/data/2.5/weather?lat="+homa.settings.get("latitude")+"&lon="+homa.settings.get("longitude")+"&mode=json&units="+ homa.settings.get("units"), function(error, response, body) {
 		if(!error) {
 			var now = JSON.parse(body);
+			// Uncomment to see API response
 			// console.log("now: " + now);
 			// console.log(now);
-			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Now", now.main.temp + "°C " + now.weather[0].main , true);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Now", now.main.temp + unit + now.weather[0].main , true);
 
 		} else {
 			return;
@@ -54,12 +56,11 @@ function queryWeather(){
 	request("http://api.openweathermap.org/data/2.5/forecast/daily?lat="+homa.settings.get("latitude")+"&lon="+homa.settings.get("longitude")+"&mode=json&units="+ homa.settings.get("units")+"&cnt=2", function(error, response, body) {
 		if(!error) {
 			var forecast = JSON.parse(body);
-			console.log("forecast: ")
-			console.log(forecast);
-
-			console.log(forecast.list[0].temp);
-			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today", forecast.list[0].temp.morn + "°C " + forecast.list[0].temp.day + "°C " + forecast.list[0].temp.eve + "°C ", true);
-			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Tomorrow", forecast.list[1].temp.morn + "°C " + forecast.list[1].temp.day + "°C " + forecast.list[1].temp.eve + "°C ", true);
+			// Uncomment to see API response
+			// console.log("forecast: ")
+			// console.log(forecast);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today", forecast.list[0].temp.morn + unit + forecast.list[0].temp.day + unit + forecast.list[0].temp.eve + unit, true);
+			homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Tomorrow", forecast.list[1].temp.morn + unit + forecast.list[1].temp.day + unit + forecast.list[1].temp.eve + unit, true);
 
 		} else {
 			return;

@@ -15,6 +15,8 @@ The default $SYSTEMID is ```383274-weather```.
 $ ./solar [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID]
 $ publish.js -t "/sys/$SYSTEMID/latitude" -p "48.802545" -r
 $ publish.js -t "/sys/$SYSTEMID/longitude" -p "9.226254" -r
+$ publish.js -t "/sys/$SYSTEMID/units" -p "metric" -r
+
 ```
 
 The latitude and longitude values of your home can easily be obtained with the help of Google Maps. Just point it to the desired location, right-click the map and select _What is here?_. 
