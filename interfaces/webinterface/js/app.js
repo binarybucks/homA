@@ -302,6 +302,7 @@ comparator: function(a, b) {
       var data = _(arr).reduce(function(acc, field){acc[field.name] = field.value;return acc;}, {});
       for(setting in data)
         App.publishForDevice(this.model.get("id"), "/meta/"+setting, data[setting]);
+      Router.back();
     },
   });
 
@@ -483,6 +484,8 @@ comparator: function(a, b) {
     },
     initialize: function(){
         Backbone.history.start({pushState : false});
+        this.routesHit = 0;
+        Backbone.history.on('route', function() { this.routesHit++; }, this);
     },
     index: function() {
       var indexView = new RoomView({model: Devices});
@@ -504,6 +507,8 @@ comparator: function(a, b) {
       var device = Devices.get(id); // Device might not yet exists
       var view; 
       var matchId = id;
+      console.log("Backbone.history");
+      console.log(Backbone.history);
 
       if (device == null)
         view = new PlaceholderView({model: Devices, callbackRoute: Backbone.history.fragment, readyComparator: function(addedObject){return addedObject.get("id") == matchId;}});
@@ -515,6 +520,17 @@ comparator: function(a, b) {
       var settingsView = new SettingsView({model: Settings});
       App.showView(settingsView);
     },
+      back: function() {
+    if(this.routesHit > 1) {
+      //more than one route hit -> user did not land to current page directly
+      window.history.back();
+    } else {
+      //otherwise go to the home page. Use replaceState if available so
+      //the navigation doesn't create an extra history entry
+      this.navigate('/', {trigger:true, replace:true});
+    }
+  }
+
   });
   var Settings = new ApplicationSettings;
   var Logger = new Logger();
