@@ -11,6 +11,7 @@ var Message = function (packet) {
         this.p = packet.payload;
         this.changed = this.p_previous != this.p;
         this.retained = packet.retain;
+        this.lastChange = new Date();
     }
     
     this.changedFromTo = function(from, to) {

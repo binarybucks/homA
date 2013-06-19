@@ -15,7 +15,7 @@
   var ApplicationSettings = Backbone.Model.extend({
     defaults: { connectivity: "disconnected", 
                 logging: "0", 
-                port: "1884", 
+                port: "18883", 
                 host: document.location.hostname || "127.0.0.1"
               },
 

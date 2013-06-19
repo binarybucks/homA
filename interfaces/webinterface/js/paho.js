@@ -1074,8 +1074,6 @@ Messaging = (function (global) {
     ClientImpl.prototype._on_socket_message = function (event) {
         this._trace("Client._on_socket_message", event.data);
         
-        // Reset the ping timer.
-        this.pinger.reset();
         var byteArray = new Uint8Array(event.data);
         try {
             var wireMessage = decodeMessage(byteArray);
@@ -1217,6 +1215,10 @@ Messaging = (function (global) {
                 break;
                 
             case MESSAGE_TYPE.PINGRESP:
+                // Quick fix for disconnect problems according to https://bugs.eclipse.org/bugs/show_bug.cgi?id=407627
+                // Reset the ping timer.
+                this.pinger.reset();
+
                 break;
                 
             case MESSAGE_TYPE.DISCONNECT:
