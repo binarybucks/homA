@@ -29,6 +29,7 @@
         this.set(key, data[key]);
         localStorage.setItem(key, data[key]);
       }
+      Router.back();
     }
   });
   var Logger = Backbone.Model.extend({
