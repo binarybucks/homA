@@ -11,14 +11,18 @@ var Message = function (packet) {
         this.p = packet.payload;
         this.changed = this.p_previous != this.p;
         this.retained = packet.retain;
-        this.lastChange = new Date();
+        this.lastChange = this.currentChange;
+        this.currentChange = new Date();
     }
     
     this.changedFromTo = function(from, to) {
         return this.p_previous == from && this.p == to;
     }
+    
     this.t = packet.topic;
     this.updatePayload(packet);
+    this.currentChange = new Date();
+    this.lastChange = undefined;
 };
 
 var Clock = function(){
