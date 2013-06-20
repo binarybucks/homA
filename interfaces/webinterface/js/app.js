@@ -393,8 +393,8 @@ comparator: function(a, b) {
       this.mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
       this.mqttClient.subscribe('/devices/+/controls/+', 0);
       this.mqttClient.subscribe('/devices/+/meta/#', 0);
-      this.pingTimeoutId = setInterval(function(){App.publish("$SYS/keepalive", "0");}, 10000)()}; //Can be removed once https://bugs.eclipse.org/bugs/show_bug.cgi?id=407627 is solved
-      window.onbeforeunload = function(){App.disconnect
+      this.pingTimeoutId = setInterval(function(){App.publish("$SYS/keepalive", "0");}, 10000);// Can be removed once https://bugs.eclipse.org/bugs/show_bug.cgi?id=407627 is solved
+      window.onbeforeunload = function(){App.disconnect()}; 
     },
     disconnect: function() {
       if(Settings.get("connectivity") == "connected")
