@@ -340,6 +340,7 @@ comparator: function(a, b) {
 
     mqttClient: undefined,
     connectivityTimeoutId: undefined,
+    pingTimeoutId: undefined,
 
     initialize: function() {
       Settings.on('change:connectivity', this.connectivityChanged, this);
@@ -392,7 +393,8 @@ comparator: function(a, b) {
       this.mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
       this.mqttClient.subscribe('/devices/+/controls/+', 0);
       this.mqttClient.subscribe('/devices/+/meta/#', 0);
-      window.onbeforeunload = function(){App.disconnect()};
+      this.pingTimeoutId = setInterval(function(){App.publish("$SYS/keepalive", "0");}, 10000)()}; //Can be removed once https://bugs.eclipse.org/bugs/show_bug.cgi?id=407627 is solved
+      window.onbeforeunload = function(){App.disconnect
     },
     disconnect: function() {
       if(Settings.get("connectivity") == "connected")
@@ -401,12 +403,14 @@ comparator: function(a, b) {
     disconnected: function() {
       Settings.set("connectivity", "disconnected");
       console.log("Connection terminated");
+      if(this.pingTimeoutId) 
+        clearInterval()
 
       for (var i = 0, l = Devices.length; i < l; i++)
         Devices.pop();        
 
       for (i = 0, l = Rooms.length; i < l; i++)
-        Rooms.pop();        
+        Rooms.pop(pingTimeoutId);        
     },
     connectionLost: function(response){ 
       if (response.errorCode !== 0) {
