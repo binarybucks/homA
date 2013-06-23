@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="appName">HomA</string>
+   	
+   	<string name="titleActivityNfc">"Tags beschreiben"</string>
+    <string name="titleActivityMain">HomA</string>
+   	<string name="titleActivityPreferences">"Einstellungen"</string>
+    
+    <string name="preferencesServerTitle">"Server"</string>
+    <string name="preferencesServerAddress">"Server Adresse"</string>
+    <string name="preferencesServerPort">"Server Port"</string>
+    <string name="preferencesServerCancel">"Trennen"</string>
+    <string name="preferencesServerConnect">"Verbinden"</string>
+    <string name="preferencesLicensesTitle">"Lizenzen"</string>
+    <string name="preferencesLicensesSummary">"Details zu verwendeter open-source Software"</string>
+    <string name="preferencesLicensesDismiss">"Schließen"</string>
+    <string name="preferencesNotificationSummary">"Benachrichtigung anzeigen, um im Hintergrund ausgeführt zu werden"</string>
+    <string name="preferencesNotificationTitle">"Benachrichigung"</string>
+    <string name="preferencesVersionTitle">"Version"</string>
+    
+    <string name="connectivityConnecting">"Verbinden"</string>
+    <string name="connectivityConnected">"Verbunden"</string>
+    <string name="connectivityDisconnecting">"Trennen"</string>
+    <string name="connectivityDisconnected">"Getrennt"</string>
+    
+    
+    <string name="nfcWriteDialogWaitingForTag">"Smartphone zum Beschreiben über Tag platzieren"</string>
+    <string name="nfcWriteDialogTitle">"Schreiben"</string>
+    <string name="nfcWritePayloadInput">"Payload"</string>
+    <string name="nfcWriteTopicInput">"Topic"</string>
+    <string name="nfcWriteRetainedInput">"Retained"</string>
+    <string name="nfcWriteDialogTagReadOnly">"Tag ist schreibgeschützt"</string>
+    <string name="nfcWriteDialogTagFormatedAndWrote">"Tag erfolgreich formatiert und beschrieben"</string>
+    <string name="nfcWriteDialogTagFailedToFormat">"Tag konnte nicht formatiert werden"</string>
+    <string name="nfcWriteDialogTagFailedToWrite">"Tag konnte nicht beschrieben werden"</string>
+    <string name="nfcWriteDialogTagNoNDEFSupport">"Tag unterstützt kein NDEF Format"</string>
+    <string name="nfcWriteDialogTagCapacityIs">"Tag Kapazität ist "</string>
+    <string name="nfcWriteDialogTagMessageSizeIs">", Nachrichtengröße ist "</string>
+    <string name="nfcWriteDialogTagNoContent">"Keine Nachricht zum schreiben vorhanden"</string>
+    <string name="nfcWriteDialogTagSuccess">"Tag erfolgreich beschrieben"</string>
+    <string name="nfcWrite">"Schreiben"</string>
+    
+    <string name="nfcStartRecording">"Aufzeichung starten"</string>
+    <string name="nfcStopRecording">"Aufzeichnung stoppen"</string>
+    
+    
+    <string name="actionModeOneSelected">"Ein Element ausgewählt"</string>
+    <string name="actionModeMoreSelected">"Elemente ausgewählt"</string>
+    <string name="actionModeDiscardSelected">"Löschen"</string>
+    
+    <string name="add">"Hinzufügen"</string>
+    <string name="cancel">"Abbrechen"</string>
+    
+</resources>
