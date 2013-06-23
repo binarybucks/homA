@@ -23,8 +23,8 @@ void addSocket(char* id, char* group, int type);
 Socket* getSocket(char* id, char* group);
 
 // Settings 
-byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0x02 };
-byte broker[] = { 192, 168, 8, 2 };
+byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0x01 };
+byte broker[] = { 192, 168, 7, 63 };
 unsigned int connectCtr = 0;
 Socket* firstSocket = NULL; 
 Socket* lastSocket = NULL;

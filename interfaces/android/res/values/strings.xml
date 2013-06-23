@@ -1,46 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="titleActivityMain">HomA</string>
+    
     <string name="appName">HomA</string>
+   	
+   	<string name="titleActivityNfc">"Write Tags"</string>
+    <string name="titleActivityMain">HomA</string>
+   	<string name="titleActivityPreferences">"Settings"</string>
+    
     <string name="preferencesServerTitle">"Server"</string>
     <string name="preferencesServerAddress">"Server address"</string>
     <string name="preferencesServerPort">"Server port"</string>
     <string name="preferencesServerCancel">"Disconnect"</string>
     <string name="preferencesServerConnect">"Connect"</string>
+    <string name="preferencesLicensesTitle">"Licenses"</string>
+    <string name="preferencesLicensesSummary">"Details for included open-source software"</string>
+    <string name="preferencesLicensesDismiss">"Dismiss"</string>
+    <string name="preferencesNotificationSummary">"Display a notification to keep the application running in the background"</string>
+    <string name="preferencesNotificationTitle">"Notification"</string>
+    <string name="preferencesVersionTitle">"Version"</string>
+    
     <string name="connectivityConnecting">"Connecting"</string>
     <string name="connectivityConnected">"Connected"</string>
     <string name="connectivityDisconnecting">"Disconnecting"</string>
     <string name="connectivityDisconnected">"Disconnected"</string>
-    <string name="defaultsRoomName">"unassigned"</string>
-    <string name="defaultsServerAddress">"192.168.8.2"</string>
-    <string name="defaultsServerPort">"1883"</string>
-    <string name="menuSettings">"Settings"</string>
-    <string name="menuDiscard">"Discard"</string>
-    <string name="menuAdd">"Add"</string>
-    <string name="menuWrite">"Write"</string>
-    <string name="menuStartRecording">"Start recording"</string>
-    <string name="menuStopRecording">"Stop recording"</string>
-    <string name="title_activity_nfc">"Write Tags"</string>
-    <string name="nfcWriteWaitingForTag">"Place your phone above a tag to write"</string>
+    
+    
+    <string name="nfcWriteDialogWaitingForTag">"Place your phone above a tag to write"</string>
+    <string name="nfcWriteDialogTitle">"Write"</string>
     <string name="nfcWritePayloadInput">"Payload"</string>
     <string name="nfcWriteTopicInput">"Topic"</string>
     <string name="nfcWriteRetainedInput">"Retained"</string>
-    <string name="nfcWriteTagReadOnly">"Tag is read-only"</string>
-    <string name="nfcWriteTagFormatedAndWrote">"Formatted tag and wrote message"</string>
-    <string name="nfcWriteTagFailedToFormat">"Failed to format tag"</string>
-    <string name="nfcWriteTagFailedToWrite">"Failed to write tag"</string>
-    <string name="nfcWriteTagNoNDEFSupport">"Tag does not support NDEF format"</string>
-    <string name="nfcWriteTagCapacityIs">"Tag capacity is "</string>
-    <string name="nfcWriteTagMessageSizeIs">", Message size is "</string>
-    <string name="nfcWriteTagNoContent">"No content to write"</string>
-    <string name="nfcWriteTagSuccess">"Tag written successfully"</string>
-    <string name="actionBarSingleItem">"One item selected"</string>
-    <string name="actionBarMultipleItems">"items selected"</string>
-        <string name="preferencesLicenseTitle">"Licenses"</string>
-        <string name="preferencesLicenseSummary">"Details for included open-source software"</string>
-                <string name="preferencesLicenseDismiss">"Dismiss"</string>
-        <string name="version">"Version"</string>
-                
+    <string name="nfcWriteDialogTagReadOnly">"Tag is read-only"</string>
+    <string name="nfcWriteDialogTagFormatedAndWrote">"Formatted tag and wrote message"</string>
+    <string name="nfcWriteDialogTagFailedToFormat">"Failed to format tag"</string>
+    <string name="nfcWriteDialogTagFailedToWrite">"Failed to write tag"</string>
+    <string name="nfcWriteDialogTagNoNDEFSupport">"Tag does not support NDEF format"</string>
+    <string name="nfcWriteDialogTagCapacityIs">"Tag capacity is "</string>
+    <string name="nfcWriteDialogTagMessageSizeIs">", Message size is "</string>
+    <string name="nfcWriteDialogTagNoContent">"No content to write"</string>
+    <string name="nfcWriteDialogTagSuccess">"Tag written successfully"</string>
+    <string name="nfcWrite">"Write"</string>
+    
+    <string name="nfcStartRecording">"Start recording"</string>
+    <string name="nfcStopRecording">"Stop recording"</string>
+    
+    
+    <string name="actionModeOneSelected">"One item selected"</string>
+    <string name="actionModeMoreSelected">"items selected"</string>
+    <string name="actionModeDiscardSelected">"Discard selected"</string>
+    
+    <string name="add">"Add"</string>
+    <string name="cancel">"Cancel"</string>
     
 </resources>

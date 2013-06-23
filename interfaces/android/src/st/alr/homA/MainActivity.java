@@ -1,10 +1,8 @@
 
 package st.alr.homA;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.TreeMap;
 
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Control;
@@ -51,7 +49,7 @@ public class MainActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                Intent intent1 = new Intent(this, SettingsActivity.class);
+                Intent intent1 = new Intent(this, PreferencesActivity.class);
                 startActivity(intent1);
                 return true;
             case R.id.menu_nfc:
@@ -456,118 +454,4 @@ public class MainActivity extends FragmentActivity {
             EventBus.getDefault().unregister(this);
         }
     }
-    //
-    // public static class RoomFragment extends Fragment {
-    // Room room;
-    // DeviceMapAdapter m;
-    //
-    // static RoomFragment newInstance(String id) {
-    // Log.v("RoomFragment", "newInstance for: " + id);
-    // RoomFragment f = new RoomFragment();
-    // Bundle args = new Bundle();
-    // args.putString("roomId", id);
-    // f.setArguments(args);
-    // return f;
-    // }
-    //
-    //
-    // private boolean setArgs(Bundle savedInstanceState){
-    // Bundle b;
-    // if(savedInstanceState != null)
-    // b = savedInstanceState;
-    // else
-    // b = getArguments();
-    //
-    // room = App.getRoom(b.getString("roomId"));
-    //
-    // if(room == null) {
-    // Log.e(this.toString(), "RoomFragment for phantom room: "+
-    // b.getString("roomId"));
-    // return false;
-    // }
-    // return true;
-    // }
-    //
-    // @Override
-    // public void onSaveInstanceState(Bundle outState) {
-    // super.onSaveInstanceState(outState);
-    // outState.putString("roomId", room.getId());
-    // }
-    //
-    //
-    // public View onCreateView(LayoutInflater inflater, ViewGroup container,
-    // Bundle savedInstanceState) {
-    // setArgs(savedInstanceState);
-    // View v = inflater.inflate(R.layout.fragment_room, container, false);
-    // Log.e(this.toString(), "onCreateView " + roomId);
-    //
-    // if(room == null){
-    // Log.e(this.toString(), "No room for id " + roomId);
-    // return v;
-    // }
-    //
-    // m = new DeviceMapAdapter(getActivity(), room.getDevices());
-    // ListView lv = (ListView) v.findViewById(R.id.devices_list);
-    // lv.setAdapter(m);
-    // m.notifyDataSetChanged();
-    //
-    // lv.setOnItemClickListener(new OnItemClickListener() {
-    // @Override
-    // public void onItemClick(AdapterView<?> parent, View view, int position,
-    // long it) {
-    // DeviceFragment d = DeviceFragment.newInstance(room.getId(),
-    // room.getDevices()
-    // .values().toArray()[position].toString());
-    // d.show(getFragmentManager(), "tag");
-    // }
-    // });
-    //
-    //
-    // EventBus.getDefault().register(this);
-    //
-    //
-    // return v;
-    // }
-    //
-    //
-    // public void onEventMainThread(Events.DeviceAddedToRoom event) {
-    // if(event.getRoom() != room) {
-    // return;
-    // }
-    // Log.v(this.toString(), "DeviceAddedToRoom: " +
-    // event.getDevice().toString() + " "
-    // + event.getRoom().getId());
-    // m.addItem(event.getDevice());
-    // m.notifyDataSetChanged();
-    // }
-    //
-    // public void onEventMainThread(Events.DeviceRenamed event) {
-    // if(event.getDevice().getRoom() != room) {
-    // return;
-    // }
-    //
-    // Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
-    // m.sortDataset();
-    // m.notifyDataSetChanged();
-    //
-    // }
-    //
-    // public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
-    // if(event.getRoom() != room) {
-    // return;
-    // }
-    //
-    // Log.v(this.toString(), "DeviceRemovedFromRoom: " +
-    // event.getDevice().toString() + " "
-    // + event.getRoom().toString());
-    // m.removeItem(event.getDevice());
-    // m.notifyDataSetChanged();
-    // }
-    //
-    // @Override
-    // public void onDestroy(){
-    // EventBus.getDefault().unregister(this);
-    // super.onDestroy();
-    // }
-    // }
 }

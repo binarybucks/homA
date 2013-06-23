@@ -23,6 +23,10 @@ public class App extends Application {
     
     private static NfcRecordAdapter nfcRecordListAdapter;
     private static boolean recording = false;
+    public static final String defaultsServerAddress = "192.168.8.2";
+    public static final String defaultsServerPort = "1883";
+    public static final String defaultsRoomName = "unassigned";
+
     
     @Override
     public void onCreate() {

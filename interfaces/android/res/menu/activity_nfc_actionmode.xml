@@ -6,7 +6,7 @@
         android:icon="@drawable/ic_action_discard"
         android:orderInCategory="99"
         android:showAsAction="ifRoom"
-        android:title="@string/menuDiscard">
+        android:title="@string/actionModeDiscardSelected">
     </item>
 
 </menu>

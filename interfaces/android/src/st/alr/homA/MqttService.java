@@ -185,10 +185,8 @@ public class MqttService extends Service implements MqttCallback
 
         try
         {
-            String brokerAddress = sharedPreferences.getString("serverAddress",
-                    getString(R.string.defaultsServerAddress));
-            String brokerPort = sharedPreferences.getString("serverPort",
-                    getString(R.string.defaultsServerPort));
+            String brokerAddress = sharedPreferences.getString("serverAddress", App.defaultsServerAddress);
+            String brokerPort = sharedPreferences.getString("serverPort", App.defaultsServerPort);
 
             mqttClient = new MqttClient("tcp://" + brokerAddress + ":" + brokerPort, getClientId(),
                     null);
@@ -377,7 +375,7 @@ public class MqttService extends Service implements MqttCallback
                 device = new Device(deviceId, this);
 
                 App.addDevice(device);
-                device.moveToRoom(getString(R.string.defaultsRoomName));
+                device.moveToRoom(App.defaultsRoomName);
 
             }
             

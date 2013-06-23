@@ -25,48 +25,49 @@
         android:label="@string/appName"
         android:theme="@style/Theme.homa" >
         <activity
-            android:name="st.alr.homA.SettingsActivity"
+            android:name="st.alr.homA.PreferencesActivity"
             android:configChanges="orientation"
-            android:label="Settings" >
+            android:label="@string/titleActivityPreferences" >
         </activity>
         <activity
             android:name="st.alr.homA.MainActivity"
             android:label="@string/titleActivityMain" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service android:name="st.alr.homA.MqttService" 
-            android:exported="false">
-
+        <service
+            android:name="st.alr.homA.MqttService"
+            android:exported="false" >
         </service>
-        <service android:name="st.alr.homA.NfcReadService" 
-            android:exported="false">
+        <service
+            android:name="st.alr.homA.NfcReadService"
+            android:exported="false" >
         </service>
 
         <activity
-            android:exported="false"
-            android:parentActivityName="st.alr.homA.MainActivity"
             android:name="st.alr.homA.NfcWriteActivity"
-            android:label="@string/title_activity_nfc" >
+            android:exported="false"
+            android:label="@string/titleActivityNfc"
+            android:parentActivityName="st.alr.homA.MainActivity" >
         </activity>
-
         <activity
             android:name="st.alr.homA.NfcReadActivity"
             android:permission="android.permission.NFC" >
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data
                     android:host="ext"
                     android:pathPrefix="/st.alr.homa:nfc"
                     android:scheme="vnd.android.nfc" />
             </intent-filter>
         </activity>
-        
-        
     </application>
 
 </manifest>

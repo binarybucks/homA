@@ -46,7 +46,7 @@ public class Device implements Comparable<Device> {
         if (room != null && room.getId().equals(roomname)) // Don't move if the device is already in the target room. Also prevents https://github.com/binarybucks/homA/issues/47
             return;
 
-        String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : context.getString(R.string.defaultsRoomName);
+        String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : App.defaultsRoomName;
 
         Room newRoom = App.getRoom(cleanedName);
 

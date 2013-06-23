@@ -13,6 +13,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NdefMessage;
@@ -24,6 +25,8 @@ import android.nfc.tech.NdefFormatable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -127,10 +130,10 @@ public class NfcWriteActivity extends FragmentActivity {
                     mode.setTitle(null);
                     break;
                 case 1:
-                    mode.setTitle(getResources().getString(R.string.actionBarSingleItem));
+                    mode.setTitle(getResources().getString(R.string.actionModeOneSelected));
                     break;
                 default:
-                    mode.setTitle(checkedCount + getResources().getString(R.string.actionBarMultipleItems));
+                    mode.setTitle(checkedCount + getResources().getString(R.string.actionModeMoreSelected));
                     break;
             }
         }
@@ -178,11 +181,11 @@ public class NfcWriteActivity extends FragmentActivity {
                 ndef.connect();
 
                 if (!ndef.isWritable()) {
-                    publishProgress(getResources().getString(R.string.nfcWriteTagReadOnly), false);
+                    publishProgress(getResources().getString(R.string.nfcWriteDialogTagReadOnly), false);
                     success = false;
                 }
                 if (ndef.getMaxSize() < ndefMsg.getByteArrayLength()) {
-                    publishProgress(getResources().getString(R.string.nfcWriteTagCapacityIs) + ndef.getMaxSize() + " byte" + getResources().getString(R.string.nfcWriteTagMessageSizeIs) + ndefMsg.getByteArrayLength() + "byte.", false);
+                    publishProgress(getResources().getString(R.string.nfcWriteDialogTagCapacityIs) + ndef.getMaxSize() + " byte" + getResources().getString(R.string.nfcWriteDialogTagMessageSizeIs) + ndefMsg.getByteArrayLength() + "byte.", false);
                     success = false;
                 }
 
@@ -194,19 +197,19 @@ public class NfcWriteActivity extends FragmentActivity {
                     try {
                         format.connect();
                         format.format(ndefMsg);
-                        publishProgress(getResources().getString(R.string.nfcWriteTagFormatedAndWrote), true);
+                        publishProgress(getResources().getString(R.string.nfcWriteDialogTagFormatedAndWrote), true);
                         success = true;
                     } catch (IOException e) {
-                        publishProgress(getResources().getString(R.string.nfcWriteTagFailedToFormat), false);
+                        publishProgress(getResources().getString(R.string.nfcWriteDialogTagFailedToFormat), false);
                         success = false;
                     }
                 } else {
-                    publishProgress(getResources().getString(R.string.nfcWriteTagNoNDEFSupport), false);
+                    publishProgress(getResources().getString(R.string.nfcWriteDialogTagNoNDEFSupport), false);
                     success = false;
                 }
             }
         } catch (Exception e) {
-            Log.e(this.toString(), getResources().getString(R.string.nfcWriteTagFailedToWrite) +  " ("+ e.getMessage()+")", e);
+            Log.e(this.toString(), getResources().getString(R.string.nfcWriteDialogTagFailedToWrite) +  " ("+ e.getMessage()+")", e);
         }
 
         return success;
@@ -229,7 +232,7 @@ public class NfcWriteActivity extends FragmentActivity {
             
             Map<String, MqttMessage> map = App.getRecordMapListAdapter().getMap();
             if (map.size() < 1) {
-                publishProgress(getResources().getString(R.string.nfcWriteTagNoContent), false);
+                publishProgress(getResources().getString(R.string.nfcWriteDialogTagNoContent), false);
                 return;
             }
             
@@ -243,7 +246,7 @@ public class NfcWriteActivity extends FragmentActivity {
                 try {
                     payload = new String(map.get( topic).getPayload());
                 } catch (MqttException e) {
-                    payload = "undefined";
+                    payload = "";
                 }
                 String retained = map.get( topic).isRetained() ? "t" : "f";
                 text.append( topic + "," + payload + "," + retained + ";");
@@ -254,7 +257,7 @@ public class NfcWriteActivity extends FragmentActivity {
 
             if (write(text.toString(), mytag)) {
                 Log.v(this.toString(), "Write ok");
-                publishProgress(getResources().getString(R.string.nfcWriteTagSuccess), true);
+                publishProgress(getResources().getString(R.string.nfcWriteDialogTagSuccess), true);
 
             } else {
                 Log.e(this.toString(), "Write fail");
@@ -281,22 +284,47 @@ public class NfcWriteActivity extends FragmentActivity {
 
             payloadInput = (TextView) view.findViewById(R.id.paylodInput);
             retainedCheckbox = (CheckBox) view.findViewById(R.id.retainedCheck);
+            
+            topicInput.addTextChangedListener(new TextWatcher() {
+                
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                
+                @Override
+                public void afterTextChanged(Editable s) {
+                    View v = getDialog().findViewById(android.R.id.button1);
+                    if(v == null)
+                        return; 
+                    
+                    if(s.toString().length() > 0)
+                        v.setEnabled(true);
+                    else
+                        v.setEnabled(false);
+
+                }
+            });
+            
             return view;
         }
 
+        
+        
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                    .setTitle("Add")
+                    .setTitle(getResources().getString(R.string.add))
                     .setView(getContentView())
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dismiss();
                         }
                     })
-                    .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(getResources().getString(R.string.add), new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -307,7 +335,18 @@ public class NfcWriteActivity extends FragmentActivity {
                             dismiss();
                         }
                     });
+            
+        
+
             Dialog dialog = builder.create();
+            dialog.setOnShowListener(new OnShowListener() {
+                
+                @Override
+                public void onShow(DialogInterface dialog) {
+                    getDialog().findViewById(android.R.id.button1).setEnabled(false);
+                    
+                }
+            });
             return dialog;
         }
 
@@ -345,7 +384,7 @@ public class NfcWriteActivity extends FragmentActivity {
                         tagDetected
                 };
 
-                tv.setText(savedMessage != null ? savedMessage : getResources().getString(R.string.nfcWriteWaitingForTag));
+                tv.setText(savedMessage != null ? savedMessage : getResources().getString(R.string.nfcWriteDialogWaitingForTag));
             }
 
             return view;
@@ -362,7 +401,7 @@ public class NfcWriteActivity extends FragmentActivity {
             NfcWriteActivity.writeMode = true;
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                    .setTitle("Write")
+                    .setTitle(getResources().getString(R.string.nfcWriteDialogTitle))
                     .setView(getContentView(savedInstanceState))
                     .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
 

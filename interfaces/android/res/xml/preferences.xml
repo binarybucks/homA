@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-7  
-        <st.alr.homA.ServerDialogPreference
-            android:key="serverPreference"
-            android:negativeButtonText="@string/preferencesServerCancel"
-            android:positiveButtonText="@string/preferencesServerConnect"
-            android:title="@string/preferencesServerTitle"  >
-        </st.alr.homA.ServerDialogPreference>
-        
-  <CheckBoxPreference
-          android:title="Run in background"
-          android:defaultValue="true"
-          android:summary="Display a notification to keep the application running in the background"
-          android:key="runInBackgroundPreference" />
-  
-   <st.alr.homA.LicenseDialogPreference
-            android:key="licenseDialog"
-            android:title="@string/preferencesLicenseTitle"
-            android:summary="@string/preferencesLicenseSummary" 
-            android:positiveButtonText="@string/preferencesLicenseDismiss"
-            android:negativeButtonText=""  >
-        </st.alr.homA.LicenseDialogPreference>
-               
-   
-   
-   <Preference 
- android:key="versionReadOnly"
- android:title="@string/version" />
-   
-  
+    <st.alr.homA.PreferencesServer
+        android:key="serverPreference"
+        android:negativeButtonText="@string/preferencesServerCancel"
+        android:positiveButtonText="@string/preferencesServerConnect"
+        android:title="@string/preferencesServerTitle" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="runInBackgroundPreference"
+        android:summary="@string/preferencesNotificationSummary"
+        android:title="@string/preferencesNotificationTitle" />
+
+    <st.alr.homA.support.ImplementedDialogPreference
+        android:negativeButtonText=""
+        android:positiveButtonText="@string/preferencesLicensesDismiss"
+        android:summary="@string/preferencesLicensesSummary"
+        android:title="@string/preferencesLicensesTitle"
+        android:dialogLayout="@layout/preferences_licenses" />
+    
+    <Preference
+        android:key="versionReadOnly"
+        android:title="@string/preferencesVersionTitle" />
+
 </PreferenceScreen>

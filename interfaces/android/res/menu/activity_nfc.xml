@@ -6,28 +6,28 @@
         android:icon="@drawable/ic_action_add"
         android:orderInCategory="97"
         android:showAsAction="ifRoom"
-        android:title="@string/menuAdd">
+        android:title="@string/add">
     </item>
     <item
         android:id="@+id/write"
         android:icon="@drawable/ic_action_write"
         android:orderInCategory="99"
         android:showAsAction="ifRoom"
-        android:title="@string/menuWrite">
+        android:title="@string/nfcWrite">
     </item>
     <item
         android:id="@+id/recordingStart"
         android:icon="@drawable/ic_action_record_start"
         android:orderInCategory="98"
         android:showAsAction="ifRoom"
-        android:title="@string/menuStartRecording">
+        android:title="@string/nfcStartRecording">
     </item>
     <item
         android:id="@+id/recordingStop"
         android:icon="@drawable/ic_action_record_stop"
         android:orderInCategory="98"
         android:showAsAction="ifRoom"
-        android:title="@string/menuStopRecording">
+        android:title="@string/nfcStopRecording">
     </item>
 
 </menu>
