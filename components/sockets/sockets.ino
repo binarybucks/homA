@@ -24,7 +24,7 @@ Socket* getSocket(char* id, char* group);
 
 // Settings 
 byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFF, 0x01 };
-byte broker[] = { 192, 168, 7, 63 };
+byte broker[] = { 192, 168, 8, 2 };
 unsigned int connectCtr = 0;
 Socket* firstSocket = NULL; 
 Socket* lastSocket = NULL;
@@ -48,8 +48,8 @@ void loop() {
 
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("Starting");
+  //Serial.begin(9600);
+  //Serial.println("Starting");
   pinMode(WIFIPIN, OUTPUT);
   transmitter.enableTransmit(WIFIPIN);
   Ethernet.begin(mac);
@@ -57,7 +57,7 @@ void setup() {
 }
 
 void connect() {
-  Serial.println("Connecting to mqtt server");
+ // Serial.println("Connecting to mqtt server");
   // clear switches
   Socket *next = firstSocket;
   Socket *tmp;
@@ -83,10 +83,10 @@ void receive(char* topic, byte* rawPayload, unsigned int length) {
   memset(payload, 0, length+1);
   memcpy(payload, rawPayload, length); 
   
-  Serial.print("Received: ");
-  Serial.print(topic);
-  Serial.print(":");
-  Serial.println(payload);
+ // Serial.print("Received: ");
+ // Serial.print(topic);
+ // Serial.print(":");
+ // Serial.println(payload);
   // T is: /sys/158212-Socket/11011-01000:typeA
   //      /devices/158212-Socket-11011-01000/controls/Power/on:1
   // Info starts is the beginning of: 11011-01000
@@ -104,10 +104,10 @@ void receive(char* topic, byte* rawPayload, unsigned int length) {
     strncpy(group, infoStarts, delimiter-infoStarts);
     strcpy(id, delimiter+1);
 
-    Serial.print("ID: ");
-    Serial.println(id);
-    Serial.print("G: ");
-    Serial.println(group);
+ //   Serial.print("ID: ");
+ //   Serial.println(id);
+ //   Serial.print("G: ");
+  //  Serial.println(group);
     if((strcmp(topic, "") == 0) || (topic == NULL))
       removeSocket(id, group);
     else 
@@ -117,10 +117,10 @@ void receive(char* topic, byte* rawPayload, unsigned int length) {
     strncpy( group, infoStarts, delimiter-infoStarts);
     strncpy(id, delimiter+1,  infoEnd-(delimiter+1));
 
-    Serial.print("ID: ");
-    Serial.println(id);
-    Serial.print("G: ");
-    Serial.println(group);
+//    Serial.print("ID: ");
+   // Serial.println(id);
+  //  Serial.print("G: ");
+  //  Serial.println(group);
     setSocket(getSocket(id, group), payload);
     
     // Echo back state
@@ -138,18 +138,18 @@ void publish(char* topic, char* payload) {
 
 
 Socket* getSocket(char* id, char* group) {
-  Serial.println("--getSocket");
+  //Serial.println("--getSocket");
 
   Socket* s = firstSocket;
   while(s != NULL) {
       if(strcmp(s->id, id) == 0 && strcmp(s->group, group) == 0)
       {
-          Serial.println("  found");
+         // Serial.println("  found");
           return s;
       }
       s = s->next;
   }  
-      Serial.println("  not found");
+    //  Serial.println("  not found");
 
   return NULL;
 
@@ -164,7 +164,7 @@ void addSocket(char* id, char*  group, char* type) {
   Socket* socket = getSocket(id, group);
 
   if(socket != NULL) {
-    Serial.println("  already there");
+    //Serial.println("  already there");
     return;
   } 
 
@@ -182,11 +182,11 @@ void addSocket(char* id, char*  group, char* type) {
   socket->next = NULL;
   
   if (firstSocket == NULL) {
-    Serial.println("  First one");
+    //Serial.println("  First one");
     firstSocket = socket;
     lastSocket = socket;
   } else {
-    Serial.println("  Adding at back");
+   // Serial.println("  Adding at back");
 
     lastSocket->next = socket;
     lastSocket = socket;
@@ -197,15 +197,15 @@ void addSocket(char* id, char*  group, char* type) {
  memset(buffer, 0, 9+clientIdSize+1+strlen(group)+1+strlen(id)+26+1);
 
   snprintf(buffer, 9+clientIdSize+1+strlen(group)+1+strlen(id)+26,"/devices/%s-%s-%s/controls/Power/meta/type", clientId, group, id);
-  Serial.print("  Publishing meta:");
-  Serial.println(buffer);
+  //Serial.print("  Publishing meta:");
+  //Serial.println(buffer);
   publish(buffer, "switch");
 
   memset(buffer, 0, 9+clientIdSize+1+strlen(group)+1+strlen(id)+26+1);
   
   snprintf(buffer, 9+clientIdSize+1+strlen(group)+1+strlen(id)+19 ,"/devices/%s-%s-%s/controls/Power/on", clientId, group, id);
-  Serial.print("  Subscribing to: ");
-  Serial.println(buffer);
+  //Serial.print("  Subscribing to: ");
+  //Serial.println(buffer);
   mqttClient.subscribe(buffer);
   
 
