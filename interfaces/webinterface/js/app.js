@@ -340,7 +340,6 @@ comparator: function(a, b) {
 
     mqttClient: undefined,
     connectivityTimeoutId: undefined,
-    pingTimeoutId: undefined,
 
     initialize: function() {
       Settings.on('change:connectivity', this.connectivityChanged, this);
@@ -393,7 +392,6 @@ comparator: function(a, b) {
       this.mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
       this.mqttClient.subscribe('/devices/+/controls/+', 0);
       this.mqttClient.subscribe('/devices/+/meta/#', 0);
-      this.pingTimeoutId = setInterval(function(){App.publish("$SYS/keepalive", "0");}, 10000);// Can be removed once https://bugs.eclipse.org/bugs/show_bug.cgi?id=407627 is solved
       window.onbeforeunload = function(){App.disconnect()}; 
     },
     disconnect: function() {
@@ -403,14 +401,12 @@ comparator: function(a, b) {
     disconnected: function() {
       Settings.set("connectivity", "disconnected");
       console.log("Connection terminated");
-      if(this.pingTimeoutId) 
-        clearInterval()
 
       for (var i = 0, l = Devices.length; i < l; i++)
         Devices.pop();        
 
       for (i = 0, l = Rooms.length; i < l; i++)
-        Rooms.pop(pingTimeoutId);        
+        Rooms.pop();        
     },
     connectionLost: function(response){ 
       if (response.errorCode !== 0) {
@@ -446,17 +442,12 @@ comparator: function(a, b) {
           control.set("value", payload);
         else if (topic[5] == "meta" && topic[6] != null) {           // Control meta 
 
-          if(topic[6] == "order") {
+          if(topic[6] == "order") {                                 // Todo: move sorting to a model.on('change:order') event
             control.set("order", parseInt(payload));
             device.controls.sort();
-            console.log(device.controls);
-
           } else {
             control.set(topic[6], payload);
           }
-          // control.device.controls.sort();
-          // console.log("debug")
-          // console.log(control.device.controls);
         }
       } else if(topic[3] == "meta" ) {                             // TODO: Could be moved to the setter to facilitate parsing
         if (topic[4] == "room")                                    // Device Room
