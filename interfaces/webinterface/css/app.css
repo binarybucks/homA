@@ -108,6 +108,13 @@ h2 {
     border-width: 0px 1px 3px 1px;
     border-style: solid;
     margin: 0 auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
 }
 .card h1 { /* Card title */
     display: block;
@@ -261,6 +268,6 @@ input[type="text"]:focus {
     background-size: contain;
     opacity: 0.5;
 }
-a:focus{
+a:focus, input{
         outline: none;
 }
