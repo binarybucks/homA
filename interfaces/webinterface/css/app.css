@@ -124,7 +124,8 @@ h2 {
     display: inline-block;
     overflow: hidden;
     width: 100px;
-    margin-right: 25px
+    margin-right: 25px;
+    float: left;
 }
 .card .subviews { }/*Holds subviews (no shit sherlock) */
 .card .subview {

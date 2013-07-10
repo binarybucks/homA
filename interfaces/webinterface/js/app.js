@@ -224,6 +224,9 @@ comparator: function(a, b) {
       } else if (this.model.get("type") == "text") {
         this.dynamicRender = this.textRender;
         this.dynamicModelValueChanged = this.textModelValueChanged;
+      } else if (this.model.get("type") == "image") {
+        this.dynamicRender = this.imageRender;
+        this.dynamicModelValueChanged = this.imageModelValueChanged;
       } else {
         this.dynamicRender = this.undefinedRender;
       }
@@ -260,13 +263,22 @@ comparator: function(a, b) {
     switchInputValueChanged: function(event) {App.publish(this.model.get("topic"), event.target.checked == 0 ? "0" : "1");},
     switchModelValueChanged: function(model) {this.render();},
 
-    // Specialized methods for type text (readonly)
+    // Specialized methods for type text (read-only)
     textRender: function() {
       var tmpl = this.templateByType("text");
       this.$el.html(tmpl(this.model.toJSON()));
       return this;
     },
     textModelValueChanged: function(model) {this.render();},
+
+    // Specialized methods for type image (read-only)
+    imageRender: function() {
+      var tmpl = this.templateByType("image");
+      this.$el.html(tmpl(this.model.toJSON()));
+      return this;
+    },
+    imageModelValueChanged: function(model) {this.render();},
+
 
     // Specialized methods for type undefined
     undefinedRender: function() {
