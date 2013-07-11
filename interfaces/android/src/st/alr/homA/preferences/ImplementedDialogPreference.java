@@ -1,4 +1,4 @@
-package st.alr.homA.support;
+package st.alr.homA.preferences;
 
 import android.content.Context;
 import android.preference.DialogPreference;

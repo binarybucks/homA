@@ -19,6 +19,10 @@
     <string name="preferencesNotificationTitle">"Notification"</string>
     <string name="preferencesVersionTitle">"Version"</string>
     
+        <string name="preferencesQuickpublishTitle">"Quickpublish"</string>
+            <string name="preferencesQuickpublishNotificationTitle">"Notification"</string>
+        
+    
     <string name="connectivityConnecting">"Connecting"</string>
     <string name="connectivityConnected">"Connected"</string>
     <string name="connectivityDisconnecting">"Disconnecting"</string>

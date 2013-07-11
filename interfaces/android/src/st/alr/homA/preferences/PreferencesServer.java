@@ -1,8 +1,13 @@
-package st.alr.homA;
+package st.alr.homA.preferences;
 
 import java.util.regex.Pattern;
 
+import st.alr.homA.App;
+import st.alr.homA.MqttService;
+import st.alr.homA.R;
 import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
+import st.alr.homA.R.id;
+import st.alr.homA.R.layout;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

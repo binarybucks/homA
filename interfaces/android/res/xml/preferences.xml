@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <st.alr.homA.PreferencesServer
+    <st.alr.homA.preferences.PreferencesServer
         android:key="serverPreference"
         android:negativeButtonText="@string/preferencesServerCancel"
         android:positiveButtonText="@string/preferencesServerConnect"
@@ -13,7 +13,23 @@
         android:summary="@string/preferencesNotificationSummary"
         android:title="@string/preferencesNotificationTitle" />
 
-    <st.alr.homA.support.ImplementedDialogPreference
+	<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" 
+	    android:title="@string/preferencesQuickpublishTitle">
+	    
+		<st.alr.homA.preferences.PreferencesQuickpublishNotification 
+		    
+		    	        android:title="@string/preferencesQuickpublishNotificationTitle"
+	        android:layout="@layout/preferences_quickpublish_notification" 
+		    
+		    />
+		    
+		    
+		    
+	    
+	</PreferenceScreen>
+	   
+   
+    <st.alr.homA.preferences.ImplementedDialogPreference
         android:negativeButtonText=""
         android:positiveButtonText="@string/preferencesLicensesDismiss"
         android:summary="@string/preferencesLicensesSummary"
