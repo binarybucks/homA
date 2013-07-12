@@ -55,7 +55,7 @@ public class QuickpublishAdapter extends BaseAdapter {
 
     
     static class ViewHolder {
-        public TextView title;
+        public TextView name;
         public TextView subtitle;
     }
     
@@ -70,14 +70,14 @@ public class QuickpublishAdapter extends BaseAdapter {
             rowView = inflater.inflate(R.layout.two_line_row_layout, null);
 
             holder = new ViewHolder();
-            holder.title = (TextView) rowView.findViewById(android.R.id.text1);
+            holder.name = (TextView) rowView.findViewById(android.R.id.text1);
             holder.subtitle = (TextView) rowView.findViewById(android.R.id.text2);
             rowView.setTag(holder);
         } else {
             holder = (ViewHolder) rowView.getTag();
         }
 
-        holder.title.setText(q.getTopic());
+        holder.name.setText(q.getName());
         holder.subtitle.setText("Payload: " + q.getPayload() + " Retained: " + q.isRetained());
 
         return rowView;

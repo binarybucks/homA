@@ -3,9 +3,10 @@ package st.alr.homA;
 
 import de.greenrobot.event.EventBus;
 
+import st.alr.homA.ActivityMain.DeviceFragment;
 import st.alr.homA.model.Quickpublish;
 import st.alr.homA.support.Defaults;
-import st.alr.homA.support.Events.QuickpublishAdded;
+import st.alr.homA.support.Events;
 import st.alr.homA.support.QuickpublishAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,11 +27,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class ActivityQuickpublish extends FragmentActivity {
     private ListView listView;
     private Menu menu;
@@ -45,11 +48,22 @@ public class ActivityQuickpublish extends FragmentActivity {
         listView.setAdapter(listAdapter);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setMultiChoiceModeListener(multiChoiceListener);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
+                AddDialog addDialog = AddDialog.newInstance(position);
+                getFragmentManager().beginTransaction().add(addDialog, "addDialog").commit();
+
+            }
+        });
+        
+        
         EventBus.getDefault().register(this);
     }
     
-    public void onEventMainThread(QuickpublishAdded event) {
+    public void onEventMainThread(Events.QuickpublishNotificationAdded event) {
         listAdapter.add(event.getQuickpublish());
         save();
     }
@@ -82,6 +96,10 @@ public class ActivityQuickpublish extends FragmentActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    
+    private QuickpublishAdapter getListAdapter(){
+        return this.listAdapter;
     }
 
     private MultiChoiceModeListener multiChoiceListener = new MultiChoiceModeListener() {
@@ -132,16 +150,28 @@ public class ActivityQuickpublish extends FragmentActivity {
     };
 
     public static class AddDialog extends DialogFragment {
+        TextView nameInput;
         TextView topicInput;
         TextView payloadInput;
         CheckBox retainedCheckbox;
+        Quickpublish q;
+        
+        
 
         private View getContentView() {
+            Log.v(this.toString(), "getContentView");
             View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_nfc_add, null);
+            nameInput = (TextView) view.findViewById(R.id.nameInput);
             topicInput = (TextView) view.findViewById(R.id.topicInput);
-
             payloadInput = (TextView) view.findViewById(R.id.paylodInput);
             retainedCheckbox = (CheckBox) view.findViewById(R.id.retainedCheck);
+            
+            if(q != null) {
+                nameInput.setText(q.getName());
+                topicInput.setText(q.getTopic());
+                payloadInput.setText(q.getPayload());
+                retainedCheckbox.setChecked(q.isRetained());
+            }
             
             topicInput.addTextChangedListener(new TextWatcher() {
                 
@@ -170,10 +200,30 @@ public class ActivityQuickpublish extends FragmentActivity {
 
         
         
+        public static AddDialog newInstance(int position) {
+            AddDialog f = new AddDialog();
+                Bundle args = new Bundle();
+                args.putInt("position", position);
+                f.setArguments(args);
+                return f;
+            
+        }
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Log.v(this.toString(), "onCreateDialog");
+
+            Bundle b;
+            if (savedInstanceState != null)
+                b = savedInstanceState;
+            else
+                b = getArguments();
+
+            q = ((ActivityQuickpublish) getActivity()).getListAdapter().getItem(b.getInt("position"));
+            
+            
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                    .setTitle(getResources().getString(R.string.add))
+                    .setTitle(q == null? getResources().getString(R.string.quickpublishAdd) : getResources().getString(R.string.quickpublishEdit))
                     .setView(getContentView())
                     .setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
@@ -185,8 +235,17 @@ public class ActivityQuickpublish extends FragmentActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Quickpublish q = new Quickpublish(topicInput.getText().toString(), payloadInput.getText().toString(), retainedCheckbox.isChecked());
-                            EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishAdded(q));
+                            if(q != null) {
+                                q.setName(nameInput.getText().toString());
+                                q.setTopic(topicInput.getText().toString());
+                                q.setPayload(payloadInput.getText().toString());
+                                q.setRetained(retainedCheckbox.isChecked());
+                                EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationChanged(q));
+
+                            } else {
+                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), retainedCheckbox.isChecked()); 
+                                EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationAdded(q));
+                            }
                             dismiss();
                         }
                     });

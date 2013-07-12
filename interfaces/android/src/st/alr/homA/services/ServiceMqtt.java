@@ -56,20 +56,16 @@ public class ServiceMqtt extends Service implements MqttCallback
         INITIAL, CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED_WAITINGFORINTERNET, DISCONNECTED_USERDISCONNECT, DISCONNECTED_DATADISABLED, DISCONNECTED
     }
     
-    public static final String MQTT_PING_ACTION = "st.alr.homA.MqttService.PING";
-    private static final int NOTIFCATION_ID = 1337;
 
-    private static MQTT_CONNECTIVITY mqttConnectivity;
+    private static MQTT_CONNECTIVITY mqttConnectivity = MQTT_CONNECTIVITY.DISCONNECTED;
     private short keepAliveSeconds;
     private String mqttClientId;
     private MqttClient mqttClient;
     private NetworkConnectionIntentReceiver netConnReceiver;
     private PingSender pingSender;
     private static SharedPreferences sharedPreferences;
-    private static NotificationCompat.Builder notificationBuilder;
+
     private static ServiceMqtt instance;
-    private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
-    private NotificationManager notificationManager;
     private boolean notificationEnabled;
     private LocalBinder<ServiceMqtt> mBinder;
     private Thread workerThread;
@@ -86,21 +82,10 @@ public class ServiceMqtt extends Service implements MqttCallback
         workerThread = null;
         changeMqttConnectivity(MQTT_CONNECTIVITY.INITIAL);
         mBinder = new LocalBinder<ServiceMqtt>(this);
-        notificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationBuilder = new NotificationCompat.Builder(App.getInstance());
         keepAliveSeconds = 15 * 60;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-          @Override
-          public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
-              if (key.equals(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED))
-                  handleNotification();
-          }
-        };
-        sharedPreferences.registerOnSharedPreferenceChangeListener(preferencesChangedListener);
 
         EventBus.getDefault().register(this);
-        handleNotification();
     }
 
     @Override
@@ -253,7 +238,7 @@ public class ServiceMqtt extends Service implements MqttCallback
         // Establish ping sender
         if (pingSender == null) {
             pingSender = new PingSender();
-            registerReceiver(pingSender, new IntentFilter(MQTT_PING_ACTION));
+            registerReceiver(pingSender, new IntentFilter(Defaults.MQTT_PING_ACTION));
         }
         
         // Subscribe to topics
@@ -427,7 +412,7 @@ public class ServiceMqtt extends Service implements MqttCallback
     private void scheduleNextPing()
     {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(
-                MQTT_PING_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+                Defaults.MQTT_PING_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
 
         Calendar wakeUpTime = Calendar.getInstance();
         wakeUpTime.add(Calendar.SECOND, keepAliveSeconds);
@@ -469,7 +454,7 @@ public class ServiceMqtt extends Service implements MqttCallback
     public void onEvent(Events.MqttConnectivityChanged event) {
         mqttConnectivity = event.getConnectivity();
         if(notificationEnabled)
-            updateNotification();
+           App.getInstance().updateNotification();
         
         if (deferredPublish != null && event.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED)
             deferredPublish.run();
@@ -529,49 +514,7 @@ public class ServiceMqtt extends Service implements MqttCallback
         }
     }
 
-    /**
-     * @category NOTIFICATION HANDLING
-     */
-    private void handleNotification(){
-        if(notificationEnabled = sharedPreferences.getBoolean(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED, Defaults.VALUE_NOTIFICATION_ENABLED)) {        
-            createNotification();
-        } else {
-            notificationManager.cancel(NOTIFCATION_ID);
-        }
-    }
-    
-    private void createNotification() {
-        Intent resultIntent = new Intent(App.getInstance(), ActivityMain.class);
-        android.support.v4.app.TaskStackBuilder stackBuilder = android.support.v4.app.TaskStackBuilder.create(App
-                .getInstance());
-        stackBuilder.addParentStack(ActivityMain.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationBuilder.setContentIntent(resultPendingIntent);
-        updateNotification();
-    }
 
-    private void updateNotification() {
-        Intent intent = new Intent(this, ActivityBackgroundPublish.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-
-
-        notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle(getResources().getString(R.string.appName));
-        notificationBuilder.setOngoing(true).setContentText(getConnectivityText())
-        .addAction(android.R.drawable.ic_btn_speak_now, "A", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
-        .addAction(android.R.drawable.ic_btn_speak_now, "B", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
-        .addAction(android.R.drawable.ic_btn_speak_now, "C", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
-        .addAction(android.R.drawable.ic_btn_speak_now, "D", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
-
-        .setPriority(Notification.PRIORITY_MIN).setWhen(0);
-
-        
-        final Notification note = notificationBuilder.build();
-        notificationManager.notify(NOTIFCATION_ID, note);
-        
-    }
     
     /**
      * @category OBSERVERS
@@ -718,7 +661,6 @@ public class ServiceMqtt extends Service implements MqttCallback
             mBinder.close();
             mBinder = null;
         }
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferencesChangedListener);
 
         super.onDestroy();
     }

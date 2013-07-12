@@ -1,7 +1,11 @@
 package st.alr.homA.support;
 
 public class Defaults {
-    
+    public static final String BUGSNAG_API_KEY = "635a508c10fa87191e33662dd3c08512";
+    public static final String MQTT_PING_ACTION = "st.alr.homA.ServiceMqtt.PING";
+    public static final int NOTIFCATION_ID = 1337;
+    public static final int NOTIFICATION_MAX_ACTIONS = 3; // Android just allows for 3 custom actions on a notification
+
     public static final String SETTINGS_KEY_BROKER_HOST = "serverAddress";
     public static final String SETTINGS_KEY_BROKER_PORT = "serverPort";
     public static final String SETTINGS_KEY_NOTIFICATION_ENABLED = "runInBackgroundPreference";
@@ -14,6 +18,7 @@ public class Defaults {
     public static final String VALUE_ROOM_NAME = "unassigned";
     public static final boolean VALUE_NOTIFICATION_ENABLED = true;
     public static final String VALUE_QUICKPUBLISH_JSON = "[]";
+    public static final String VALUE_QUICKPUBLISH_NAME = "Quickpublish";
 
 
 }

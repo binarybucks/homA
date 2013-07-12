@@ -12,15 +12,17 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 
 public class Quickpublish {
+    String name = Defaults.VALUE_QUICKPUBLISH_NAME; 
     String topic = ""; 
     String payload = "";
     boolean retained = false; 
     String imagePath = "";
     
-    public Quickpublish(String topic, String payload, boolean retained) {
-        this( topic, payload, null, retained);
+    public Quickpublish(String name, String topic, String payload, boolean retained) {
+        this(name, topic, payload, null, retained);
     }
-    public Quickpublish(String topic, String payload, String imagePath, boolean retained) {
+    public Quickpublish(String name, String topic, String payload, String imagePath, boolean retained) {
+        this.name = name != null && !name.equals("") ? name : Defaults.VALUE_QUICKPUBLISH_NAME;
         this.topic = topic;
         this.payload = payload; 
         this.imagePath = imagePath;
@@ -32,13 +34,20 @@ public class Quickpublish {
             this.payload = jsonObject.getString("p");
             this.retained = jsonObject.getString("r").equals("1") ? true : false;
             this.imagePath = jsonObject.has("img") ? jsonObject.getString("img") : "";
- 
+            this.name = jsonObject.has("n")? jsonObject.getString("n") : Defaults.VALUE_QUICKPUBLISH_NAME;
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
     
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
     public String getTopic() {
         return topic;
     }
@@ -74,7 +83,12 @@ public class Quickpublish {
           object.put("t", this.topic);
           object.put("p", this.payload);
           object.put("r", this.retained == true ? "1" : "0" );
-          object.put("img", this.imagePath);
+          if(!this.name.equals(Defaults.VALUE_QUICKPUBLISH_NAME))
+              object.put("n", this.name);
+          if(!this.name.equals(""))
+              object.put("img", this.imagePath);
+
+          
         } catch (JSONException e) {
           e.printStackTrace();
         }
@@ -116,12 +130,6 @@ public class Quickpublish {
         }
         
         return list;
-    }
-    
-    public MqttMessage toMqttMessage(){
-        MqttMessage m = new MqttMessage();
-        return m;
-        // TODO
     }
     
     public static ArrayList<Quickpublish> fromPreferences(Context context, String key) {
