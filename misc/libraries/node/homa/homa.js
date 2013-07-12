@@ -129,9 +129,15 @@ var MqttHelper = function() {
 		});
 	}
 
-	this.publish = function(topic, payload, retained) {
-		log.info("MQTT", "Publishing %s:%s (retained=%s)", topic, payload, retained);
-		self.mqttClient.publish(topic.toString(), payload.toString(), {qos: 0, retain: retained});
+	this.publish = function(topic, payload, retained, ops, callback) {
+		var o;
+		if(ops)
+			o = ops; 
+		else 
+			o  = {qos: 0, retain: retained};
+
+		log.info("MQTT", "Publishing %s:%s (retained=%s)", topic, payload, o.retain);
+		self.mqttClient.publish(topic.toString(), payload.toString(), o, callback);
 	}
 
 	this.schedulePublish = function(date, topic, payload, retained){
@@ -153,8 +159,8 @@ var MqttHelper = function() {
 		self.mqttClient.end();
 	}
 
-	this.subscribe  = function(topic) {
-		self.mqttClient.subscribe(topic);
+	this.subscribe  = function(topic, opts, callback) {
+		self.mqttClient.subscribe(topic, opts, callback);
 	}
 
  	this.unsubscribe = function(topic) {
