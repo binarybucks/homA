@@ -1,6 +1,7 @@
 
 package st.alr.homA;
 
+import st.alr.homA.services.ServiceMqtt;
 import st.alr.homA.support.Events;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,7 +13,7 @@ import android.preference.PreferenceFragment;
 import android.view.Menu;
 import de.greenrobot.event.EventBus;
 
-public class PreferencesActivity extends PreferenceActivity {
+public class ActivityPreferences extends PreferenceActivity {
     private static Preference serverPreference;
 
     @Override
@@ -20,7 +21,7 @@ public class PreferencesActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
 
         // Start service if it is not already started
-        Intent service = new Intent(this, MqttService.class);
+        Intent service = new Intent(this, ServiceMqtt.class);
         startService(service);
 
         // Register for connection changed events
@@ -64,9 +65,9 @@ public class PreferencesActivity extends PreferenceActivity {
     }
 
     private static void setServerPreferenceSummary() {
-        serverPreference.setSummary(MqttService.getConnectivityText());
+        serverPreference.setSummary(ServiceMqtt.getConnectivityText());
     }
-
+ 
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {

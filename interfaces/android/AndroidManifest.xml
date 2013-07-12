@@ -25,12 +25,12 @@
         android:label="@string/appName"
         android:theme="@style/Theme.homa" >
         <activity
-            android:name="st.alr.homA.PreferencesActivity"
+            android:name="st.alr.homA.ActivityPreferences"
             android:configChanges="orientation"
             android:label="@string/titleActivityPreferences" >
         </activity>
         <activity
-            android:name="st.alr.homA.MainActivity"
+            android:name="st.alr.homA.ActivityMain"
             android:label="@string/titleActivityMain" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,23 +40,29 @@
         </activity>
 
         <service
-            android:name="st.alr.homA.MqttService"
+            android:name="st.alr.homA.services.ServiceMqtt"
             android:exported="false" >
         </service>
         <service
-            android:name="st.alr.homA.NfcReadService"
+            android:name="st.alr.homA.services.ServiceNfc"
             android:exported="false" >
         </service>
 
         <activity
-            android:name="st.alr.homA.NfcWriteActivity"
+            android:name="st.alr.homA.ActivityQuickpublish"
             android:exported="false"
-            android:label="@string/titleActivityNfc"
-            android:parentActivityName="st.alr.homA.MainActivity" >
+            android:parentActivityName="st.alr.homA.ActivityPreferences" >
         </activity>
         <activity
-            android:name="st.alr.homA.NfcReadActivity"
-            android:permission="android.permission.NFC" >
+            android:name="st.alr.homA.ActivityQuickpublishNfc"
+            android:exported="false"
+            android:label="@string/titleActivityNfc"
+            android:parentActivityName="st.alr.homA.ActivityMain" >
+        </activity>
+        <activity
+            android:name="st.alr.homA.services.ActivityBackgroundNfc"
+            android:permission="android.permission.NFC"
+            android:theme="@style/invisible" >
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
@@ -67,6 +73,11 @@
                     android:pathPrefix="/st.alr.homa:nfc"
                     android:scheme="vnd.android.nfc" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="st.alr.homA.services.ActivityBackgroundPublishPublish"
+            android:exported="true"
+            android:theme="@style/invisible" >
         </activity>
     </application>
 

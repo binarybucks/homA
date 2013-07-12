@@ -1,8 +1,11 @@
 package st.alr.homA.support;
 
-import st.alr.homA.MqttService;
+import java.util.ArrayList;
+
 import st.alr.homA.model.Device;
+import st.alr.homA.model.Quickpublish;
 import st.alr.homA.model.Room;
+import st.alr.homA.services.ServiceMqtt;
 
 public class Events {
     public static class RoomsCleared {
@@ -20,16 +23,37 @@ public class Events {
             return this.device;
         }
     }
+    
+    public static class QuickpublishAdded {
+        Quickpublish q;
+        public QuickpublishAdded(Quickpublish q) {
+            this.q = q;
+        }
+        public Quickpublish getQuickpublish() {
+            return q;
+        }
+    }
 
+    public static class QuickpublishNotificationChanged {
+        ArrayList<Quickpublish> a;
+        public QuickpublishNotificationChanged(ArrayList<Quickpublish> a) {
+            this.a = a;
+        }
+        public ArrayList<Quickpublish> getQuickpublishes() {
+            return a;
+        }
+    }
+
+    
     public static class MqttConnectivityChanged {
-		private MqttService.MQTT_CONNECTIVITY connectivity;
+		private ServiceMqtt.MQTT_CONNECTIVITY connectivity;
 
 		public MqttConnectivityChanged(
-				MqttService.MQTT_CONNECTIVITY connectivity) {
+				ServiceMqtt.MQTT_CONNECTIVITY connectivity) {
 			this.connectivity = connectivity;
 		}
 
-		public MqttService.MQTT_CONNECTIVITY getConnectivity() {
+		public ServiceMqtt.MQTT_CONNECTIVITY getConnectivity() {
 			return connectivity;
 		}
 	}

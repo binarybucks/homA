@@ -40,7 +40,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-public class NfcWriteActivity extends FragmentActivity {
+public class ActivityQuickpublishNfc extends FragmentActivity {
     private static boolean writeMode;
     private ListView listView;
     private Menu menu;
@@ -398,7 +398,7 @@ public class NfcWriteActivity extends FragmentActivity {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            NfcWriteActivity.writeMode = true;
+            ActivityQuickpublishNfc.writeMode = true;
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setTitle(getResources().getString(R.string.nfcWriteDialogTitle))

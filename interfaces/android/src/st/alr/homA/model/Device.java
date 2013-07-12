@@ -3,6 +3,7 @@ package st.alr.homA.model;
 
 import st.alr.homA.App;
 import st.alr.homA.R;
+import st.alr.homA.support.Defaults;
 import st.alr.homA.support.ValueChangedObserver;
 import st.alr.homA.support.ValueSortedMap;
 import android.content.Context;
@@ -46,7 +47,7 @@ public class Device implements Comparable<Device> {
         if (room != null && room.getId().equals(roomname)) // Don't move if the device is already in the target room. Also prevents https://github.com/binarybucks/homA/issues/47
             return;
 
-        String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : App.defaultsRoomName;
+        String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : Defaults.VALUE_ROOM_NAME;
 
         Room newRoom = App.getRoom(cleanedName);
 

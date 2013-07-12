@@ -1,6 +1,7 @@
-package st.alr.homA;
+package st.alr.homA.services;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -12,9 +13,17 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
+import st.alr.homA.App;
+import st.alr.homA.ActivityMain;
+import st.alr.homA.R;
+import st.alr.homA.R.drawable;
+import st.alr.homA.R.string;
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
+import st.alr.homA.model.Quickpublish;
+import st.alr.homA.support.Defaults;
 import st.alr.homA.support.Events;
+import st.alr.homA.support.Events.MqttConnectivityChanged;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -29,6 +38,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -39,7 +49,7 @@ import android.util.Log;
 import de.greenrobot.event.EventBus;
 
 
-public class MqttService extends Service implements MqttCallback
+public class ServiceMqtt extends Service implements MqttCallback
 {
 
     public static enum MQTT_CONNECTIVITY {
@@ -57,12 +67,13 @@ public class MqttService extends Service implements MqttCallback
     private PingSender pingSender;
     private static SharedPreferences sharedPreferences;
     private static NotificationCompat.Builder notificationBuilder;
-    private static MqttService instance;
+    private static ServiceMqtt instance;
     private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
     private NotificationManager notificationManager;
     private boolean notificationEnabled;
-    private LocalBinder<MqttService> mBinder;
+    private LocalBinder<ServiceMqtt> mBinder;
     private Thread workerThread;
+    private Runnable deferredPublish;
     
     /**
      * @category SERVICE HANDLING
@@ -74,7 +85,7 @@ public class MqttService extends Service implements MqttCallback
         instance = this;
         workerThread = null;
         changeMqttConnectivity(MQTT_CONNECTIVITY.INITIAL);
-        mBinder = new LocalBinder<MqttService>(this);
+        mBinder = new LocalBinder<ServiceMqtt>(this);
         notificationManager = (NotificationManager) App.getInstance().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(App.getInstance());
         keepAliveSeconds = 15 * 60;
@@ -82,7 +93,7 @@ public class MqttService extends Service implements MqttCallback
         preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
           @Override
           public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
-              if (key.equals("runInBackgroundPreference"))
+              if (key.equals(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED))
                   handleNotification();
           }
         };
@@ -185,8 +196,8 @@ public class MqttService extends Service implements MqttCallback
 
         try
         {
-            String brokerAddress = sharedPreferences.getString("serverAddress", App.defaultsServerAddress);
-            String brokerPort = sharedPreferences.getString("serverPort", App.defaultsServerPort);
+            String brokerAddress = sharedPreferences.getString(Defaults.SETTINGS_KEY_BROKER_HOST, Defaults.VALUE_BROKER_HOST);
+            String brokerPort = sharedPreferences.getString(Defaults.SETTINGS_KEY_BROKER_PORT, Defaults.VALUE_BROKER_PORT);
 
             mqttClient = new MqttClient("tcp://" + brokerAddress + ":" + brokerPort, getClientId(),
                     null);
@@ -375,7 +386,7 @@ public class MqttService extends Service implements MqttCallback
                 device = new Device(deviceId, this);
 
                 App.addDevice(device);
-                device.moveToRoom(App.defaultsRoomName);
+                device.moveToRoom(Defaults.VALUE_ROOM_NAME);
 
             }
             
@@ -459,6 +470,9 @@ public class MqttService extends Service implements MqttCallback
         mqttConnectivity = event.getConnectivity();
         if(notificationEnabled)
             updateNotification();
+        
+        if (deferredPublish != null && event.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED)
+            deferredPublish.run();
     }
     
     
@@ -502,9 +516,9 @@ public class MqttService extends Service implements MqttCallback
     }
     
     public static String getConnectivityText() {
-        switch (MqttService.getConnectivity()) {
+        switch (ServiceMqtt.getConnectivity()) {
             case CONNECTED:
-                return App.getInstance().getString(R.string.connectivityConnected);
+                return App.getInstance().getString(R.string.connectivityConnected) + " to " + sharedPreferences.getString(Defaults.SETTINGS_KEY_BROKER_HOST, Defaults.VALUE_BROKER_HOST);
             case CONNECTING:
                 return App.getInstance().getString(R.string.connectivityConnecting);
             case DISCONNECTING:
@@ -519,7 +533,7 @@ public class MqttService extends Service implements MqttCallback
      * @category NOTIFICATION HANDLING
      */
     private void handleNotification(){
-        if(notificationEnabled = sharedPreferences.getBoolean("runInBackgroundPreference", true)) {        
+        if(notificationEnabled = sharedPreferences.getBoolean(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED, Defaults.VALUE_NOTIFICATION_ENABLED)) {        
             createNotification();
         } else {
             notificationManager.cancel(NOTIFCATION_ID);
@@ -527,10 +541,10 @@ public class MqttService extends Service implements MqttCallback
     }
     
     private void createNotification() {
-        Intent resultIntent = new Intent(App.getInstance(), MainActivity.class);
+        Intent resultIntent = new Intent(App.getInstance(), ActivityMain.class);
         android.support.v4.app.TaskStackBuilder stackBuilder = android.support.v4.app.TaskStackBuilder.create(App
                 .getInstance());
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(ActivityMain.class);
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -539,11 +553,24 @@ public class MqttService extends Service implements MqttCallback
     }
 
     private void updateNotification() {
-        notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle("HomA");
+        Intent intent = new Intent(this, ActivityBackgroundPublish.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+
+        notificationBuilder.setSmallIcon(R.drawable.homamonochrome).setContentTitle(getResources().getString(R.string.appName));
         notificationBuilder.setOngoing(true).setContentText(getConnectivityText())
-                .setPriority(Notification.PRIORITY_MIN).setWhen(0);
+        .addAction(android.R.drawable.ic_btn_speak_now, "A", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
+        .addAction(android.R.drawable.ic_btn_speak_now, "B", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
+        .addAction(android.R.drawable.ic_btn_speak_now, "C", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
+        .addAction(android.R.drawable.ic_btn_speak_now, "D", PendingIntent.getActivity(this, 0, new Intent(this, ActivityMain.class), 0))
+
+        .setPriority(Notification.PRIORITY_MIN).setWhen(0);
+
+        
         final Notification note = notificationBuilder.build();
         notificationManager.notify(NOTIFCATION_ID, note);
+        
     }
     
     /**
@@ -637,7 +664,7 @@ public class MqttService extends Service implements MqttCallback
     /**
      * @category MISC
      */
-    public static MqttService getInstance() {
+    public static ServiceMqtt getInstance() {
         return instance;
     }
     
@@ -663,12 +690,12 @@ public class MqttService extends Service implements MqttCallback
 
     public class LocalBinder<T> extends Binder
     {
-        private WeakReference<MqttService> mService;
-        public LocalBinder(MqttService service) {
-            mService = new WeakReference<MqttService>(service);
+        private WeakReference<ServiceMqtt> mService;
+        public LocalBinder(ServiceMqtt service) {
+            mService = new WeakReference<ServiceMqtt>(service);
         }
 
-        public MqttService getService() {
+        public ServiceMqtt getService() {
             return mService.get();
         }
 
@@ -698,6 +725,32 @@ public class MqttService extends Service implements MqttCallback
 
     @Override
     public void deliveryComplete(MqttDeliveryToken arg0) { }
+
+
+    public void publishWithTimeout(final String topic, final String payload, final boolean retained, int timeout) {
+        if (getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+            publish(topic, payload, retained);
+        } else {
+            Log.d(this.toString(), "No broker connection established yet, deferring publish");
+            deferredPublish = new Runnable() {
+                @Override
+                public void run() {
+                    deferredPublish = null;
+                    Log.d(this.toString(), "Broker connection established, publishing deferred message");
+                    publish(topic, payload, retained);
+                }
+                
+            };
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(this.toString(),  "Publish timed out");
+                    deferredPublish = null;
+                }
+            }, timeout * 1000);        
+        }
+    }
 }
 
 

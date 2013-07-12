@@ -4,10 +4,11 @@ package st.alr.homA;
 import java.util.HashMap;
 import java.util.Locale;
 
-import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
+import st.alr.homA.services.ServiceMqtt;
+import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
 import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueSortedMap;
@@ -37,7 +38,7 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends FragmentActivity {
+public class ActivityMain extends FragmentActivity {
     private Room currentRoom;
     private RoomPagerAdapter roomPagerAdapter;
     private static ViewPager mViewPager;
@@ -47,14 +48,20 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent i;
+        
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                Intent intent1 = new Intent(this, PreferencesActivity.class);
-                startActivity(intent1);
+                i = new Intent(this, ActivityPreferences.class);
+                startActivity(i);
                 return true;
             case R.id.menu_nfc:
-                Intent intent2 = new Intent(this, NfcWriteActivity.class);
-                startActivity(intent2);
+                i = new Intent(this, ActivityQuickpublishNfc.class);
+                startActivity(i);
+                return true;
+            case R.id.menu_qp:
+                i = new Intent(this, ActivityQuickpublish.class);
+                startActivity(i);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -69,12 +76,12 @@ public class MainActivity extends FragmentActivity {
     protected void onStart() {
         super.onStart();
 
-        Intent service = new Intent(this, MqttService.class);
+        Intent service = new Intent(this, ServiceMqtt.class);
         startService(service);
     }
 
     private void updateViewVisibility() {
-        if (MqttService.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+        if (ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
             connectedLayout.setVisibility(View.VISIBLE);
             disconnectedLayout.setVisibility(View.INVISIBLE);
         } else {
@@ -345,7 +352,7 @@ public class MainActivity extends FragmentActivity {
         }
 
         public void onEventMainThread(MqttConnectivityChanged event) {
-            if (event.getConnectivity() != MqttService.MQTT_CONNECTIVITY.CONNECTED) {
+            if (event.getConnectivity() != ServiceMqtt.MQTT_CONNECTIVITY.CONNECTED) {
                 Log.v(this.toString(), "Lost connection, closing currently open dialog");
                 android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
                 android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
@@ -427,13 +434,13 @@ public class MainActivity extends FragmentActivity {
             ControlView v = null;
 
             if (control.getMeta("type", "text").equals("switch")) {
-                v = new st.alr.homA.view.SwitchControlView(getActivity());
+                v = new st.alr.homA.view.ControlViewSwitch(getActivity());
 
             } else if (control.getMeta("type", "text").equals("range")) {
-                v = new st.alr.homA.view.RangeControlView(getActivity());
+                v = new st.alr.homA.view.ControlViewRange(getActivity());
 
             } else {
-                v = new st.alr.homA.view.TextControlView(getActivity());
+                v = new st.alr.homA.view.ControlViewText(getActivity());
 
             }
 

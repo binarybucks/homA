@@ -1,16 +1,9 @@
 package st.alr.homA.preferences;
 
-import java.util.regex.Pattern;
-
-import st.alr.homA.App;
-import st.alr.homA.MqttService;
 import st.alr.homA.R;
-import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
-import st.alr.homA.R.id;
-import st.alr.homA.R.layout;
-
-import android.app.AlertDialog;
-import android.app.Dialog;
+import st.alr.homA.services.ServiceMqtt;
+import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
+import st.alr.homA.support.Defaults;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -55,8 +48,8 @@ public class PreferencesServer extends DialogPreference {
 	@Override
 	protected void onBindDialogView(View view) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		address.setText(prefs.getString("serverAddress", App.defaultsServerAddress));
-		port.setText(prefs.getString("serverPort", App.defaultsServerPort));
+		address.setText(prefs.getString(Defaults.SETTINGS_KEY_BROKER_HOST, Defaults.VALUE_BROKER_HOST));
+		port.setText(prefs.getString(Defaults.SETTINGS_KEY_BROKER_PORT, Defaults.VALUE_BROKER_PORT));
 	}
 	
 	private void validateAddress(String s){
@@ -102,10 +95,10 @@ public class PreferencesServer extends DialogPreference {
         if (v == null)
             return;
 
-        if (MqttService.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET
-                || MqttService.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT
-                || MqttService.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_DATADISABLED
-                || MqttService.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
+        if (ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET
+                || ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT
+                || ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_DATADISABLED
+                || ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
             v.setEnabled(false);
         } else {
             v.setEnabled(true);
@@ -117,8 +110,8 @@ public class PreferencesServer extends DialogPreference {
 	protected void showDialog(Bundle state) {
 	       super.showDialog(state);
 
-	    validateAddress(PreferenceManager.getDefaultSharedPreferences(context).getString("serverAddress", App.defaultsServerAddress));
-        validatePort(PreferenceManager.getDefaultSharedPreferences(context).getString("serverPort", App.defaultsServerPort));
+	    validateAddress(PreferenceManager.getDefaultSharedPreferences(context).getString(Defaults.SETTINGS_KEY_BROKER_HOST, Defaults.VALUE_BROKER_HOST));
+        validatePort(PreferenceManager.getDefaultSharedPreferences(context).getString(Defaults.SETTINGS_KEY_BROKER_PORT, Defaults.VALUE_BROKER_PORT));
         conditionalyEnableConnectButton();
         conditionallyEnableDisconnectButton();
         
@@ -173,10 +166,10 @@ public class PreferencesServer extends DialogPreference {
 
 				editor.apply();
 
-				MqttService.getInstance().reconnect();
+				ServiceMqtt.getInstance().reconnect();
 				break;
 			case DialogInterface.BUTTON_NEGATIVE:
-			    MqttService.getInstance().disconnect(true);
+			    ServiceMqtt.getInstance().disconnect(true);
 		}
 		super.onClick(dialog, which);
 	}

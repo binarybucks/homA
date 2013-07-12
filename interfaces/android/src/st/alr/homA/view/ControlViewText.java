@@ -3,9 +3,9 @@ import st.alr.homA.R;
 import android.app.Activity;
 import android.widget.TextView;
 
-public class TextControlView extends ControlView {
+public class ControlViewText extends ControlView {
 
-    public TextControlView(Activity activity) {
+    public ControlViewText(Activity activity) {
         super(activity, R.layout.fragment_device_text, R.id.textControlValue, R.id.textControlName);
     }
 

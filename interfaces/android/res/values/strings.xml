@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
     <string name="appName">HomA</string>
-   	
-   	<string name="titleActivityNfc">"Write Tags"</string>
+    <string name="titleActivityNfc">"Write Tags"</string>
     <string name="titleActivityMain">HomA</string>
-   	<string name="titleActivityPreferences">"Settings"</string>
-    
+    <string name="titleActivityPreferences">"Settings"</string>
     <string name="preferencesServerTitle">"Server"</string>
     <string name="preferencesServerAddress">"Server address"</string>
     <string name="preferencesServerPort">"Server port"</string>
     <string name="preferencesServerCancel">"Disconnect"</string>
     <string name="preferencesServerConnect">"Connect"</string>
     <string name="preferencesLicensesTitle">"Licenses"</string>
-    <string name="preferencesLicensesSummary">"Details for included open-source software"</string>
+    <string name="preferencesLicensesSummary">"Details for included software"</string>
     <string name="preferencesLicensesDismiss">"Dismiss"</string>
-    <string name="preferencesNotificationSummary">"Display a notification to keep the application running in the background"</string>
+    <string name="preferencesNotificationSummary">"Display a notification to keep running"</string>
     <string name="preferencesNotificationTitle">"Notification"</string>
     <string name="preferencesVersionTitle">"Version"</string>
+    <string name="preferencesQuickpublishTitle">"Quickpublish"</string>
+    <string name="preferencesQuickpublishSummary">"Access to commonly used tasks"</string>
+   
+    <string name="preferencesQuickpublishNotificationTitle">"Notification"</string>
     
-        <string name="preferencesQuickpublishTitle">"Quickpublish"</string>
-            <string name="preferencesQuickpublishNotificationTitle">"Notification"</string>
-        
-    
+    <string name="preferencesQuickpublishWidgetTitle">"Widget"</string>
+    <string name="preferencesQuickpublishNotificationSlot1Title">"Slot 1"</string>
+    <string name="preferencesQuickpublishNotificationSlot2Title">"Slot 2"</string>
+    <string name="preferencesQuickpublishNotificationSlot3Title">"Slot 3"</string>
+    <string name="preferencesQuickpublishNotificationSlot4Title">"Slot 4"</string>
     <string name="connectivityConnecting">"Connecting"</string>
     <string name="connectivityConnected">"Connected"</string>
     <string name="connectivityDisconnecting">"Disconnecting"</string>
     <string name="connectivityDisconnected">"Disconnected"</string>
-    
-    
     <string name="nfcWriteDialogWaitingForTag">"Place your phone above a tag to write"</string>
     <string name="nfcWriteDialogTitle">"Write"</string>
     <string name="nfcWritePayloadInput">"Payload"</string>
@@ -44,16 +45,13 @@
     <string name="nfcWriteDialogTagNoContent">"No content to write"</string>
     <string name="nfcWriteDialogTagSuccess">"Tag written successfully"</string>
     <string name="nfcWrite">"Write"</string>
-    
     <string name="nfcStartRecording">"Start recording"</string>
     <string name="nfcStopRecording">"Stop recording"</string>
-    
-    
     <string name="actionModeOneSelected">"One item selected"</string>
     <string name="actionModeMoreSelected">"items selected"</string>
     <string name="actionModeDiscardSelected">"Discard selected"</string>
-    
     <string name="add">"Add"</string>
     <string name="cancel">"Cancel"</string>
-    
+    <string name="save">"Save"</string>
+
 </resources>

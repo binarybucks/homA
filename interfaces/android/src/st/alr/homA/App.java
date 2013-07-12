@@ -1,10 +1,13 @@
     
 package st.alr.homA;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
+import st.alr.homA.model.Quickpublish;
+
+import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.support.NfcRecordAdapter;
@@ -19,24 +22,21 @@ public class App extends Application {
     private static App instance;
     private static HashMap<String, Device> devices;
     private static ValueSortedMap<String, Room> rooms;
-    
-    
+    private static ArrayList<Quickpublish> quickpublishesNotification;
     private static NfcRecordAdapter nfcRecordListAdapter;
     private static boolean recording = false;
-    public static final String defaultsServerAddress = "192.168.8.2";
-    public static final String defaultsServerPort = "1883";
-    public static final String defaultsRoomName = "unassigned";
 
     
     @Override
     public void onCreate() {
         super.onCreate();
         Bugsnag.register(this, "635a508c10fa87191e33662dd3c08512");
+        Bugsnag.setNotifyReleaseStages("production", "testing");
+
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new ValueSortedMap<String, Room>();
         nfcRecordListAdapter = new NfcRecordAdapter(this);
-
         EventBus.getDefault().register(this);
     }
 

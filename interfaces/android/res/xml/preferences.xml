@@ -13,29 +13,30 @@
         android:summary="@string/preferencesNotificationSummary"
         android:title="@string/preferencesNotificationTitle" />
 
-	<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" 
-	    android:title="@string/preferencesQuickpublishTitle">
-	    
-		<st.alr.homA.preferences.PreferencesQuickpublishNotification 
-		    
-		    	        android:title="@string/preferencesQuickpublishNotificationTitle"
-	        android:layout="@layout/preferences_quickpublish_notification" 
-		    
-		    />
-		    
-		    
-		    
-	    
-	</PreferenceScreen>
-	   
-   
+    <PreferenceScreen android:title="@string/preferencesQuickpublishTitle"         
+        android:summary="@string/preferencesQuickpublishSummary"
+         >
+        <PreferenceScreen android:title="@string/preferencesQuickpublishNotificationTitle" >
+    		    <intent android:targetPackage="st.alr.homA" android:targetClass="st.alr.homA.ActivityQuickpublish"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="@string/preferencesQuickpublishWidgetTitle" >
+        </PreferenceScreen>
+        
+               
+            <PreferenceScreen android:title="NFC" >
+			    <intent android:targetPackage="st.alr.homA" android:targetClass="st.alr.homA.ActivityNfcWrite"/>
+			</PreferenceScreen>
+            
+            
+    </PreferenceScreen>
+
     <st.alr.homA.preferences.ImplementedDialogPreference
+        android:dialogLayout="@layout/preferences_licenses"
         android:negativeButtonText=""
         android:positiveButtonText="@string/preferencesLicensesDismiss"
         android:summary="@string/preferencesLicensesSummary"
-        android:title="@string/preferencesLicensesTitle"
-        android:dialogLayout="@layout/preferences_licenses" />
-    
+        android:title="@string/preferencesLicensesTitle" />
+
     <Preference
         android:key="versionReadOnly"
         android:title="@string/preferencesVersionTitle" />
