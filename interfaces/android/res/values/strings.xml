@@ -34,7 +34,7 @@
     <string name="nfcWriteDialogTitle">"Write"</string>
     <string name="quickpublishNameInputTitle">"Name"</string>
         <string name="quickpublishAdd">"Add quickpublish"</string>
-            <string name="quickpublishEdit">"Edit quickpublish"</string>
+            <string name="quickpublishEdit">"Edit Quickpublish"</string>
         
     
     <string name="quickpublishPayloadInputTitle">"Payload"</string>

@@ -8,9 +8,9 @@ import st.alr.homA.model.Room;
 import st.alr.homA.services.ServiceMqtt;
 
 public class Events {
-    public class QuickpublishChanged {
+    
 
-    }
+
 
     public static class RoomsCleared {
 
@@ -31,6 +31,16 @@ public class Events {
     public static class QuickpublishNotificationAdded {
         Quickpublish q;
         public QuickpublishNotificationAdded(Quickpublish q) {
+            this.q = q;
+        }
+        public Quickpublish getQuickpublish() {
+            return q;
+        }
+    }
+
+    public static class QuickpublishNotificationRemoved {
+        Quickpublish q;
+        public QuickpublishNotificationRemoved(Quickpublish q) {
             this.q = q;
         }
         public Quickpublish getQuickpublish() {

@@ -58,24 +58,35 @@ public class ActivityQuickpublish extends FragmentActivity {
 
             }
         });
-        
-        
-        EventBus.getDefault().register(this);
-    }
+     }
     
-    public void onEventMainThread(Events.QuickpublishNotificationAdded event) {
-        listAdapter.add(event.getQuickpublish());
-        save();
-    }
 
     
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
     }
     
-    public void save() {
+    protected void add(Quickpublish q){
+        listAdapter.add(q);
+        save();
+        EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationAdded(q));
+    }
+    
+    protected void update(Quickpublish q){
+        save();
+        listAdapter.notifyDataSetChanged();
+        EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationChanged(q));
+    }
+    
+    protected void remove(Quickpublish q) {
+        listAdapter.remove(q);
+        save();
+        EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationRemoved(q));
+    }
+    
+    
+    private void save() {
         Quickpublish.toPreferences(this, Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION, listAdapter.getValues());
     }
     
@@ -160,11 +171,11 @@ public class ActivityQuickpublish extends FragmentActivity {
 
         private View getContentView() {
             Log.v(this.toString(), "getContentView");
-            View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_nfc_add, null);
-            nameInput = (TextView) view.findViewById(R.id.nameInput);
-            topicInput = (TextView) view.findViewById(R.id.topicInput);
-            payloadInput = (TextView) view.findViewById(R.id.paylodInput);
-            retainedCheckbox = (CheckBox) view.findViewById(R.id.retainedCheck);
+            View view = getActivity().getLayoutInflater().inflate(R.layout.preferences_quickpublish_notification, null);
+            nameInput = (TextView) view.findViewById(R.id.quickpublishNameInput);
+            topicInput = (TextView) view.findViewById(R.id.quickpublishTopicInput);
+            payloadInput = (TextView) view.findViewById(R.id.quickpublishPayloadInput);
+            retainedCheckbox = (CheckBox) view.findViewById(R.id.quickpublishRetainedCheckbox);
             
             if(q != null) {
                 nameInput.setText(q.getName());
@@ -183,17 +194,11 @@ public class ActivityQuickpublish extends FragmentActivity {
                 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    View v = getDialog().findViewById(android.R.id.button1);
-                    if(v == null)
-                        return; 
-                    
-                    if(s.toString().length() > 0)
-                        v.setEnabled(true);
-                    else
-                        v.setEnabled(false);
-
+                    conditionallyEnableSaveButton();
                 }
             });
+     
+            conditionallyEnableSaveButton();
             
             return view;
         }
@@ -209,6 +214,17 @@ public class ActivityQuickpublish extends FragmentActivity {
             
         }
 
+        private void conditionallyEnableSaveButton() {
+            View v = getActivity().findViewById(android.R.id.button1);
+            if(v == null)
+                return; 
+            
+            if(topicInput.getText().toString().length() > 0)
+                v.setEnabled(true);
+            else
+                v.setEnabled(false);                    
+        }
+            
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             Log.v(this.toString(), "onCreateDialog");
@@ -240,11 +256,12 @@ public class ActivityQuickpublish extends FragmentActivity {
                                 q.setTopic(topicInput.getText().toString());
                                 q.setPayload(payloadInput.getText().toString());
                                 q.setRetained(retainedCheckbox.isChecked());
-                                EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationChanged(q));
+                                ((ActivityQuickpublish) getActivity()).save();
 
                             } else {
                                 Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), retainedCheckbox.isChecked()); 
-                                EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationAdded(q));
+                                ((ActivityQuickpublish) getActivity()).add(q);
+
                             }
                             dismiss();
                         }

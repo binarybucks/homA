@@ -13,7 +13,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/nameInput"
+        android:id="@+id/quickpublishNameInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -21,14 +21,14 @@
     </EditText>
 
     <TextView
-        android:id="@+id/topicInput"
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/quickpublishTopicInputTitle"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/quickpublishPayloadInput"
+        android:id="@+id/quickpublishTopicInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -43,14 +43,14 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/paylodInput"
+        android:id="@+id/quickpublishPayloadInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text" />
 
     <CheckBox
-        android:id="@+id/retainedCheck"
+        android:id="@+id/quickpublishRetainedCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/quickpublishRetainedInputTitle" />

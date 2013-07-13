@@ -89,7 +89,18 @@ public class QuickpublishAdapter extends BaseAdapter {
         notifyDataSetChanged();
 
     }
+    
+    public void remove(Quickpublish q) {
+        values.remove(q);
+        notifyDataSetChanged();
+    }
 
+    public void remove(int position) {
+        values.remove(position);
+        notifyDataSetChanged();
+    }
+
+    
     public void remove(SparseBooleanArray sba) {
             for (int i = 0; i < getCount(); i++)
                 if (sba.get(i))
