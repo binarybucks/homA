@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import de.greenrobot.event.EventBus;
 import com.bugsnag.android.*;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -52,7 +53,6 @@ public class App extends Application {
         nfcRecordListAdapter = new NfcRecordAdapter(this);
         notificationManager = (NotificationManager) App.getInstance().getSystemService(
                 Context.NOTIFICATION_SERVICE);
-        notificationBuilder = new NotificationCompat.Builder(App.getInstance());
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -160,20 +160,23 @@ public class App extends Application {
      * @category NOTIFICATION HANDLING
      */
     private void handleNotification() {
-        if (sharedPreferences.getBoolean(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED, Defaults.VALUE_NOTIFICATION_ENABLED)) {
+        Log.v(this.toString(), "handleNotification()");
+        notificationManager.cancel(Defaults.NOTIFCATION_ID);
+
+        if (sharedPreferences.getBoolean(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED, Defaults.VALUE_NOTIFICATION_ENABLED))
             createNotification();
-        } else {
-            notificationManager.cancel(Defaults.NOTIFCATION_ID);
-        }
     }
 
     private void createNotification() {
+        notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+
         Intent resultIntent = new Intent(App.getInstance(), ActivityMain.class);
         android.support.v4.app.TaskStackBuilder stackBuilder = android.support.v4.app.TaskStackBuilder.create(this);
         stackBuilder.addParentStack(ActivityMain.class);
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(resultPendingIntent);
+        setNotificationQuickpublishes();
         updateNotification();
     }
 
@@ -185,15 +188,15 @@ public class App extends Application {
                 .setContentText(ServiceMqtt.getConnectivityText())
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setWhen(0);
-        setNotificationQuickpublishes();
         notificationManager.notify(Defaults.NOTIFCATION_ID, notificationBuilder.build());
     }
     
     private void setNotificationQuickpublishes(){
         ArrayList<Quickpublish> qps = Quickpublish.fromPreferences(this, Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION);
         for (int i = 0; i < qps.size() && i < Defaults.NOTIFICATION_MAX_ACTIONS; i++) {
+            Log.v(this.toString(),                     qps.get(i).getName());
             notificationBuilder.addAction(
-                    0,
+                    R.drawable.ic_quickpublish,
                     qps.get(i).getName(),
                     PendingIntent.getActivity(this, 0, new Intent(this, ActivityBackgroundPublish.class), 0));
 

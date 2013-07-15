@@ -14,22 +14,27 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnShowListener;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -70,21 +75,18 @@ public class ActivityQuickpublish extends FragmentActivity {
     protected void add(Quickpublish q){
         listAdapter.add(q);
         save();
-        EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationAdded(q));
     }
     
     protected void update(Quickpublish q){
         save();
         listAdapter.notifyDataSetChanged();
-        EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationChanged(q));
     }
     
-    protected void remove(Quickpublish q) {
-        listAdapter.remove(q);
+    
+    protected void remove(SparseBooleanArray sba) {
+        listAdapter.remove(sba);
         save();
-        EventBus.getDefault().post(new st.alr.homA.support.Events.QuickpublishNotificationRemoved(q));
     }
-    
     
     private void save() {
         Quickpublish.toPreferences(this, Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION, listAdapter.getValues());
@@ -135,7 +137,7 @@ public class ActivityQuickpublish extends FragmentActivity {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard:
-                    listAdapter.remove(listView.getCheckedItemPositions());
+                    remove(listView.getCheckedItemPositions());
                     mode.finish();
                     return true;
                 default:
@@ -165,6 +167,8 @@ public class ActivityQuickpublish extends FragmentActivity {
         TextView topicInput;
         TextView payloadInput;
         CheckBox retainedCheckbox;
+        ImageView imageView;
+        Uri imageUri;
         Quickpublish q;
         
         
@@ -176,13 +180,22 @@ public class ActivityQuickpublish extends FragmentActivity {
             topicInput = (TextView) view.findViewById(R.id.quickpublishTopicInput);
             payloadInput = (TextView) view.findViewById(R.id.quickpublishPayloadInput);
             retainedCheckbox = (CheckBox) view.findViewById(R.id.quickpublishRetainedCheckbox);
+            imageView = (ImageView) view.findViewById(R.id.quickpublishIconImageview);
             
             if(q != null) {
                 nameInput.setText(q.getName());
                 topicInput.setText(q.getTopic());
                 payloadInput.setText(q.getPayload());
                 retainedCheckbox.setChecked(q.isRetained());
+                imageUri = q.getImagePath();
+                imageView.setImageURI(q.getImagePath());
+            } else {
+                imageUri = Defaults.VALUE_QUICKPUBLISH_ICON;
+
             }
+            
+            imageView.setImageURI(imageUri);
+
             
             topicInput.addTextChangedListener(new TextWatcher() {
                 
@@ -198,12 +211,36 @@ public class ActivityQuickpublish extends FragmentActivity {
                 }
             });
      
-            conditionallyEnableSaveButton();
+            imageView.setOnClickListener(new OnClickListener() {
+                
+                @Override
+                public void onClick(View v) {
+                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto , Defaults.GET_IMAGE_ID);
+
+
+
+
+                    
+                }
+            });
+
             
             return view;
         }
 
-        
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) { 
+            super.onActivityResult(requestCode, resultCode, imageReturnedIntent); 
+            if(requestCode == Defaults.GET_IMAGE_ID) {
+                if(resultCode == RESULT_OK){  
+                    imageUri = imageReturnedIntent.getData();
+                    imageView.setImageURI(imageUri);
+                }
+            }
+       }
+
         
         public static AddDialog newInstance(int position) {
             AddDialog f = new AddDialog();
@@ -215,13 +252,15 @@ public class ActivityQuickpublish extends FragmentActivity {
         }
 
         private void conditionallyEnableSaveButton() {
-            View v = getActivity().findViewById(android.R.id.button1);
-            if(v == null)
+            View v = getDialog().findViewById(android.R.id.button1);
+
+             if(v == null)
                 return; 
+                
             
-            if(topicInput.getText().toString().length() > 0)
+            if(topicInput.getText().toString().length() > 0) 
                 v.setEnabled(true);
-            else
+                        else
                 v.setEnabled(false);                    
         }
             
@@ -235,11 +274,12 @@ public class ActivityQuickpublish extends FragmentActivity {
             else
                 b = getArguments();
 
-            q = ((ActivityQuickpublish) getActivity()).getListAdapter().getItem(b.getInt("position"));
+            if(b != null)
+                q = ((ActivityQuickpublish) getActivity()).getListAdapter().getItem(b.getInt("position"));
             
             
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                    .setTitle(q == null? getResources().getString(R.string.quickpublishAdd) : getResources().getString(R.string.quickpublishEdit))
+                    .setTitle(getResources().getString(q == null? R.string.quickpublishAdd : R.string.quickpublishEdit))
                     .setView(getContentView())
                     .setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                         @Override
@@ -247,19 +287,21 @@ public class ActivityQuickpublish extends FragmentActivity {
                             dismiss();
                         }
                     })
-                    .setPositiveButton(getResources().getString(R.string.add), new DialogInterface.OnClickListener() {
+                    .setPositiveButton(getResources().getString(q != null ? R.string.save : R.string.add), new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if(q != null) {
+                                Log.v(this.toString(), "updating qp");
                                 q.setName(nameInput.getText().toString());
                                 q.setTopic(topicInput.getText().toString());
                                 q.setPayload(payloadInput.getText().toString());
                                 q.setRetained(retainedCheckbox.isChecked());
-                                ((ActivityQuickpublish) getActivity()).save();
-
+                                q.setImagePath(imageUri);
+                                ((ActivityQuickpublish) getActivity()).update(q);
                             } else {
-                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), retainedCheckbox.isChecked()); 
+                                Log.v(this.toString(), "adding qp");
+                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), imageUri, retainedCheckbox.isChecked()); 
                                 ((ActivityQuickpublish) getActivity()).add(q);
 
                             }
@@ -274,8 +316,8 @@ public class ActivityQuickpublish extends FragmentActivity {
                 
                 @Override
                 public void onShow(DialogInterface dialog) {
-                    getDialog().findViewById(android.R.id.button1).setEnabled(false);
-                    
+                    conditionallyEnableSaveButton();
+
                 }
             });
             return dialog;

@@ -19,13 +19,10 @@
     <string name="preferencesQuickpublishTitle">"Quickpublish"</string>
     <string name="preferencesQuickpublishSummary">"Access to commonly used tasks"</string>
    
+    
     <string name="preferencesQuickpublishNotificationTitle">"Notification"</string>
     
     <string name="preferencesQuickpublishWidgetTitle">"Widget"</string>
-    <string name="preferencesQuickpublishNotificationSlot1Title">"Slot 1"</string>
-    <string name="preferencesQuickpublishNotificationSlot2Title">"Slot 2"</string>
-    <string name="preferencesQuickpublishNotificationSlot3Title">"Slot 3"</string>
-    <string name="preferencesQuickpublishNotificationSlot4Title">"Slot 4"</string>
     <string name="connectivityConnecting">"Connecting"</string>
     <string name="connectivityConnected">"Connected"</string>
     <string name="connectivityDisconnecting">"Disconnecting"</string>
@@ -40,6 +37,10 @@
     <string name="quickpublishPayloadInputTitle">"Payload"</string>
     <string name="quickpublishTopicInputTitle">"Topic"</string>
     <string name="quickpublishRetainedInputTitle">"Retained"</string>
+    <string name="quickpublishIconInputTitle">"Icon"</string>
+    
+        
+    
     <string name="nfcWriteDialogTagReadOnly">"Tag is read-only"</string>
     <string name="nfcWriteDialogTagFormatedAndWrote">"Formatted tag and wrote message"</string>
     <string name="nfcWriteDialogTagFailedToFormat">"Failed to format tag"</string>

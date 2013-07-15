@@ -55,4 +55,18 @@
         android:layout_height="wrap_content"
         android:text="@string/quickpublishRetainedInputTitle" />
 
+     <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/quickpublishIconInputTitle"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+     <ImageView
+         android:id="@+id/quickpublishIconImageview"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:clickable="true"
+ />
+    
 </LinearLayout>
