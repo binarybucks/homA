@@ -1,3 +1,4 @@
+[![Stories in Ready](http://badge.waffle.io/binarybucks/homA.png)](http://waffle.io/binarybucks/homA)  
 # HomA
 
 HomA is a free and open source framework for building smart homes and connecting them to the internet of things. 
