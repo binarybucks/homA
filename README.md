@@ -14,8 +14,9 @@ Getting started with HomA is quite easy and requries just some basic Linux and c
 A list of offical components is available in the [wiki](https://github.com/binarybucks/homA/wiki/Components). 
 
 ### Contribute
-Fork the repository on GitHub, add your own improvements, push it to a branch in your fork and send us a pull request.
+Fork the repository on GitHub, add your own improvements, push it to a branch in your fork and send us a pull request. An overview of open tasks is available on the [Waffle.io](http://waffle.io/binarybucks/homA) dashboard.
 You can also file bugs or feature requests in our [issue tracker](https://github.com/binarybucks/homA/issues) or say hi in our [Google+ Community](https://plus.google.com/u/0/communities/111676474572375715081).
+
 
 ### License
 If not stated otherwise explicitly, any code in this repository is licensed under the EPL license.
