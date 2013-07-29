@@ -165,11 +165,24 @@ public class PreferencesServer extends DialogPreference {
 				editor.putString("serverPort", newPort);
 
 				editor.apply();
+	            Runnable r = new Runnable() {                    
+                    @Override
+                    public void run() {
+                        ServiceMqtt.getInstance().reconnect();
+                    }
+                };
+                new Thread( r ).start();
 
-				ServiceMqtt.getInstance().reconnect();
 				break;
 			case DialogInterface.BUTTON_NEGATIVE:
-			    ServiceMqtt.getInstance().disconnect(true);
+			    
+            Runnable s = new Runnable() {                    
+                    @Override
+                    public void run() {
+                        ServiceMqtt.getInstance().disconnect(true);
+                    }
+                };
+                new Thread( s ).start();
 		}
 		super.onClick(dialog, which);
 	}
