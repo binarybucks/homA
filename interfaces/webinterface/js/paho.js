@@ -82,7 +82,7 @@ Messaging = (function (global) {
     // Private variables below, these are only visible inside the function closure
     // which is used to define the module. 
 
-    var version = "0.0.0.0";
+    var version = "@VERSION@";
     var buildLevel = "@BUILDLEVEL@";
     
     /** 
@@ -911,7 +911,7 @@ Messaging = (function (global) {
         else
           wsurl = ["ws://", host, ":", port, "/mqtt"].join("");
         this.connected = false;
-        this.socket = new WebSocket(wsurl, 'mqttv3.1');
+        this.socket = new WebSocket(wsurl);
         this.socket.binaryType = 'arraybuffer';
         this.socket.onopen = scope(this._on_socket_open, this);
         this.socket.onmessage = scope(this._on_socket_message, this);
@@ -1088,7 +1088,8 @@ Messaging = (function (global) {
         }
         this._trace("Client._on_socket_message", wireMessage);
 
-        switch(wireMessage.type) {
+        try {
+            switch(wireMessage.type) {
             case MESSAGE_TYPE.CONNACK:
                 this._connectTimeout.cancel();
                 
@@ -1231,7 +1232,11 @@ Messaging = (function (global) {
 
             default:
                 this._disconnected(ERROR.INVALID_MQTT_MESSAGE_TYPE.code , format(ERROR.INVALID_MQTT_MESSAGE_TYPE, [wireMessage.type]));
-        }; 
+            };
+        } catch (error) {
+            this._disconnected(ERROR.INTERNAL_ERROR.code , format(ERROR.INTERNAL_ERROR, [error.message]));
+            return;
+        }
     };
     
     /** @ignore */
@@ -1329,7 +1334,7 @@ Messaging = (function (global) {
         
             if (errorCode === undefined) {
                 errorCode = ERROR.OK.code;
-                errroText = format(ERROR.OK);
+                errorText = format(ERROR.OK);
             }
             
             // Run any application callbacks last as they may attempt to reconnect and hence create a new socket.
