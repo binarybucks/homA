@@ -6,10 +6,12 @@ import st.alr.homA.support.Events;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceScreen;
 import android.view.Menu;
 import de.greenrobot.event.EventBus;
 
@@ -39,7 +41,7 @@ public class ActivityPreferences extends PreferenceActivity {
 
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preferences);
-
+           
             PackageManager pm = this.getActivity().getPackageManager();
             Preference version = findPreference("versionReadOnly");
 
@@ -51,6 +53,13 @@ public class ActivityPreferences extends PreferenceActivity {
 
             serverPreference = findPreference("serverPreference");
             setServerPreferenceSummary();
+            
+            if (NfcAdapter.getDefaultAdapter(getActivity()) == null
+                    || !NfcAdapter.getDefaultAdapter(getActivity()).isEnabled()) {
+                PreferenceScreen nfcPreferenceItem = (PreferenceScreen) findPreference("preferencesNFC");
+                nfcPreferenceItem.setEnabled(false);
+             }
+
 
         }
     }

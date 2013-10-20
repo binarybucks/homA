@@ -12,6 +12,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import st.alr.homA.App;
 import st.alr.homA.ActivityMain;
@@ -91,6 +93,18 @@ public class ServiceMqtt extends Service implements MqttCallback
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        if(intent != null && intent.getAction() != null && intent.getAction().equals("st.alr.homA.action.QUICKPUBLISH")){
+            Log.v(this.toString(), "Notification Quickpublish in Service");
+
+            String json = intent.getStringExtra("qp");
+            try {
+                Quickpublish qp = new Quickpublish(new JSONObject(json));
+                ServiceMqtt.getInstance().publishWithTimeout(qp.getTopic(), qp.getPayload(), qp.isRetained(), 30);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        
         doStart(intent, startId);
         return START_STICKY;
     }

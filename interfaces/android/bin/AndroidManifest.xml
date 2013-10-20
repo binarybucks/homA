@@ -7,13 +7,12 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.NFC" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     
     <uses-feature
         android:name="android.hardware.nfc"
@@ -50,15 +49,14 @@
         </service>
 
         <activity
-            android:name="st.alr.homA.ActivityQuickpublish"
+            android:name="st.alr.homA.ActivityQuickpublishNotification"
             android:exported="false"
-            android:parentActivityName="st.alr.homA.ActivityPreferences" >
+            android:label="@string/titleActivityQuickpublishNotification">
         </activity>
         <activity
             android:name="st.alr.homA.ActivityQuickpublishNfc"
             android:exported="false"
-            android:label="@string/titleActivityNfc"
-            android:parentActivityName="st.alr.homA.ActivityMain" >
+            android:label="@string/titleActivityQuickpublishNfc">
         </activity>
         <activity
             android:name="st.alr.homA.services.ActivityBackgroundNfc"
@@ -66,7 +64,7 @@
             android:theme="@style/invisible" >
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-
+                
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data
@@ -76,9 +74,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="st.alr.homA.services.ActivityBackgroundPublishPublish"
+            android:name="st.alr.homA.services.ActivityBackgroundPublish"
             android:exported="true"
             android:theme="@style/invisible" >
+                
         </activity>
     </application>
 

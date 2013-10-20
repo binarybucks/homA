@@ -1,4 +1,5 @@
 package st.alr.homA.view;
+
 import st.alr.homA.R;
 import android.app.Activity;
 import android.widget.TextView;

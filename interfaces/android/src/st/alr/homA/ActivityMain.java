@@ -50,21 +50,13 @@ public class ActivityMain extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent i;
         
-        switch (item.getItemId()) {
-            case R.id.menu_settings:
-                i = new Intent(this, ActivityPreferences.class);
-                startActivity(i);
-                return true;
-            case R.id.menu_nfc:
-                i = new Intent(this, ActivityQuickpublishNfc.class);
-                startActivity(i);
-                return true;
-            case R.id.menu_qp:
-                i = new Intent(this, ActivityQuickpublish.class);
-                startActivity(i);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_settings) {
+            i = new Intent(this, ActivityPreferences.class);
+            startActivity(i);
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -110,10 +102,10 @@ public class ActivityMain extends FragmentActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (NfcAdapter.getDefaultAdapter(this) == null
-                || !NfcAdapter.getDefaultAdapter(this).isEnabled()) {
-            menu.removeItem(R.id.menu_nfc);
-        }
+//        if (NfcAdapter.getDefaultAdapter(this) == null
+//                || !NfcAdapter.getDefaultAdapter(this).isEnabled()) {
+//            menu.removeItem(R.id.menu_nfc);
+//        }
 
         return true;
     }

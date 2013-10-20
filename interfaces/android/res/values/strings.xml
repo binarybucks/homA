@@ -2,7 +2,9 @@
 <resources>
 
     <string name="appName">HomA</string>
-    <string name="titleActivityNfc">"Write Tags"</string>
+    <string name="titleActivityQuickpublishNfc">"NFC Quickpublish"</string>
+        <string name="titleActivityQuickpublishNotification">"Notification Quickpublish"</string>
+    
     <string name="titleActivityMain">HomA</string>
     <string name="titleActivityPreferences">"Settings"</string>
     <string name="preferencesServerTitle">"Server"</string>

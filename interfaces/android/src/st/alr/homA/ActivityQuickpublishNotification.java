@@ -34,11 +34,10 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ActivityQuickpublish extends FragmentActivity {
+public class ActivityQuickpublishNotification extends FragmentActivity {
     private ListView listView;
     private Menu menu;
     private QuickpublishAdapter listAdapter;
@@ -167,8 +166,6 @@ public class ActivityQuickpublish extends FragmentActivity {
         TextView topicInput;
         TextView payloadInput;
         CheckBox retainedCheckbox;
-        ImageView imageView;
-        Uri imageUri;
         Quickpublish q;
         
         
@@ -180,22 +177,13 @@ public class ActivityQuickpublish extends FragmentActivity {
             topicInput = (TextView) view.findViewById(R.id.quickpublishTopicInput);
             payloadInput = (TextView) view.findViewById(R.id.quickpublishPayloadInput);
             retainedCheckbox = (CheckBox) view.findViewById(R.id.quickpublishRetainedCheckbox);
-            imageView = (ImageView) view.findViewById(R.id.quickpublishIconImageview);
             
             if(q != null) {
                 nameInput.setText(q.getName());
                 topicInput.setText(q.getTopic());
                 payloadInput.setText(q.getPayload());
                 retainedCheckbox.setChecked(q.isRetained());
-                imageUri = q.getImagePath();
-                imageView.setImageURI(q.getImagePath());
-            } else {
-                imageUri = Defaults.VALUE_QUICKPUBLISH_ICON;
-
-            }
-            
-            imageView.setImageURI(imageUri);
-
+            } 
             
             topicInput.addTextChangedListener(new TextWatcher() {
                 
@@ -210,36 +198,10 @@ public class ActivityQuickpublish extends FragmentActivity {
                     conditionallyEnableSaveButton();
                 }
             });
-     
-            imageView.setOnClickListener(new OnClickListener() {
-                
-                @Override
-                public void onClick(View v) {
-                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(pickPhoto , Defaults.GET_IMAGE_ID);
-
-
-
-
-                    
-                }
-            });
-
             
             return view;
         }
 
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) { 
-            super.onActivityResult(requestCode, resultCode, imageReturnedIntent); 
-            if(requestCode == Defaults.GET_IMAGE_ID) {
-                if(resultCode == RESULT_OK){  
-                    imageUri = imageReturnedIntent.getData();
-                    imageView.setImageURI(imageUri);
-                }
-            }
-       }
 
         
         public static AddDialog newInstance(int position) {
@@ -275,7 +237,7 @@ public class ActivityQuickpublish extends FragmentActivity {
                 b = getArguments();
 
             if(b != null)
-                q = ((ActivityQuickpublish) getActivity()).getListAdapter().getItem(b.getInt("position"));
+                q = ((ActivityQuickpublishNotification) getActivity()).getListAdapter().getItem(b.getInt("position"));
             
             
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
@@ -297,12 +259,11 @@ public class ActivityQuickpublish extends FragmentActivity {
                                 q.setTopic(topicInput.getText().toString());
                                 q.setPayload(payloadInput.getText().toString());
                                 q.setRetained(retainedCheckbox.isChecked());
-                                q.setImagePath(imageUri);
-                                ((ActivityQuickpublish) getActivity()).update(q);
+                                ((ActivityQuickpublishNotification) getActivity()).update(q);
                             } else {
                                 Log.v(this.toString(), "adding qp");
-                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), imageUri, retainedCheckbox.isChecked()); 
-                                ((ActivityQuickpublish) getActivity()).add(q);
+                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), null, retainedCheckbox.isChecked()); 
+                                ((ActivityQuickpublishNotification) getActivity()).add(q);
 
                             }
                             dismiss();

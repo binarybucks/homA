@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -194,11 +195,31 @@ public class App extends Application {
     private void setNotificationQuickpublishes(){
         ArrayList<Quickpublish> qps = Quickpublish.fromPreferences(this, Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION);
         for (int i = 0; i < qps.size() && i < Defaults.NOTIFICATION_MAX_ACTIONS; i++) {
+            
             Log.v(this.toString(),                     qps.get(i).getName());
+            
+            Intent intent = new Intent(this, ActivityBackgroundPublish.class);
+            intent.setAction("st.alr.homA.action.QUICKPUBLISH");
+            intent.putExtra("qp", qps.get(i).toJsonString());
+
+            PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+
+//            //Yes intent
+//            Intent yesReceive = new Intent(this, st.alr.homA.services.ActivityBackgroundPublish.class);
+//            yesReceive.setAction("st.alr.homA.action.QUICKPUBLISH");
+//            yesReceive.putExtra("qp", qps.get(i).toJsonString());
+//            PendingIntent pendingIntentYes = PendingIntent.getBroadcast(this, 12345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//            //mBuilder.addAction(R.drawable.calendar_v, "Yes", pendingIntentYes);
+
+            
+//            Intent p = new Intent(this, ActivityBackgroundPublish.class);
+//            p.setAction("st.alr.homA.action.QUICKPUBLISH"); // TODO: move as final static variable to Defaults class
+//            p.putExtra("qp", qps.get(i).toJsonString());
+
             notificationBuilder.addAction(
-                    R.drawable.ic_quickpublish,
+                    0,
                     qps.get(i).getName(),
-                    PendingIntent.getActivity(this, 0, new Intent(this, ActivityBackgroundPublish.class), 0));
+                    pIntent);
 
         }
     }

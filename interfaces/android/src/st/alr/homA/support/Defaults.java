@@ -25,6 +25,7 @@ public class Defaults {
     public static final String VALUE_QUICKPUBLISH_JSON = "[]";
     public static final String VALUE_QUICKPUBLISH_NAME = "Quickpublish";
     public static final Uri VALUE_QUICKPUBLISH_ICON = Uri.parse("android.resource://st.alr.homA/drawable/ic_quickpublish");
+    public static final Object INTENT_ACTION_PUBLISH_LASTKNOWN = "st.alr.mqttitude.PUBLISH_LASTKNOWN";
 
 
 }
