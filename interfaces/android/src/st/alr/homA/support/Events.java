@@ -1,10 +1,16 @@
 package st.alr.homA.support;
 
-import st.alr.homA.MqttService;
-import st.alr.homA.model.Device;
-import st.alr.homA.model.Room;
+import java.util.ArrayList;
 
+import st.alr.homA.model.Device;
+import st.alr.homA.model.Quickpublish;
+import st.alr.homA.model.Room;
+import st.alr.homA.services.ServiceMqtt;
 public class Events {
+    
+
+
+
     public static class RoomsCleared {
 
     }
@@ -20,19 +26,60 @@ public class Events {
             return this.device;
         }
     }
+    
+    public static class QuickpublishNotificationAdded {
+        Quickpublish q;
+        public QuickpublishNotificationAdded(Quickpublish q) {
+            this.q = q;
+        }
+        public Quickpublish getQuickpublish() {
+            return q;
+        }
+    }
 
-    public static class MqttConnectivityChanged {
-		private MqttService.MQTT_CONNECTIVITY connectivity;
+    public static class QuickpublishNotificationRemoved {
+        Quickpublish q;
+        public QuickpublishNotificationRemoved(Quickpublish q) {
+            this.q = q;
+        }
+        public Quickpublish getQuickpublish() {
+            return q;
+        }
+    }
 
-		public MqttConnectivityChanged(
-				MqttService.MQTT_CONNECTIVITY connectivity) {
-			this.connectivity = connectivity;
-		}
+    public static class QuickpublishNotificationChanged {
+        Quickpublish q;
+        public QuickpublishNotificationChanged(Quickpublish q) {
+            this.q = q;
+        }
+        public Quickpublish getQuickpublishes() {
+            return q;
+        }
+    }
 
-		public MqttService.MQTT_CONNECTIVITY getConnectivity() {
-			return connectivity;
-		}
-	}
+    public static class StateChanged {
+        public static class ServiceMqtt {
+            private Defaults.State.ServiceMqtt state;
+            private Object extra;
+            
+            public ServiceMqtt(Defaults.State.ServiceMqtt state) {
+               this(state, null);
+            }
+            
+            public ServiceMqtt(Defaults.State.ServiceMqtt state, Object extra) {
+                this.state = state;
+                this.extra = extra;
+            }
+            public Defaults.State.ServiceMqtt getState() {
+                return this.state;
+            }
+            public Object getExtra() {
+                return extra;
+            }
+            
+        }
+
+   }
 
 	public static class RoomAdded {
 		Room room;

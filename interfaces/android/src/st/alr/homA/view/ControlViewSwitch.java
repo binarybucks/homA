@@ -1,15 +1,15 @@
 
 package st.alr.homA.view;
 
-import st.alr.homA.MqttService;
 import st.alr.homA.R;
+import st.alr.homA.services.ServiceMqtt;
 import android.app.Activity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Switch;
 
-public class SwitchControlView extends ControlView {
-    public SwitchControlView(Activity activity) {
+public class ControlViewSwitch extends ControlView {
+    public ControlViewSwitch(Activity activity) {
         super(activity, R.layout.fragment_device_switch, R.id.switchControlValue, R.id.switchControlName);
     }
 
@@ -25,8 +25,8 @@ public class SwitchControlView extends ControlView {
             @Override
             public void onClick(View v) {
                 String payload = _control.getValue().equals("1") ? "0" : "1";
-                if (MqttService.getInstance() != null) {
-                    MqttService.getInstance().publish(_control.getTopic(), payload);
+                if (ServiceMqtt.getInstance() != null) {
+                    ServiceMqtt.getInstance().publish(_control.getTopic(), payload);
                 }
             }
         });

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <st.alr.homA.PreferencesServer
+    <st.alr.homA.preferences.PreferencesBroker
         android:key="serverPreference"
         android:negativeButtonText="@string/preferencesServerCancel"
         android:positiveButtonText="@string/preferencesServerConnect"
@@ -13,13 +13,28 @@
         android:summary="@string/preferencesNotificationSummary"
         android:title="@string/preferencesNotificationTitle" />
 
-    <st.alr.homA.support.ImplementedDialogPreference
+    <PreferenceScreen android:title="@string/preferencesQuickpublishTitle"         
+        android:summary="@string/preferencesQuickpublishSummary"
+         >
+        <PreferenceScreen android:title="@string/preferencesQuickpublishNotificationTitle" >
+    		    <intent android:targetPackage="st.alr.homA" android:targetClass="st.alr.homA.ActivityQuickpublishNotification"/>
+        </PreferenceScreen>
+        
+               
+            <PreferenceScreen android:title="NFC" android:key="preferencesNFC" >
+			    <intent android:targetPackage="st.alr.homA" android:targetClass="st.alr.homA.ActivityQuickpublishNfc"/>
+			</PreferenceScreen>
+            
+            
+    </PreferenceScreen>
+
+    <st.alr.homA.preferences.ImplementedDialogPreference
+        android:dialogLayout="@layout/preferences_licenses"
         android:negativeButtonText=""
         android:positiveButtonText="@string/preferencesLicensesDismiss"
         android:summary="@string/preferencesLicensesSummary"
-        android:title="@string/preferencesLicensesTitle"
-        android:dialogLayout="@layout/preferences_licenses" />
-    
+        android:title="@string/preferencesLicensesTitle" />
+
     <Preference
         android:key="versionReadOnly"
         android:title="@string/preferencesVersionTitle" />

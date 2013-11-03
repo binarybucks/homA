@@ -5,13 +5,12 @@
     tools:context=".NfcActivity" >
 
     <ListView
-        android:id="@+id/nfcRecords"
+        android:id="@+id/records"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" 
        	style="@style/homa_listview"
-        
         >
     </ListView>
     

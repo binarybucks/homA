@@ -1,15 +1,15 @@
 package st.alr.homA.view;
 
-import st.alr.homA.MqttService;
 import st.alr.homA.R;
 import st.alr.homA.model.Control;
+import st.alr.homA.services.ServiceMqtt;
 import android.app.Activity;
 import android.util.Log;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class RangeControlView extends ControlView {
-    public RangeControlView(Activity activity) {
+public class ControlViewRange extends ControlView {
+    public ControlViewRange(Activity activity) {
         super(activity, R.layout.fragment_device_range, R.id.seekControlValue, R.id.seekControlName);
     }
 
@@ -51,9 +51,9 @@ public class RangeControlView extends ControlView {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    if (MqttService.getInstance() != null) {
+                    if (ServiceMqtt.getInstance() != null) {
                         String payload = Integer.toString(progress);
-                        MqttService.getInstance().publish(_control.getTopic(), payload);
+                        ServiceMqtt.getInstance().publish(_control.getTopic(), payload);
                     }
                 }                
             }

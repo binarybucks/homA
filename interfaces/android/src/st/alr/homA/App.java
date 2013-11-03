@@ -1,49 +1,76 @@
-    
+
 package st.alr.homA;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import st.alr.homA.MqttService.MQTT_CONNECTIVITY;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
+import st.alr.homA.model.Quickpublish;
+
+import st.alr.homA.services.ActivityBackgroundPublish;
+import st.alr.homA.services.ServiceMqtt;
 import st.alr.homA.support.Events;
-import st.alr.homA.support.Events.MqttConnectivityChanged;
+import st.alr.homA.support.Defaults;
 import st.alr.homA.support.NfcRecordAdapter;
 import st.alr.homA.support.ValueSortedMap;
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.NetworkInfo.State;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import de.greenrobot.event.EventBus;
 import com.bugsnag.android.*;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 
 public class App extends Application {
     private static App instance;
     private static HashMap<String, Device> devices;
     private static ValueSortedMap<String, Room> rooms;
-    
-    
     private static NfcRecordAdapter nfcRecordListAdapter;
     private static boolean recording = false;
-    public static final String defaultsServerAddress = "192.168.8.2";
-    public static final String defaultsServerPort = "1883";
-    public static final String defaultsRoomName = "unassigned";
+    private static NotificationCompat.Builder notificationBuilder;
+    private static SharedPreferences sharedPreferences;
+    private SharedPreferences.OnSharedPreferenceChangeListener preferencesChangedListener;
 
-    
+    private NotificationManager notificationManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        Bugsnag.register(this, "635a508c10fa87191e33662dd3c08512");
+        Bugsnag.register(this, Defaults.BUGSNAG_API_KEY);
+        Bugsnag.setNotifyReleaseStages("production", "testing");
         instance = this;
         devices = new HashMap<String, Device>();
         rooms = new ValueSortedMap<String, Room>();
         nfcRecordListAdapter = new NfcRecordAdapter(this);
-
+        notificationManager = (NotificationManager) App.getInstance().getSystemService(
+                Context.NOTIFICATION_SERVICE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferencesChangedListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreference, String key) {
+                if (key.equals(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED) || key.equals(Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION))
+                    handleNotification();
+            }
+        };
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferencesChangedListener);
+        handleNotification();
         EventBus.getDefault().register(this);
     }
 
     public static Room getRoom(String id) {
         synchronized (rooms) {
 
-        return rooms.get(id);
+            return rooms.get(id);
         }
     }
 
@@ -54,12 +81,13 @@ public class App extends Application {
     }
 
     public static Integer getRoomCount() {
-         return rooms.size();
+        return rooms.size();
     }
 
     public static Set<String> getRoomIds() {
         return rooms.keySet();
     }
+
     public static void addRoom(Room room) {
         rooms.put(room.getId(), room);
         EventBus.getDefault().post(new Events.RoomAdded(room));
@@ -68,12 +96,12 @@ public class App extends Application {
     public static void removeRoom(Room room) {
         rooms.remove(room.getId());
         EventBus.getDefault().post(new Events.RoomRemoved(room));
-        
+
     }
 
-    public static void removeAllRooms() {        
-            rooms.clear();
-            EventBus.getDefault().post(new Events.RoomsCleared());
+    public static void removeAllRooms() {
+        rooms.clear();
+        EventBus.getDefault().post(new Events.RoomsCleared());
     }
 
     public static Device getDevice(String id) {
@@ -88,53 +116,119 @@ public class App extends Application {
     public static App getInstance() {
         return instance;
     }
-    
-    
-    
-    public void onEvent(MqttConnectivityChanged event) {
-        
 
+    public void onEvent(Events.StateChanged.ServiceMqtt event) {
 
-        
-        if(event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET 
-        || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT
-        || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_DATADISABLED
-        || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
+        if (event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_WAITINGFORINTERNET
+                || event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_USERDISCONNECT
+                || event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_DATADISABLED
+                || event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED) {
             removeAllRooms();
             devices.clear();
 
         }
     }
-    
-    
-    
+
     public static void addToNfcRecordMap(String topic, MqttMessage message) {
         nfcRecordListAdapter.put(topic, message);
     }
-    
+
     public static void removeFromNfcRecordMap(String topic) {
         nfcRecordListAdapter.remove(topic);
     }
-        
+
     public static HashMap<String, MqttMessage> getNfcRecordMap() {
         return nfcRecordListAdapter.getMap();
     }
-    
-    public static NfcRecordAdapter getRecordMapListAdapter(){
+
+    public static NfcRecordAdapter getRecordMapListAdapter() {
         return nfcRecordListAdapter;
     }
-    
-    
-    public static boolean isRecording(){
+
+    public static boolean isRecording() {
         return recording;
     }
-    
-    public static void startRecording(){
-        recording = true;        
+
+    public static void startRecording() {
+        recording = true;
     }
 
-    public static void stopRecording(){
+    public static void stopRecording() {
         recording = false;
     }
-}
 
+    /**
+     * @category NOTIFICATION HANDLING
+     */
+    private void handleNotification() {
+        Log.v(this.toString(), "handleNotification()");
+        notificationManager.cancel(Defaults.NOTIFCATION_ID);
+
+        if (sharedPreferences.getBoolean(Defaults.SETTINGS_KEY_NOTIFICATION_ENABLED, Defaults.VALUE_NOTIFICATION_ENABLED))
+            createNotification();
+    }
+
+    private void createNotification() {
+        notificationBuilder = new NotificationCompat.Builder(App.getInstance());
+
+        Intent resultIntent = new Intent(App.getInstance(), ActivityMain.class);
+        android.support.v4.app.TaskStackBuilder stackBuilder = android.support.v4.app.TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(ActivityMain.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(resultPendingIntent);
+        setNotificationQuickpublishes();
+        updateNotification();
+    }
+
+    public void updateNotification() {
+        notificationBuilder.setContentTitle(getResources().getString(R.string.appName));
+        notificationBuilder
+                .setSmallIcon(R.drawable.homamonochrome)
+                .setOngoing(true)
+                .setContentText(ServiceMqtt.getStateAsString())
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setWhen(0);
+        notificationManager.notify(Defaults.NOTIFCATION_ID, notificationBuilder.build());
+    }
+    
+    private void setNotificationQuickpublishes(){
+        ArrayList<Quickpublish> qps = Quickpublish.fromPreferences(this, Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION);
+        for (int i = 0; i < qps.size() && i < Defaults.NOTIFICATION_MAX_ACTIONS; i++) {
+            
+            Log.v(this.toString(),                     qps.get(i).getName());
+            
+            Intent intent = new Intent(this, ActivityBackgroundPublish.class);
+            intent.setAction("st.alr.homA.action.QUICKPUBLISH");
+            intent.putExtra("qp", qps.get(i).toJsonString());
+
+            PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+
+//            //Yes intent
+//            Intent yesReceive = new Intent(this, st.alr.homA.services.ActivityBackgroundPublish.class);
+//            yesReceive.setAction("st.alr.homA.action.QUICKPUBLISH");
+//            yesReceive.putExtra("qp", qps.get(i).toJsonString());
+//            PendingIntent pendingIntentYes = PendingIntent.getBroadcast(this, 12345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//            //mBuilder.addAction(R.drawable.calendar_v, "Yes", pendingIntentYes);
+
+            
+//            Intent p = new Intent(this, ActivityBackgroundPublish.class);
+//            p.setAction("st.alr.homA.action.QUICKPUBLISH"); // TODO: move as final static variable to Defaults class
+//            p.putExtra("qp", qps.get(i).toJsonString());
+
+            notificationBuilder.addAction(
+                    0,
+                    qps.get(i).getName(),
+                    pIntent);
+
+        }
+    }
+
+
+    public static String getAndroidId() {
+        return Secure.getString(instance.getContentResolver(), Secure.ANDROID_ID);
+    }
+    public static Context getContext() {
+        return getInstance();
+    }
+}

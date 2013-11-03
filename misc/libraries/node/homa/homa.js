@@ -9,7 +9,7 @@ var schedule = require('node-schedule');
 var log = require('npmlog')
 log.disableColor();
 var global = this; 
-var params = require('optimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT").describe("systemId", "The unique client ID that determines where settings on the /sys topic are received");
+var params = require('pessimist').describe("brokerHost", "The MQTT broker's hostname or IP adress. Can also be set via ENV HOMA_BROKER_HOST").describe("brokerPort", "The MQTT broker's port. Can also be set via ENV HOMA_BROKER_PORT").describe("systemId", "The unique client ID that determines where settings on the /sys topic are received");
 		params = process.env.HOMA_BROKER_HOST ? params.default("brokerHost", process.env.HOMA_BROKER_HOST) : params.demand("brokerHost");
 		params = process.env.HOMA_BROKER_PORT ? params.default("brokerPort", process.env.HOMA_BROKER_PORT) : params.default("brokerPort", 1883);
 
