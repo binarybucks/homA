@@ -17,16 +17,11 @@ public class Quickpublish {
     String topic = ""; 
     String payload = "";
     boolean retained = false; 
-    Uri imagePath = null;
     
     public Quickpublish(String name, String topic, String payload, boolean retained) {
-        this(name, topic, payload, null, retained);
-    }
-    public Quickpublish(String name, String topic, String payload, Uri imagePath, boolean retained) {
         this.name = name != null && !name.equals("") ? name : Defaults.VALUE_QUICKPUBLISH_NAME;
         this.topic = topic;
         this.payload = payload; 
-        this.imagePath = imagePath;
         this.retained = retained;
     }
     public Quickpublish(JSONObject jsonObject) {
@@ -34,7 +29,6 @@ public class Quickpublish {
             this.topic = jsonObject.getString("t");
             this.payload = jsonObject.getString("p");
             this.retained = jsonObject.getString("r").equals("1") ? true : false;
-            this.imagePath = jsonObject.has("img") ? Uri.parse(jsonObject.getString("img")) : null;
             this.name = jsonObject.has("n")? jsonObject.getString("n") : Defaults.VALUE_QUICKPUBLISH_NAME;
 
         } catch (JSONException e) {
@@ -68,12 +62,6 @@ public class Quickpublish {
         this.retained = retained;
     }
     
-    public Uri getImagePath() {
-        return imagePath != null? imagePath : Defaults.VALUE_QUICKPUBLISH_ICON;
-    }
-    public void setImagePath(Uri imagePath) {
-        this.imagePath = imagePath;
-    }
     public String toJsonString()
     {
         JSONObject object = new JSONObject();
@@ -83,9 +71,6 @@ public class Quickpublish {
           object.put("r", this.retained == true ? "1" : "0" );
           if(!this.name.equals(Defaults.VALUE_QUICKPUBLISH_NAME))
               object.put("n", this.name);
-          if(this.imagePath != null)
-              object.put("img", this.imagePath.toString());
-
           
         } catch (JSONException e) {
           e.printStackTrace();
@@ -136,8 +121,5 @@ public class Quickpublish {
 
     public static void toPreferences(Context context, String key, ArrayList<Quickpublish> values) {
        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(key, Quickpublish.toJsonString(values)).apply();
-    }
-    public Uri getImageURI() {
-        return null;
     }
 }

@@ -2,7 +2,6 @@ package st.alr.homA.preferences;
 
 import st.alr.homA.R;
 import st.alr.homA.services.ServiceMqtt;
-import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
 import st.alr.homA.support.Defaults;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -95,10 +94,10 @@ public class PreferencesServer extends DialogPreference {
         if (v == null)
             return;
 
-        if (ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET
-                || ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT
-                || ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_DATADISABLED
-                || ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
+        if (ServiceMqtt.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_WAITINGFORINTERNET
+                || ServiceMqtt.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_USERDISCONNECT
+                || ServiceMqtt.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_DATADISABLED
+                || ServiceMqtt.getState() == Defaults.State.ServiceMqtt.DISCONNECTED) {
             v.setEnabled(false);
         } else {
             v.setEnabled(true);

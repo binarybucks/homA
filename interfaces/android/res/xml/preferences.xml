@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <st.alr.homA.preferences.PreferencesServer
+    <st.alr.homA.preferences.PreferencesBroker
         android:key="serverPreference"
         android:negativeButtonText="@string/preferencesServerCancel"
         android:positiveButtonText="@string/preferencesServerConnect"

@@ -1,8 +1,7 @@
 
 package st.alr.homA.services;
-
-import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
-import st.alr.homA.support.Events.MqttConnectivityChanged;
+import st.alr.homA.support.Defaults;
+import st.alr.homA.support.Events;
 import android.app.Service;
 import android.content.Intent;
 import android.nfc.NdefMessage;
@@ -32,7 +31,7 @@ public class ServiceNfc extends Service
     {
 
         Log.v(this.toString(), "NFC Read service started: ");
-        EventBus.getDefault().register(this, MqttConnectivityChanged.class);
+        EventBus.getDefault().register(this, Events.StateChanged.ServiceMqtt.class);
 
         if (intent != null) {
 
@@ -76,8 +75,7 @@ public class ServiceNfc extends Service
                 Log.v(this.toString(), "Got topic: " + tokens[0]);
                 Log.v(this.toString(), "Got payload: " + tokens[1]);
                 Log.v(this.toString(), "Got retained: " + tokens[2]);
-
-                ServiceMqtt.getInstance().publishWithTimeout(tokens[0], tokens[1], tokens[2] == "t", 10);
+                ServiceMqtt.getInstance().publish(tokens[0], tokens[1], tokens[2] == "t", 0, 20, null, null);
             } else {
                 Log.e(this.toString(), "Failed to parse mqttMessages");
             }
@@ -85,8 +83,8 @@ public class ServiceNfc extends Service
 
     }
 
-    public void onEvent(MqttConnectivityChanged event) {
-        if (waitingForConnection && event.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+    public void onEvent(Events.StateChanged.ServiceMqtt event) {
+        if (waitingForConnection && event.getState() == Defaults.State.ServiceMqtt.CONNECTED) {
             if (deferred != null) {
                 waitingForConnection = false;
                 deferred.run();

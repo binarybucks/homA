@@ -10,9 +10,7 @@ import st.alr.homA.model.Quickpublish;
 
 import st.alr.homA.services.ActivityBackgroundPublish;
 import st.alr.homA.services.ServiceMqtt;
-import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
 import st.alr.homA.support.Events;
-import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.support.Defaults;
 import st.alr.homA.support.NfcRecordAdapter;
 import st.alr.homA.support.ValueSortedMap;
@@ -23,8 +21,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.NetworkInfo.State;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
@@ -117,12 +117,12 @@ public class App extends Application {
         return instance;
     }
 
-    public void onEvent(MqttConnectivityChanged event) {
+    public void onEvent(Events.StateChanged.ServiceMqtt event) {
 
-        if (event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_WAITINGFORINTERNET
-                || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_USERDISCONNECT
-                || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED_DATADISABLED
-                || event.getConnectivity() == MQTT_CONNECTIVITY.DISCONNECTED) {
+        if (event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_WAITINGFORINTERNET
+                || event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_USERDISCONNECT
+                || event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED_DATADISABLED
+                || event.getState() == Defaults.State.ServiceMqtt.DISCONNECTED) {
             removeAllRooms();
             devices.clear();
 
@@ -186,7 +186,7 @@ public class App extends Application {
         notificationBuilder
                 .setSmallIcon(R.drawable.homamonochrome)
                 .setOngoing(true)
-                .setContentText(ServiceMqtt.getConnectivityText())
+                .setContentText(ServiceMqtt.getStateAsString())
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setWhen(0);
         notificationManager.notify(Defaults.NOTIFCATION_ID, notificationBuilder.build());
@@ -222,5 +222,13 @@ public class App extends Application {
                     pIntent);
 
         }
+    }
+
+
+    public static String getAndroidId() {
+        return Secure.getString(instance.getContentResolver(), Secure.ANDROID_ID);
+    }
+    public static Context getContext() {
+        return getInstance();
     }
 }

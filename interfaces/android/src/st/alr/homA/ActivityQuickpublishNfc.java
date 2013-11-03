@@ -48,9 +48,9 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nfc);
+        setContentView(R.layout.activity_quickpublish);
 
-        listView = (ListView) findViewById(R.id.nfcRecords);
+        listView = (ListView) findViewById(R.id.records);
         listView.setAdapter(App.getRecordMapListAdapter());
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
 
@@ -243,12 +243,9 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
             StringBuffer text = new StringBuffer();
             for (String topic : map.keySet()) {
                 String payload;
-                try {
                     payload = new String(map.get( topic).getPayload());
-                } catch (MqttException e) {
-                    payload = "";
-                }
-                String retained = map.get( topic).isRetained() ? "t" : "f";
+
+                    String retained = map.get( topic).isRetained() ? "t" : "f";
                 text.append( topic + "," + payload + "," + retained + ";");
             }
             text.deleteCharAt(text.length() - 1);// strip last ","
@@ -279,11 +276,16 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
         CheckBox retainedCheckbox;
 
         private View getContentView() {
-            View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_nfc_add, null);
-            topicInput = (TextView) view.findViewById(R.id.topicInput);
+            View view = getActivity().getLayoutInflater().inflate(R.layout.preferences_quickpublish, null);
+            topicInput = (TextView) view.findViewById(R.id.quickpublishTopicInput);
 
-            payloadInput = (TextView) view.findViewById(R.id.paylodInput);
-            retainedCheckbox = (CheckBox) view.findViewById(R.id.retainedCheck);
+            payloadInput = (TextView) view.findViewById(R.id.quickpublishPayloadInput);
+            retainedCheckbox = (CheckBox) view.findViewById(R.id.quickpublishRetainedCheckbox);
+
+            // Not required for NFC
+            view.findViewById(R.id.textView0).setVisibility(View.GONE);
+            view.findViewById(R.id.quickpublishNameInput).setVisibility(View.GONE);
+            
             
             topicInput.addTextChangedListener(new TextWatcher() {
                 

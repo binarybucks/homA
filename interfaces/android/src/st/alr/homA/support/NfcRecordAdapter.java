@@ -76,12 +76,7 @@ public class NfcRecordAdapter extends BaseAdapter {
 
         MqttMessage m = getValue(position);
         String payload;
-        try {
-            payload = new String(m.getPayload());
-        } catch (MqttException e) {
-            payload = "Undefined";
-        }
-        
+        payload = new String(m.getPayload());
         holder.topic.setText(getKey(position));
         holder.payload.setText("Payload: " + payload + " Retained: " + m.isRetained());
 

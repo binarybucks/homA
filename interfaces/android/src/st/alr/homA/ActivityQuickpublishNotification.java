@@ -48,7 +48,7 @@ public class ActivityQuickpublishNotification extends FragmentActivity {
         setContentView(R.layout.activity_quickpublish);
 
         listAdapter = new QuickpublishAdapter(this, Quickpublish.fromPreferences(this, Defaults.SETTINGS_KEY_QUICKPUBLISH_NOTIFICATION));
-        listView = (ListView) findViewById(R.id.quickpublishList);
+        listView = (ListView) findViewById(R.id.records);
         listView.setAdapter(listAdapter);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setMultiChoiceModeListener(multiChoiceListener);
@@ -172,7 +172,7 @@ public class ActivityQuickpublishNotification extends FragmentActivity {
 
         private View getContentView() {
             Log.v(this.toString(), "getContentView");
-            View view = getActivity().getLayoutInflater().inflate(R.layout.preferences_quickpublish_notification, null);
+            View view = getActivity().getLayoutInflater().inflate(R.layout.preferences_quickpublish, null);
             nameInput = (TextView) view.findViewById(R.id.quickpublishNameInput);
             topicInput = (TextView) view.findViewById(R.id.quickpublishTopicInput);
             payloadInput = (TextView) view.findViewById(R.id.quickpublishPayloadInput);
@@ -262,7 +262,7 @@ public class ActivityQuickpublishNotification extends FragmentActivity {
                                 ((ActivityQuickpublishNotification) getActivity()).update(q);
                             } else {
                                 Log.v(this.toString(), "adding qp");
-                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), null, retainedCheckbox.isChecked()); 
+                                Quickpublish q = new Quickpublish(nameInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), retainedCheckbox.isChecked()); 
                                 ((ActivityQuickpublishNotification) getActivity()).add(q);
 
                             }

@@ -6,7 +6,6 @@ import st.alr.homA.App;
 import st.alr.homA.R;
 import st.alr.homA.model.Quickpublish;
 import st.alr.homA.services.ServiceMqtt;
-import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -35,15 +34,15 @@ public class PreferencesQuickpublishNotification extends DialogPreference {
 
     public PreferencesQuickpublishNotification(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setDialogLayoutResource(R.layout.preferences_quickpublish_notification);
+        setDialogLayoutResource(R.layout.preferences_quickpublish);
     }
 
     @Override
     protected View onCreateDialogView() {
         View root = super.onCreateDialogView();
-        topicInput = (TextView) root.findViewById(R.id.topicInput);
-        payloadInput = (TextView) root.findViewById(R.id.paylodInput);
-        retainedCheckbox = (CheckBox) root.findViewById(R.id.retainedCheck);
+        topicInput = (TextView) root.findViewById(R.id.quickpublishTopicInput);
+        payloadInput = (TextView) root.findViewById(R.id.quickpublishPayloadInput);
+        retainedCheckbox = (CheckBox) root.findViewById(R.id.quickpublishRetainedCheckbox);
         return root;
     }
 

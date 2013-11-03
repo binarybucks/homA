@@ -6,7 +6,6 @@ import st.alr.homA.model.Device;
 import st.alr.homA.model.Quickpublish;
 import st.alr.homA.model.Room;
 import st.alr.homA.services.ServiceMqtt;
-
 public class Events {
     
 
@@ -58,19 +57,29 @@ public class Events {
         }
     }
 
-    
-    public static class MqttConnectivityChanged {
-		private ServiceMqtt.MQTT_CONNECTIVITY connectivity;
+    public static class StateChanged {
+        public static class ServiceMqtt {
+            private Defaults.State.ServiceMqtt state;
+            private Object extra;
+            
+            public ServiceMqtt(Defaults.State.ServiceMqtt state) {
+               this(state, null);
+            }
+            
+            public ServiceMqtt(Defaults.State.ServiceMqtt state, Object extra) {
+                this.state = state;
+                this.extra = extra;
+            }
+            public Defaults.State.ServiceMqtt getState() {
+                return this.state;
+            }
+            public Object getExtra() {
+                return extra;
+            }
+            
+        }
 
-		public MqttConnectivityChanged(
-				ServiceMqtt.MQTT_CONNECTIVITY connectivity) {
-			this.connectivity = connectivity;
-		}
-
-		public ServiceMqtt.MQTT_CONNECTIVITY getConnectivity() {
-			return connectivity;
-		}
-	}
+   }
 
 	public static class RoomAdded {
 		Room room;

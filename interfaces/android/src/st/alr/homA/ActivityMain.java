@@ -8,11 +8,11 @@ import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.services.ServiceMqtt;
-import st.alr.homA.services.ServiceMqtt.MQTT_CONNECTIVITY;
+import st.alr.homA.support.Defaults.State;
+import st.alr.homA.support.Defaults;
 import st.alr.homA.support.DeviceMapAdapter;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueSortedMap;
-import st.alr.homA.support.Events.MqttConnectivityChanged;
 import st.alr.homA.view.ControlView;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -60,7 +60,7 @@ public class ActivityMain extends FragmentActivity {
         }
     }
 
-    public void onEventMainThread(MqttConnectivityChanged event) {
+    public void onEventMainThread(Events.StateChanged.ServiceMqtt event) {
         updateViewVisibility();
     }
 
@@ -73,7 +73,7 @@ public class ActivityMain extends FragmentActivity {
     }
 
     private void updateViewVisibility() {
-        if (ServiceMqtt.getConnectivity() == MQTT_CONNECTIVITY.CONNECTED) {
+        if (ServiceMqtt.getState() == st.alr.homA.support.Defaults.State.ServiceMqtt.CONNECTED) {
             connectedLayout.setVisibility(View.VISIBLE);
             disconnectedLayout.setVisibility(View.INVISIBLE);
         } else {
@@ -343,8 +343,8 @@ public class ActivityMain extends FragmentActivity {
             return f;
         }
 
-        public void onEventMainThread(MqttConnectivityChanged event) {
-            if (event.getConnectivity() != ServiceMqtt.MQTT_CONNECTIVITY.CONNECTED) {
+        public void onEventMainThread(Events.StateChanged.ServiceMqtt event) {
+            if (event.getState() != Defaults.State.ServiceMqtt.CONNECTED) {
                 Log.v(this.toString(), "Lost connection, closing currently open dialog");
                 android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
                 android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager
