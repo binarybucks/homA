@@ -9,10 +9,10 @@ $ npm install
 
 ### Start
 Start the application and publish the latitude and longitude values of your home.
-The default $SYSTEMID is ```383274-weather```.
+The default $SYSTEMID is ```3832s74-weather```.
 
 ``` 
-$ ./solar [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID]
+$ ./weather [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID]
 $ publish.js -t "/sys/$SYSTEMID/latitude" -p "48.802545" -r
 $ publish.js -t "/sys/$SYSTEMID/longitude" -p "9.226254" -r
 $ publish.js -t "/sys/$SYSTEMID/units" -p "metric" -r
