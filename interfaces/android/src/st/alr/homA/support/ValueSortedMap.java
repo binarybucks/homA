@@ -103,22 +103,35 @@ public class ValueSortedMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsKey(Object key) {
+        synchronized (dataSorted) {
+
         return dataMap.containsKey(key);
+        }
     }
 
     @Override
     public boolean containsValue(Object value) {
+        synchronized (dataSorted) {
+
         return dataMap.containsValue(value);
+        }
     }
 
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
+        
+        synchronized (dataSorted) {
+
         return dataMap.entrySet();
+        }
     }
 
     @Override
     public boolean isEmpty() {
+        synchronized (dataSorted) {
+
         return size() <= 0;
+        }
     }
 
     @Override
@@ -142,7 +155,7 @@ public class ValueSortedMap<K, V> implements Map<K, V> {
         }
     }
 
-    private ArrayList<V> getDataSorted() {
+    public ArrayList<V> getDataSorted() {
         synchronized (dataSorted) {
 
             return dataSorted;
@@ -156,4 +169,6 @@ public class ValueSortedMap<K, V> implements Map<K, V> {
         }
     }
 
+    
+    
 }

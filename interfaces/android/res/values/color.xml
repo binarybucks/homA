@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <color name="windowBackground">#202020</color>
-
+    <color name="pressed_homa">#CC2bc8ec</color>
+    
+    <color name="windowBackground">#e5e5e5</color>
+    <color name="drawerBackground">#e5e5e5</color>
+    <color name="drawerFont">#000000</color>
+    
 </resources>

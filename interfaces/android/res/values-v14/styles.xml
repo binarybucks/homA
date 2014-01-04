@@ -1,34 +1,81 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme.homa" parent="@android:style/Theme.Holo">
-        <item name="android:actionBarStyle">@style/homa_solid_ActionBar</item>
-        <item name="android:windowBackground">@color/windowBackground</item>
-    </style>
-    
-    <style name="homa_solid_pager" >
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">@drawable/homa_pager</item>    
-    </style>   
-    
-    <style name="homa_solid_ActionBar" parent="@android:style/Widget.Holo.ActionBar.Solid">
-        <item name="android:background">@drawable/homa_actionbar</item>
+
+    <style name="homa_listview" parent="@android:style/Widget.ListView">
+        <item name="android:fadingEdge">none</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:divider">#ccc</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:scrollbarStyle">outsideInset</item> 
+        <item name="android:listSelector">@drawable/selectable_background_homa</item>               
     </style>
 
-	<style name="homa_listview" parent="@android:style/Widget.ListView">
-	    <item name="android:fadingEdge">none</item>
-	    <item name="android:dividerHeight">3px</item>
-		<item name="android:divider">@drawable/homa_divider</item>
+    <style name="Theme.Homa" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_homa</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Homa</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Homa</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Homa</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Homa</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Homa</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_homa</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_homa</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Homa</item>
+                <item name="android:windowContentOverlay">@null</item>
+        
     </style>
-    
-    
-    <style name="homa_listview_item">
-    	<item name="android:background">@drawable/list_background</item>	
-	</style>
-	
-	<style name="invisible" parent="@android:style/Theme.Holo">
-	    <item name="android:windowBackground">@android:color/transparent</item>
-	    <item name="android:windowIsFloating">true</item>
-	    <item name="android:windowNoTitle">true</item>
-	    <item name="android:windowContentOverlay">@null</item>
-	</style>
-    
+
+    <style name="ActionBar.Solid.Homa" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid_homa</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_homa</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_homa</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Homa</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Homa" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_homa</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Homa</item>
+    </style>
+
+    <style name="PopupMenu.Homa" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_homa</item>
+    </style>
+
+    <style name="DropDownListView.Homa" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_homa</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Homa" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_homa</item>
+    </style>
+
+    <style name="DropDownNav.Homa" parent="@android:style/Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/spinner_background_ab_homa</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_homa</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_homa</item>
+    </style>
+
+    <style name="ProgressBar.Homa" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_homa</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.Homa" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_homa</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Homa.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Homa</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Homa</item>
+    </style>
+
+    <style name="invisible" parent="@android:style/Theme.Holo">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
 </resources>

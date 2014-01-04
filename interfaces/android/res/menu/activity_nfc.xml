@@ -15,19 +15,4 @@
         android:showAsAction="ifRoom"
         android:title="@string/nfcWrite">
     </item>
-    <item
-        android:id="@+id/recordingStart"
-        android:icon="@drawable/ic_action_record_start"
-        android:orderInCategory="98"
-        android:showAsAction="ifRoom"
-        android:title="@string/nfcStartRecording">
-    </item>
-    <item
-        android:id="@+id/recordingStop"
-        android:icon="@drawable/ic_action_record_stop"
-        android:orderInCategory="98"
-        android:showAsAction="ifRoom"
-        android:title="@string/nfcStopRecording">
-    </item>
-
 </menu>

@@ -15,18 +15,7 @@ public class Events {
 
     }
 
-    public static class DeviceRenamed {
-        Device device;
 
-        public DeviceRenamed(Device device) {
-            this.device = device;
-        }
-
-        public Device getDevice() {
-            return this.device;
-        }
-    }
-    
     public static class QuickpublishNotificationAdded {
         Quickpublish q;
         public QuickpublishNotificationAdded(Quickpublish q) {

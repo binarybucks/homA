@@ -2,10 +2,14 @@
 package st.alr.homA;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import st.alr.homA.model.Quickpublish;
+import st.alr.homA.support.MapAdapter;
+import st.alr.homA.support.QuickpublishAdapter;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -43,6 +47,7 @@ import android.widget.TextView;
 public class ActivityQuickpublishNfc extends FragmentActivity {
     private static boolean writeMode;
     private ListView listView;
+    private static QuickpublishAdapter adapter;
     private Menu menu;
 
     @Override
@@ -51,11 +56,10 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
         setContentView(R.layout.activity_quickpublish);
 
         listView = (ListView) findViewById(R.id.records);
-        listView.setAdapter(App.getRecordMapListAdapter());
+        adapter = new QuickpublishAdapter(this);
+        listView.setAdapter(adapter);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-
         listView.setMultiChoiceModeListener(multiChoiceListener);
-
         writeMode = false;
 
     }
@@ -67,16 +71,6 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
         return true;
     }
     
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        if (App.isRecording()) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-
-        return true;
-    }
    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -89,35 +83,9 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
                 WriteDialog writeDialog = new WriteDialog();
                 getFragmentManager().beginTransaction().add(writeDialog, "writeDialog").commit();
                 return true;
-            case R.id.recordingStart:
-                startRecording();
-                return true;
-
-            case R.id.recordingStop:
-                stopRecording();
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void startRecording() {
-        Log.v(this.toString(), "Recording of MQTT publishes started");
-        App.startRecording();
-        setRecordingIcons();
-    }
-
-    private void stopRecording() {
-        Log.v(this.toString(), "Recording of MQTT publishes stopped");
-
-        App.stopRecording();
-        setRecordingIcons();
-
-    }
-
-    private void setRecordingIcons() {
-        menu.findItem(R.id.recordingStart).setVisible(!App.isRecording());
-        menu.findItem(R.id.recordingStop).setVisible(App.isRecording());
     }
 
     private MultiChoiceModeListener multiChoiceListener = new MultiChoiceModeListener() {
@@ -142,7 +110,7 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard:
-                    App.getRecordMapListAdapter().remove(listView.getCheckedItemPositions());
+                    adapter.remove(listView.getCheckedItemPositions());
                     mode.finish();
                     return true;
                 default:
@@ -229,30 +197,13 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
             Log.v(this.toString(), "Detected tag: " + mytag.toString());
             Log.v(this.toString(), "techlist:" + mytag.getTechList());
 
-            
-            Map<String, MqttMessage> map = App.getRecordMapListAdapter().getMap();
-            if (map.size() < 1) {
+            ArrayList<Quickpublish> qps = adapter.getValues();
+            if (qps.size() < 1) {
                 publishProgress(getResources().getString(R.string.nfcWriteDialogTagNoContent), false);
                 return;
             }
             
-            
-            
-            
-            
-            StringBuffer text = new StringBuffer();
-            for (String topic : map.keySet()) {
-                String payload;
-                    payload = new String(map.get( topic).getPayload());
-
-                    String retained = map.get( topic).isRetained() ? "t" : "f";
-                text.append( topic + "," + payload + "," + retained + ";");
-            }
-            text.deleteCharAt(text.length() - 1);// strip last ","
-
-            Log.v(this.toString(), text.toString());
-
-            if (write(text.toString(), mytag)) {
+            if (write(Quickpublish.toJsonString(qps), mytag)) {
                 Log.v(this.toString(), "Write ok");
                 publishProgress(getResources().getString(R.string.nfcWriteDialogTagSuccess), true);
 
@@ -319,7 +270,7 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setTitle(getResources().getString(R.string.add))
                     .setView(getContentView())
-                    .setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    .setNegativeButton(getResources().getString(R.string.preferencesLicensesDismiss), new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -330,10 +281,7 @@ public class ActivityQuickpublishNfc extends FragmentActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            MqttMessage m = new MqttMessage();
-                            m.setPayload(payloadInput.getText().toString().getBytes());
-                            m.setRetained(retainedCheckbox.isChecked());
-                            App.addToNfcRecordMap(topicInput.getText().toString(), m);
+                            adapter.add(new Quickpublish(topicInput.getText().toString(), topicInput.getText().toString(), payloadInput.getText().toString(), retainedCheckbox.isChecked()));
                             dismiss();
                         }
                     });

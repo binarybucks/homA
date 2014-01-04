@@ -3,10 +3,10 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="15dip"
-    style="@style/homa_listview_item" >
+    >
 
     <TextView
+        android:textColor="@color/drawerFont"
         android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,5 @@
         android:paddingTop="20dip"
         android:textSize="18sp" >
     </TextView>
-
-
 
 </LinearLayout>

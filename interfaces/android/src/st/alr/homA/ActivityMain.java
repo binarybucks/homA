@@ -1,29 +1,25 @@
 
 package st.alr.homA;
 
-import java.util.HashMap;
-import java.util.Locale;
-
 import st.alr.homA.model.Control;
 import st.alr.homA.model.Device;
 import st.alr.homA.model.Room;
 import st.alr.homA.services.ServiceMqtt;
-import st.alr.homA.support.Defaults.State;
 import st.alr.homA.support.Defaults;
-import st.alr.homA.support.DeviceMapAdapter;
+import st.alr.homA.support.DeviceAdapter;
 import st.alr.homA.support.Events;
 import st.alr.homA.support.ValueSortedMap;
 import st.alr.homA.view.ControlView;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,18 +35,26 @@ import android.widget.ScrollView;
 import de.greenrobot.event.EventBus;
 
 public class ActivityMain extends FragmentActivity {
-    private Room currentRoom;
-    private RoomPagerAdapter roomPagerAdapter;
-    private static ViewPager mViewPager;
-
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;   
     RelativeLayout disconnectedLayout;
     LinearLayout connectedLayout;
+    private CharSequence title;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent i;
         
+        
+        
         int itemId = item.getItemId();
+        
+            if (mDrawerToggle.onOptionsItemSelected(item)) {
+              return true;
+            }
+            // Handle your other action bar items...
+
         if (itemId == R.id.menu_settings) {
             i = new Intent(this, ActivityPreferences.class);
             startActivity(i);
@@ -74,11 +78,18 @@ public class ActivityMain extends FragmentActivity {
 
     private void updateViewVisibility() {
         if (ServiceMqtt.getState() == st.alr.homA.support.Defaults.State.ServiceMqtt.CONNECTED) {
+            Log.v(this.toString(), "Showing connected layout");
             connectedLayout.setVisibility(View.VISIBLE);
             disconnectedLayout.setVisibility(View.INVISIBLE);
+            setActionbarTitle();
+            
         } else {
+            Log.v(this.toString(), "Showing disconnected layout");
+
             connectedLayout.setVisibility(View.INVISIBLE);
             disconnectedLayout.setVisibility(View.VISIBLE);
+            setActionbarTitleAppname();
+
         }
     }
 
@@ -119,215 +130,183 @@ public class ActivityMain extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
+        
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        
+        
         disconnectedLayout = (RelativeLayout) findViewById(R.id.disconnectedLayout);
         connectedLayout = (LinearLayout) findViewById(R.id.connectedLayout);
 
         updateViewVisibility();
 
-        roomPagerAdapter = new RoomPagerAdapter(this);
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(roomPagerAdapter);
-        mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
-            @Override
-            public void onPageSelected(int index) {
-                currentRoom = App.getRoom(index);
-            }
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(App.getRoomListAdapter());
+        setActionbarTitleAppname();
+
+
+        mDrawerList.setOnItemClickListener(new OnItemClickListener(){
 
             @Override
-            public void onPageScrollStateChanged(int arg0) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectRoom(App.getRoom(position));
+                mDrawerLayout.closeDrawer(mDrawerList);
+                
             }
 
-            @Override
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-            }
+            
         });
-        EventBus.getDefault().register(this);
 
+        
+        
+        
+        mDrawerToggle = new ActionBarDrawerToggle(this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_navigation_drawer,  /* nav drawer icon to replace 'Up' caret */
+                R.string.na,  /* "open drawer" description */
+                R.string.na  /* "close drawer" description */) {
+
+
+            
+            
+/** Called when a drawer has settled in a completely closed state. */
+
+            @Override
+            public void onDrawerClosed(View view) {
+                setActionbarTitle();
+            }
+
+            
+/** Called when a drawer has settled in a completely open state. */
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                setActionbarTitleAppname();
+            }
+
+
+        };
+        
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerToggle.syncState();
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        
+        Room selected =  App.getRoom(PreferenceManager.getDefaultSharedPreferences(this).getString("selectedRoomId", "")); 
+        if(selected != null)
+            selectRoom(selected);
+        
+        EventBus.getDefault().register(this);
+    }
+    
+    protected void setActionbarTitleAppname() {
+        String appname = getString(R.string.appName);
+        String abtitle = (String) getActionBar().getTitle();
+        if(abtitle != null && !abtitle.equals(appname))
+            title = abtitle;        
+           
+        getActionBar().setTitle(appname);
+        
     }
 
-    public class RoomPagerAdapter extends PagerAdapter {
-        private HashMap<String, DeviceMapAdapter> deviceMapAdapter;
-        private Context context;
-        private HashMap<String, View> views;
-        private int count = 0;
+    protected void setActionbarTitle(String t){   
+     
+        Log.v(this.toString(), "setActionbarTitle with parameter to to " + t);
 
-        public RoomPagerAdapter(Context context) {
-            this.context = context;
-            this.deviceMapAdapter = new HashMap<String, DeviceMapAdapter>();
-            this.views = new HashMap<String, View>();
-            this.count = App.getRoomCount();
-            EventBus.getDefault().register(this);
-            notifyDataSetChanged();
+        getActionBar().setTitle(t);
+        title = t;
+    }
+    
+    protected void setActionbarTitle() {
+        Log.v(this.toString(), "setActionbarTitle to " + title);
+        if(title != null)
+            getActionBar().setTitle(title);
+        else 
+            setActionbarTitleAppname();
+    }
+
+    private void selectRoom(Room r) {
+        Log.v(this.toString(), "selecting " + r.getId());
+        Fragment f = RoomFragment.newInstance(r);
+        
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                       .replace(R.id.content_frame, f)
+                       .commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("selectedRoomId", r.getId()).commit();
+        Log.v(this.toString(), "selected2 "+ PreferenceManager.getDefaultSharedPreferences(this).getString("selectedRoomId", ""));
+
+        setActionbarTitle(r.getId());
+    }
+    
+    public void onEventMainThread(Events.RoomAdded e) {
+        if(e.getRoom().getId().equals(PreferenceManager.getDefaultSharedPreferences(this).getString("selectedRoomId", ""))) {
+            selectRoom(e.getRoom());
+        } else {
+            Log.v(this.toString(), "selected "+ PreferenceManager.getDefaultSharedPreferences(this).getString("selectedRoomId", ""));
+            Log.v(this.toString(), "room " +e.getRoom().getId());
+            
         }
+    }
+    
+    public static class RoomFragment extends Fragment {
+        Room room;
+        DeviceAdapter adapter;
+        private ListView listView;
+        
+        public static RoomFragment newInstance(Room r) {
+            RoomFragment f = new RoomFragment();            
+            Bundle args = new Bundle();
+            args.putString("roomId", r.getId());
+            f.setArguments(args);
 
-        public int getItemPosition(Object object) {
-            // This seems to cause https://github.com/binarybucks/homA/issues/79
-            // if(App.getRoom((String)object) == null) {
-            // return POSITION_NONE;
-            // }
-            //
-            // int i = 0;
-            // for (String s : App.getRoomIds()) {
-            // if(object.equals(s)) {
-            // break;
-            // }
-            // i++;
-            // }
-            // return i;
-            //
-            return POSITION_NONE;
+            return f;
         }
-
+        
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            final Room room = App.getRoom(position);
-            View page = views.get(room.getId());
-
-            if (page == null) {
-                page = getLayoutInflater().inflate(R.layout.fragment_room, container, false);
-                views.put(room.getId(), page);
-                ListView lv = (ListView) page.findViewById(R.id.devices_list);
-
-                DeviceMapAdapter m = new DeviceMapAdapter(context, room.getDevices());
-                deviceMapAdapter.put(room.getId(), m);
-                lv.setAdapter(m);
-                m.notifyDataSetChanged();
-
-                lv.setOnItemClickListener(new OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long it) {
-
-                        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-                        android.support.v4.app.FragmentTransaction ft = fm.beginTransaction();
-
-                        fm.beginTransaction();
-                        DeviceFragment d = DeviceFragment.newInstance(room.getId(), room
-                                .getDevices().values().toArray()[position].toString());
-                        ft.add(d, "tag");
-                        ft.commit();
-                    }
-                });
-            } else {
-                ((ViewGroup) page.getParent()).removeView(page);
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            room = App.getRoom(getArguments().getString("roomId"));
+            if(room == null) {
+                getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+                Log.e(this.toString(), "Clearing fragment for removed room");
+                return;
             }
+            
 
-            container.addView(page);
-            return room.getId();
         }
-
+        
         @Override
-        public CharSequence getPageTitle(int position) {
-            return position < getCount() ? App.getRoom(position).getId()
-                    .toUpperCase(Locale.ENGLISH) : "";
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            
+            
+            View v = inflater.inflate(R.layout.fragment_room, container, false);
+            if(room == null)
+                return v;
+            
+            this.listView = (ListView)v.findViewById(R.id.devices_list);
+            listView.setAdapter(room.getAdapter());
+            listView.setOnItemClickListener(new OnItemClickListener(){
+
+                @Override
+                public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                    android.support.v4.app.FragmentManager fm = getFragmentManager();
+                    android.support.v4.app.FragmentTransaction ft = fm.beginTransaction();
+
+                    DeviceFragment d = DeviceFragment.newInstance(room.getId(), room.getDevice(position).toString());
+                    ft.add(d, "tag");
+                    ft.commit();                    
+                }
+                
+            });
+            return v;
         }
-
-        @Override
-        public int getCount() {
-            return this.count;
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return views.get(object).equals(view);
-            // return view.equals(object);
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView(views.get(object));
-            views.remove(object);
-        }
-
-        /**
-         * @category EVENTS
-         */
-        public void onEventMainThread(Events.RoomAdded event) {
-            this.count++;
-
-            Log.v(this.toString(), "Room added : " + event.getRoom().getId() + ". new count is: "
-                    + this.count);
-            notifyDataSetChanged();
-
-            // // String currentId = currentRoom.getId();
-            // // Log.v(this.toString(), "currentId: " + currentId);
-            //
-            //
-            // // // Check if it was an insert before
-            // // if (roomAtCurrentItemPositionBefore.compareTo(event.getRoom())
-            // > 0) {
-            // // mViewPager.setCurrentItem(i, false);
-            // // }
-            //
-            //
-            // // int currentItem = mViewPager.getCurrentItem();
-            // // Room roomAtCurrentItemPositionBefore =
-            // App.getRoom(currentItem);
-            //
-            // if(currentRoom != null) {
-            // int i;
-            // for (i = 0; i < App.getRoomCount(); i++){
-            // Log.v(this.toString(), "i: " + i);
-            //
-            // if(App.getRoom(i).getId().equals(currentRoom.getId()));
-            // break;
-            // }
-            // // Room roomAtCurrentItemPositionAfter =
-            // App.getRoom(currentItem);
-            // //
-            // // // Check if it was an insert before
-            // // if
-            // (roomAtCurrentItemPositionBefore.compareTo(roomAtCurrentItemPositionAfter)
-            // <= 0) {
-            // mViewPager.setCurrentItem(i, false);}
-            // // }
-            //
-
-        }
-
-        public void onEventMainThread(Events.RoomsCleared event) {
-            Log.v(this.toString(), "Rooms cleared");
-            this.count = 0;
-            notifyDataSetChanged();
-        }
-
-        public void onEventMainThread(Events.RoomRemoved event) {
-            this.count--;
-
-            Log.v(this.toString(), "Room removed : " + event.getRoom().getId() + ". new count is: "
-                    + this.count);
-            notifyDataSetChanged();
-        }
-
-        public void onEventMainThread(Events.DeviceAddedToRoom event) {
-            Log.v(this.toString(), "DeviceAddedToRoom: " + event.getDevice().toString() + " "
-                    + event.getRoom().getId());
-            DeviceMapAdapter m = deviceMapAdapter.get(event.getRoom().getId());
-            if (m != null) {
-                m.addItem(event.getDevice());
-                m.notifyDataSetChanged();
-            }
-        }
-
-        public void onEventMainThread(Events.DeviceRenamed event) {
-            Log.v(this.toString(), "DeviceRenamed: " + event.getDevice().toString());
-            DeviceMapAdapter m = deviceMapAdapter.get(event.getDevice().getRoom().getId());
-            if (m != null) {
-                m.sortDataset();
-                m.notifyDataSetChanged();
-            }
-        }
-
-        public void onEventMainThread(Events.DeviceRemovedFromRoom event) {
-            Log.v(this.toString(), "DeviceRemovedFromRoom: " + event.getDevice().toString() + " "
-                    + event.getRoom().toString());
-            DeviceMapAdapter m = deviceMapAdapter.get(event.getRoom().getId());
-            if (m != null) {
-                m.removeItem(event.getDevice());
-                m.notifyDataSetChanged();
-            }
-        }
-
     }
 
     public static class DeviceFragment extends android.support.v4.app.DialogFragment {
@@ -354,6 +333,7 @@ public class ActivityMain extends FragmentActivity {
             }
         }
 
+        @Override
         public void onSaveInstanceState(Bundle outState) {
             super.onSaveInstanceState(outState);
             // After long times of inactivity with an open dialog, Android might
@@ -380,7 +360,7 @@ public class ActivityMain extends FragmentActivity {
                 return false;
             }
 
-            device = room.getDevices().get(b.getString("deviceId"));
+            device = room.getDevice(b.getString("deviceId"));
 
             return true;
         }

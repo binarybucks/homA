@@ -3,49 +3,46 @@ package st.alr.homA.support;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 import st.alr.homA.R;
-import st.alr.homA.model.Device;
 import st.alr.homA.model.Quickpublish;
-import st.alr.homA.support.DeviceMapAdapter.ViewHolder;
-
 import android.content.Context;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 public class QuickpublishAdapter extends BaseAdapter {
-    private ArrayList<Quickpublish> values;
+    private HashMap<String, Quickpublish> map;
     Context context;
     
     @Override
     public int getCount() {
-        return values.size();
+        return map.size();
     }
 
     public QuickpublishAdapter(Context context) {
-        this(context, new ArrayList<Quickpublish>());
+        this.map = map != null? map : new HashMap<String, Quickpublish>();
+        this.context = context;
     }
     
-    public QuickpublishAdapter(Context context, ArrayList<Quickpublish> values) {
-        this.values = values != null? values : new ArrayList<Quickpublish>();
-        this.context = context;
+    public QuickpublishAdapter(Context context, ArrayList<Quickpublish> array) {
+        this(context);
+
+        for (Quickpublish quickpublish : array) 
+            add(quickpublish);
+
     }
 
     
     @Override
     public Quickpublish getItem(int arg0) {
-        return values.get(arg0);
+        return (Quickpublish) map.values().toArray()[arg0];
     }
 
-    public ArrayList<Quickpublish> getValues(){
-        return values;
+    public ArrayList<Quickpublish> getValues(){        
+        return new ArrayList<Quickpublish>(map.values());
     }
     
     @Override
@@ -85,18 +82,17 @@ public class QuickpublishAdapter extends BaseAdapter {
     }
     
     public void add(Quickpublish q) {
-        values.add(q);
+        map.put(q.getTopic(), q);
         notifyDataSetChanged();
-
     }
     
     public void remove(Quickpublish q) {
-        values.remove(q);
+        map.remove(q.getTopic());
         notifyDataSetChanged();
     }
 
     public void remove(int position) {
-        values.remove(position);
+        map.remove(getItem(position));
         notifyDataSetChanged();
     }
 
@@ -104,7 +100,7 @@ public class QuickpublishAdapter extends BaseAdapter {
     public void remove(SparseBooleanArray sba) {
             for (int i = 0; i < getCount(); i++)
                 if (sba.get(i))
-                    values.remove(i);
+                    remove(i);
             notifyDataSetChanged();
     }
 

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+  
     <string name="appName">HomA</string>
-   	
-   	<string name="titleActivityNfc">"Tags beschreiben"</string>
+    <string name="titleActivityQuickpublishNfc">"NFC"</string>
+    <string name="titleActivityQuickpublishNotification">"Benachrichtigung"</string>
     <string name="titleActivityMain">HomA</string>
-   	<string name="titleActivityPreferences">"Einstellungen"</string>
-    
+    <string name="titleActivityPreferences">"Einstellungen"</string>
     <string name="preferencesServerTitle">"Server"</string>
     <string name="preferencesServerAddress">"Server Adresse"</string>
     <string name="preferencesServerPort">"Server Port"</string>
@@ -15,23 +14,30 @@
     <string name="preferencesLicensesTitle">"Lizenzen"</string>
     <string name="preferencesLicensesSummary">"Details zu verwendeter open-source Software"</string>
     <string name="preferencesLicensesDismiss">"Schließen"</string>
-    <string name="preferencesNotificationSummary">"Benachrichtigung anzeigen, um im Hintergrund ausgeführt zu werden"</string>
-    <string name="preferencesNotificationTitle">"Benachrichigung"</string>
+    <string name="preferencesNotificationSummary">"Benachrichtigung anzeigen"</string>
+    <string name="preferencesNotificationTitle">"Benachrichtigung"</string>
     <string name="preferencesVersionTitle">"Version"</string>
-    
+    <string name="preferencesQuickpublishTitle">"Schnellzugriff"</string>
+    <string name="preferencesQuickpublishSummary">"Zugriff auf häufig verwendete Funktionen"</string>
+    <string name="preferencesQuickpublishNotificationTitle">"Benachrichtigung"</string>
+    <string name="preferencesQuickpublishWidgetTitle">"Widget"</string>
+    <string name="nfcWriteDialogWaitingForTag">"Smartphone zum Beschreiben über Tag platzieren"</string>
+    <string name="nfcWriteDialogTitle">"Schreiben"</string>
+    <string name="quickpublishNameInputTitle">"Titel"</string>
+    <string name="quickpublishAdd">"Schnellzugriff hinzufügen"</string>
+    <string name="quickpublishEdit">"Schnellzugriff bearbeiten"</string>
+    <string name="quickpublishPayloadInputTitle">"Payload"</string>
+    <string name="quickpublishTopicInputTitle">"Topic"</string>
+    <string name="quickpublishRetainedInputTitle">"Retained"</string>
+    <string name="quickpublishIconInputTitle">"Icon"</string>
     <string name="connectivityConnecting">"Verbinden"</string>
     <string name="connectivityConnected">"Verbunden"</string>
     <string name="connectivityDisconnecting">"Trennen"</string>
     <string name="connectivityDisconnected">"Getrennt"</string>
-    
-    
-    <string name="nfcWriteDialogWaitingForTag">"Smartphone zum Beschreiben über Tag platzieren"</string>
-    <string name="nfcWriteDialogTitle">"Schreiben"</string>
-    <string name="nfcWritePayloadInput">"Payload"</string>
-    <string name="nfcWriteTopicInput">"Topic"</string>
-    <string name="nfcWriteRetainedInput">"Retained"</string>
-    <string name="nfcWriteDialogTagReadOnly">"Tag ist schreibgeschützt"</string>
-    <string name="nfcWriteDialogTagFormatedAndWrote">"Tag erfolgreich formatiert und beschrieben"</string>
+    <string name="connectivityDisconnectedUserDisconnect">"Getrennt: Benutzer"</string>
+    <string name="connectivityDisconnectedDataDisabled">"Getrennt: Keine Verbindung"</string>
+        <string name="nfcWriteDialogTagReadOnly">"Tag ist schreibgeschützt"</string>
+        <string name="nfcWriteDialogTagFormatedAndWrote">"Tag erfolgreich formatiert und beschrieben"</string>
     <string name="nfcWriteDialogTagFailedToFormat">"Tag konnte nicht formatiert werden"</string>
     <string name="nfcWriteDialogTagFailedToWrite">"Tag konnte nicht beschrieben werden"</string>
     <string name="nfcWriteDialogTagNoNDEFSupport">"Tag unterstützt kein NDEF Format"</string>
@@ -39,17 +45,32 @@
     <string name="nfcWriteDialogTagMessageSizeIs">", Nachrichtengröße ist "</string>
     <string name="nfcWriteDialogTagNoContent">"Keine Nachricht zum schreiben vorhanden"</string>
     <string name="nfcWriteDialogTagSuccess">"Tag erfolgreich beschrieben"</string>
-    <string name="nfcWrite">"Schreiben"</string>
     
-    <string name="nfcStartRecording">"Aufzeichung starten"</string>
+    
+    <string name="nfcWrite">"Beschreiben"</string>
+    <string name="nfcStartRecording">"Aufzeichnung starten"</string>
     <string name="nfcStopRecording">"Aufzeichnung stoppen"</string>
-    
-    
-    <string name="actionModeOneSelected">"Ein Element ausgewählt"</string>
+        <string name="actionModeOneSelected">"Ein Element ausgewählt"</string>
     <string name="actionModeMoreSelected">"Elemente ausgewählt"</string>
     <string name="actionModeDiscardSelected">"Löschen"</string>
-    
     <string name="add">"Hinzufügen"</string>
     <string name="cancel">"Abbrechen"</string>
+    <string name="save">"Speichern"</string>
+    <string name="rooms">"Räume"</string>
+    <string name="na">"N/A"</string>
+    <string name="preferencesBrokerUsername">"Benutzername"</string>
+    <string name="preferencesBrokerPassword">"Passwort"</string>
+    <string name="preferencesConnectionSecurity">"Verschlüsselung"</string>
     
+    <string name="error">"Fehler"</string>
+
+    <string-array name="connect_options_security">
+        <item>Keine</item>
+        <item>TLS (System Zertifikat)</item>
+        <item>TLS (Lokales Zertifikat)</item>
+    </string-array>
+    <string-array name="connect_options_auth">
+        <item>Anonym</item>
+        <item>Benutzername/Passwort</item>
+    </string-array>
 </resources>

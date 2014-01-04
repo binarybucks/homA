@@ -3,8 +3,7 @@
 
     <string name="appName">HomA</string>
     <string name="titleActivityQuickpublishNfc">"NFC Quickpublish"</string>
-        <string name="titleActivityQuickpublishNotification">"Notification Quickpublish"</string>
-    
+    <string name="titleActivityQuickpublishNotification">"Notification Quickpublish"</string>
     <string name="titleActivityMain">HomA</string>
     <string name="titleActivityPreferences">"Settings"</string>
     <string name="preferencesServerTitle">"Server"</string>
@@ -20,30 +19,23 @@
     <string name="preferencesVersionTitle">"Version"</string>
     <string name="preferencesQuickpublishTitle">"Quickpublish"</string>
     <string name="preferencesQuickpublishSummary">"Access to commonly used tasks"</string>
-   
-    
     <string name="preferencesQuickpublishNotificationTitle">"Notification"</string>
-    
     <string name="preferencesQuickpublishWidgetTitle">"Widget"</string>
     <string name="nfcWriteDialogWaitingForTag">"Place your phone above a tag to write"</string>
     <string name="nfcWriteDialogTitle">"Write"</string>
     <string name="quickpublishNameInputTitle">"Name"</string>
-        <string name="quickpublishAdd">"Add quickpublish"</string>
-            <string name="quickpublishEdit">"Edit Quickpublish"</string>
-        
-    
+    <string name="quickpublishAdd">"Add quickpublish"</string>
+    <string name="quickpublishEdit">"Edit Quickpublish"</string>
     <string name="quickpublishPayloadInputTitle">"Payload"</string>
     <string name="quickpublishTopicInputTitle">"Topic"</string>
     <string name="quickpublishRetainedInputTitle">"Retained"</string>
     <string name="quickpublishIconInputTitle">"Icon"</string>
-    
-            <string name="connectivityConnecting">"Connecting"</string>
+    <string name="connectivityConnecting">"Connecting"</string>
     <string name="connectivityConnected">"Connected"</string>
     <string name="connectivityDisconnecting">"Disconnecting"</string>
     <string name="connectivityDisconnected">"Disconnected"</string>
     <string name="connectivityDisconnectedUserDisconnect">"Disconnected: By user"</string>
     <string name="connectivityDisconnectedDataDisabled">"Disconnected: Data disabled"</string>
-    
     <string name="nfcWriteDialogTagReadOnly">"Tag is read-only"</string>
     <string name="nfcWriteDialogTagFormatedAndWrote">"Formatted tag and wrote message"</string>
     <string name="nfcWriteDialogTagFailedToFormat">"Failed to format tag"</string>
@@ -62,22 +54,21 @@
     <string name="add">"Add"</string>
     <string name="cancel">"Cancel"</string>
     <string name="save">"Save"</string>
+    <string name="rooms">"Rooms"</string>
     <string name="na">"N/A"</string>
-    
-        <string name="preferencesBrokerUsername">"Username (Broker authentication)"</string>
-        <string name="preferencesConnectionSecurity">"Connection security"</string>
-    
+    <string name="preferencesBrokerUsername">"Username (Broker authentication)"</string>
+    <string name="preferencesConnectionSecurity">"Connection security"</string>
     <string name="preferencesBrokerPassword">"Password"</string>
     <string name="error">"Error"</string>
-    
-     <string-array name="connect_options_security">
+
+    <string-array name="connect_options_security">
         <item>None</item>
         <item>TLS</item>
         <item>TLS (Custom Certificate)</item>
     </string-array>
-    
-   	<string-array name="connect_options_auth">
+    <string-array name="connect_options_auth">
         <item>Anonymous</item>
         <item>Username/Password</item>
     </string-array>
+
 </resources>

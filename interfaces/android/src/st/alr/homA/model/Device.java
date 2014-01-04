@@ -7,6 +7,8 @@ import st.alr.homA.support.Defaults;
 import st.alr.homA.support.ValueChangedObserver;
 import st.alr.homA.support.ValueSortedMap;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 public class Device implements Comparable<Device> {
@@ -35,7 +37,7 @@ public class Device implements Comparable<Device> {
 
         if (room != null) {
             room.removeDevice(this);
-            if (room.getDevices().size() == 0) {
+            if (room.getDeviceCount() == 0) {
                 Log.v(toString(), "Room " + room.getId() + " is empty, removing it");
                 App.removeRoom(room);
             }
@@ -43,23 +45,38 @@ public class Device implements Comparable<Device> {
 
     }
 
-    public void moveToRoom(String roomname) {
-        if (room != null && room.getId().equals(roomname)) // Don't move if the device is already in the target room. Also prevents https://github.com/binarybucks/homA/issues/47
-            return;
+    public void moveToRoom(final String roomname) {
+        final Device device = this;
+        Runnable r  = new Runnable() {
+            
+            @Override
+            public void run() {
+                if (room != null && room.getId().equals(roomname)) // Don't move if the device is already in the target room. Also prevents https://github.com/binarybucks/homA/issues/47
+                    return;
 
-        String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : Defaults.VALUE_ROOM_NAME;
+                String cleanedName = (roomname != null) && !roomname.equals("") ? roomname : Defaults.VALUE_ROOM_NAME;
 
-        Room newRoom = App.getRoom(cleanedName);
+                Room newRoom = App.getRoom(cleanedName);
 
-        if (newRoom == null) {
-            newRoom = new Room(context, cleanedName);
-            App.addRoom(newRoom);
-        }
+                if (newRoom == null) {
+                    newRoom = new Room(context, cleanedName);
+                    App.addRoom(newRoom);
+                }
 
-        removeFromCurrentRoom();
-        newRoom.addDevice(this);
+                removeFromCurrentRoom();
+                newRoom.addDevice(device);
 
-        room = newRoom;
+                room = newRoom;
+            }
+        };
+        
+        if(Looper.myLooper() == Looper.getMainLooper())
+               r.run();
+        else
+            new Handler(context.getMainLooper()).post(r);
+        
+        
+
     }
 
     public String getName() {
@@ -67,13 +84,9 @@ public class Device implements Comparable<Device> {
     }
 
     public void setName(String name) {
-        // TODO: handle sort change better, by sending event that triggers map sort and notifiydataset in adapter
-        this.room.removeDevice(this);
+        //this.room.removeDevice(this);
         this.name = name;  
-        this.room.addDevice(this);
-        //  EventBus.getDefault().post(new Events.DeviceRenamed(this));
-
-        
+        //this.room.addDevice(this);
     }
 
     public Control getControlWithId(String id) {

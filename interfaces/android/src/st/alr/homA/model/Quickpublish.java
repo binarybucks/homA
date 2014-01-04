@@ -62,14 +62,18 @@ public class Quickpublish {
         this.retained = retained;
     }
     
-    public String toJsonString()
+    public String toJsonString() {
+        return toJsonString(true);
+    }
+
+    public String toJsonString(boolean includeName)
     {
         JSONObject object = new JSONObject();
         try {
           object.put("t", this.topic);
           object.put("p", this.payload);
           object.put("r", this.retained == true ? "1" : "0" );
-          if(!this.name.equals(Defaults.VALUE_QUICKPUBLISH_NAME))
+          if(includeName && name != null && !this.name.equals(Defaults.VALUE_QUICKPUBLISH_NAME))
               object.put("n", this.name);
           
         } catch (JSONException e) {

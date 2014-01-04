@@ -7,13 +7,13 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.NFC" />
-    
+
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
@@ -23,7 +23,7 @@
         android:allowBackup="true"
         android:icon="@drawable/homa"
         android:label="@string/appName"
-        android:theme="@style/Theme.homa" >
+        android:theme="@style/Theme.Homa" >
         <activity
             android:name="st.alr.homA.ActivityPreferences"
             android:configChanges="orientation"
@@ -44,27 +44,17 @@
             android:exported="false" >
         </service>
         <service
-            android:name="st.alr.homA.services.ServiceNfc"
-            android:exported="false" >
+            android:name="st.alr.homA.services.ServiceBackgroundPublish"
+            android:exported="true" >
         </service>
 
         <activity
-            android:name="st.alr.homA.ActivityQuickpublishNotification"
-            android:exported="false"
-            android:label="@string/titleActivityQuickpublishNotification">
-        </activity>
-        <activity
-            android:name="st.alr.homA.ActivityQuickpublishNfc"
-            android:exported="false"
-            android:label="@string/titleActivityQuickpublishNfc">
-        </activity>
-        <activity
-            android:name="st.alr.homA.services.ActivityBackgroundNfc"
+            android:name="st.alr.homA.services.ActivityNfc"
             android:permission="android.permission.NFC"
             android:theme="@style/invisible" >
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                
+
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data
@@ -74,10 +64,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="st.alr.homA.services.ActivityBackgroundPublish"
-            android:exported="true"
-            android:theme="@style/invisible" >
-                
+            android:name="st.alr.homA.ActivityQuickpublishNfc"
+            android:exported="false"
+            android:label="@string/titleActivityQuickpublishNfc" >
         </activity>
     </application>
 

@@ -119,7 +119,7 @@ public class PreferencesBroker extends DialogPreference {
 
         brokerSecurity.setSelection(PreferenceManager.getDefaultSharedPreferences(context).getInt(Defaults.SETTINGS_KEY_BROKER_SECURITY, Defaults.VALUE_BROKER_SECURITY_SSL));        
         brokerSecuritySSLCaCrtPath.setText(prefs.getString(Defaults.SETTINGS_KEY_BROKER_SECURITY_SSL_CA_PATH, ""));
-        brokerSecuritySSLCaCrtPath.setVisibility(p.getInt(Defaults.SETTINGS_KEY_BROKER_SECURITY, Defaults.VALUE_BROKER_SECURITY_NONE) == Defaults.VALUE_BROKER_SECURITY_SSL_CUSTOMCACRT ? View.VISIBLE : View.GONE);
+        brokerSecuritySSLOptions.setVisibility(p.getInt(Defaults.SETTINGS_KEY_BROKER_SECURITY, Defaults.VALUE_BROKER_SECURITY_NONE) == Defaults.VALUE_BROKER_SECURITY_SSL_CUSTOMCACRT ? View.VISIBLE : View.GONE);
     }
 
     
