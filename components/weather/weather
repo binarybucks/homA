@@ -21,7 +21,7 @@ homa.mqttHelper.on('message', function(packet) {
 		homa.mqttHelper.publish("/devices/"+ systemId + "/controls/Today/meta/order", "2", true); // Creates device controls in interfaces
 
 
-		homa.scheduler.scheduleJob('0 * * * *', queryWeather); // Query every day at midnight
+		homa.scheduler.scheduleJob('0 * * * *', queryWeather); // Query every hour
 		queryWeather(); // Query once now
 	}
 });
