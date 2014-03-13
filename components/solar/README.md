@@ -19,6 +19,19 @@ $ publish.js -t "/sys/$SYSTEMID/longitude" -p "9.226254" -r
 
 The latitude and longitude values of your home can easily be obtained with the help of Google Maps. Just point it to the desired location, right-click the map and select _What is here?_. 
 
+Please note that because of an issue with a 3rd party library homA is using, negative number payloads are not interpreted correctly. As a result, if your latitude or longitude is a negative value don't use the publish command above; instead you can either publish directly using mosquitto_pub:
+
+``` 
+mosquitto_pub -d -t "/sys/$SYSTEMID/longitude" -m -9.226254 -r
+```
+
+or use the following syntax:
+
+``` 
+$ publish.js -t "/sys/$SYSTEMID/longitude" --payload=-9.226254 -r
+
+```
+
 ### Systemd
 If your system supports it, you can start the application as a daemon from systemd by using the provided template.
 ```none
