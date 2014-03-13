@@ -29,7 +29,6 @@ or use the following syntax:
 
 ``` 
 $ publish.js -t "/sys/$SYSTEMID/longitude" --payload=-9.226254 -r
-
 ```
 
 ### Systemd
