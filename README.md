@@ -8,7 +8,7 @@ To facilitate the development of own hardware and software extensions, HomA reli
 
 
 ### Getting started
-Getting started with HomA is quite easy and requries just some basic Linux and commandline knowledge. For detailed installation instructions, please refer to the according [wiki](https://github.com/binarybucks/homA/wiki/Components) page.
+Getting started with HomA is quite easy and requries just some basic Linux and commandline knowledge. For detailed installation instructions, please refer to the [Installation page](https://github.com/binarybucks/homA/wiki/Installation) on the Wiki.
 
 ### Components 
 A list of offical components is available in the [wiki](https://github.com/binarybucks/homA/wiki/Components). 
