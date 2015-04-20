@@ -175,14 +175,16 @@ input[type="range"] {
     top: 0;
     z-index: 100;
     left: 0;
-    background: #4aafd3;
+    background: #989898;
     border-width: 0px 0px 2px 0px;
     border-style: solid;
-    border-color: #428ea8;
+    border-color: #818181;
 }
 
 .checkboxWrapper input[type=checkbox]:checked ~ label {
     left: 37px;
+    background: #4aafd3;
+    border-color: #428ea8;
 }
 
 /* Range */
