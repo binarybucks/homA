@@ -136,39 +136,57 @@ h2 {
 input {
     margin: 0; padding: 0; border: 0;
 }
-input[type="checkbox"], input[type="range"] {
+input[type="range"] {
     border-width: 0px 0px 2px 0px;
     height: 28px;
     border-style: solid;
     margin-top: -2px;
     -webkit-appearance: none;
 }
-/* Switch */
-input[type="checkbox"] {
-    background: #efefef;
-    border-color: #d4d4d4;
-    cursor: pointer;
+
+/* Checkbox */
+.checkboxWrapper
+{
     width: 65px;
-}
-input[type="checkbox"]:after { 
-    display: block;
+    height: 30px;
+    display: inline-block;
+    overflow: hidden;
+    padding: 0;
     position: relative;
-    background: #989898;
-    content: '';
-    height: 26px;
-    width: 28px;
-    border-color: #818181;
+}
+.checkboxWrapper div
+{
+    width: 100%;
+    height:100%;
+    background: #efefef;
+    position: relative;
+    top:-32px;
     border-width: 0px 0px 2px 0px;
     border-style: solid;
+    border-color: #d4d4d4;
 }
-input[type="checkbox"]:checked {
-    padding-left: 40px;
-    padding-right: 0;
+.checkboxWrapper label
+{
+    display: block;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    z-index: 100;
+    left: 0;
+    background: #989898;
+    border-width: 0px 0px 2px 0px;
+    border-style: solid;
+    border-color: #818181;
 }
-input[type="checkbox"]:checked:after {
+
+.checkboxWrapper input[type=checkbox]:checked ~ label {
+    left: 37px;
     background: #4aafd3;
     border-color: #428ea8;
 }
+
 /* Range */
 .rangeWrapper { 
     display: inline-block;

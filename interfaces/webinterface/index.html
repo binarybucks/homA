@@ -119,7 +119,11 @@
       <h2>
         <%= id %>
       </h2>
-      <input type="checkbox" <%= checkedAttribute %>/> 
+      <div class="checkboxWrapper">
+        <input type="checkbox" value="1" id=<%= id %> <%= checkedAttribute %>/>
+        <label for=<%= id %>></label>
+        <div></div>
+      </div>
     </script>
     <script id="text-control-template" type="text/template">
       <h2>
