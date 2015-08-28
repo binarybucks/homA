@@ -103,13 +103,13 @@
     </script>
     <script id="undefined-control-template" type="text/template">
       <h2>
-        <%= id %>
+        <%= controlName %>
       <h2>
       <span "missing-type">Loading...</span>
     </script>
     <script id="range-control-template" type="text/template">
       <h2>
-        <%= id %>
+        <%= controlName %>
       </h2>
       <div class="rangeWrapper">
         <input type="range" value="<%= value %>"  min="0" max="255"/>
@@ -117,23 +117,23 @@
     </script>
     <script id="switch-control-template" type="text/template">
       <h2>
-        <%= id %>
+        <%= controlName %>
       </h2>
       <div class="checkboxWrapper">
-        <input type="checkbox" value="1" id=<%= id %> <%= checkedAttribute %>/>
-        <label for=<%= id %>></label>
+        <input type="checkbox" value="1" id=<%= uid %> <%= checkedAttribute %>/>
+        <label for=<%= uid %>></label>
         <div></div>
       </div>
     </script>
     <script id="text-control-template" type="text/template">
       <h2>
-        <%= id %>
+        <%= controlName %>
       </h2>
       <span><%= value %></span> 
     </script>
     <script id="image-control-template" type="text/template">
       <h2>
-        <%= id %>
+        <%= controlName %>
       </h2>
       <img src="<%= value %>" />
     </script>

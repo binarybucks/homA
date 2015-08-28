@@ -1,4 +1,3 @@
-dev = null;
 (function(){
   /* MODELS */
   Backbone.View.prototype.close = function() {
@@ -258,16 +257,12 @@ comparator: function(a, b) {
     // Specialized methods for type switch
     switchRender: function() {
       var tmpl = this.templateByType("switch");
-      this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : ""})));
+      this.$el.html(tmpl(_.extend(this.model.toJSON(), {checkedAttribute: this.model.get("value") == 1 ? "checked=\"true\"" : "", uid: this.model.id.replace(/\W/g, '')})));
       this.input = this.$('input');
       return this;
     },
     switchInputValueChanged: function(event) {App.publish(this.model.get("topic")+"/on", event.target.checked == 0 ? "0" : "1");},
-    switchModelValueChanged: function(model) {
-	console.log(this.model.get("id"));
-        console.log(this);
-	this.render();
-    },
+    switchModelValueChanged: function(model) {this.render();},
 
     // Specialized methods for type text (read-only)
     textRender: function() {
@@ -438,7 +433,6 @@ comparator: function(a, b) {
       // Topic array parsing:
       // Received string:     /devices/$uniqueDeviceId/controls/$deviceUniqueControlId/meta/type
       // topic array index:  0/      1/              2/       3/                     4/   5/   6
-      dev = Devices;
       var payload = message.payloadString;
       var topic = message.destinationName.split("/");
       console.log("-----------RECEIVED-----------\nReceived: "+topic+":"+payload);    
@@ -450,9 +444,9 @@ comparator: function(a, b) {
         device.moveToRoom(undefined);
       } 
       if(topic[3] == "controls") {
-        var control = device.controls.get(topic[4]);
+        var control = device.controls.get(topic.slice(0, 5).join());
         if (control == null) {
-          control = new Control({id: topic[4]});
+          control = new Control({id: topic.slice(0, 5).join(), controlName: topic[4]});
           device.controls.add(control);
           control.set("topic", "/devices/"+ topic[2] + "/controls/" + topic[4]);
         } 
