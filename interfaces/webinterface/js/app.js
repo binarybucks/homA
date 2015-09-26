@@ -13,9 +13,9 @@
   Backbone.View.prototype.finish = function() {}
 
   var ApplicationSettings = Backbone.Model.extend({
-    defaults: { connectivity: "disconnected", 
-                logging: "0", 
-                port: "18883", 
+    defaults: { connectivity: "disconnected",
+                logging: "0",
+                port: "18883",
                 host: document.location.hostname || "127.0.0.1"
               },
 
@@ -34,17 +34,17 @@
   });
   var Logger = Backbone.Model.extend({
     initialize: function(){
-      this.set("logger", console.log); 
+      this.set("logger", console.log);
       Settings.get("logging")==='1' ? this.enable() : this.disable();
     },
     enable: function(){window['console']['log'] = this.get("logger");},
-    disable: function(){  
+    disable: function(){
       console.log("Console.log disabled. Set local storage logging=1 to enable");
       console.log=function(){};}
   });
 
   var Control = Backbone.Model.extend({
-    defaults: function() {return {value: 0, type: "undefined", topic: null, order: 0 };}, 
+    defaults: function() {return {value: 0, type: "undefined", topic: null, order: 0 };},
   });
 
   var Device = Backbone.Model.extend({
@@ -56,7 +56,7 @@
         this.get("room").devices.remove(this);
         if (this.get("room").devices.length == 0)
           Rooms.remove(this.get("room"));
-      } 
+      }
     },
     moveToRoom: function(roomName) {
       var cleanedName = roomName || "unassigned";
@@ -72,7 +72,7 @@
         console.log("Creating room %s", cleanedName);
         targetRoom = new Room({id: cleanedName});
         Rooms.add(targetRoom);
-      } 
+      }
       targetRoom.devices.add(this);
       this.set("room", targetRoom);
     },
@@ -97,13 +97,13 @@ comparator: function(a, b) {
 );
 
   var SettingsView = Backbone.View.extend({
-    className: "view", 
+    className: "view",
     id: "settings-view",
     template: $("#settings-template").html(),
     events: {"click .button.save":  "save"},
 
     initialize: function() {
-      this.model.view = this; 
+      this.model.view = this;
       // this.model.on('change', this.render, this);
     },
 
@@ -112,7 +112,7 @@ comparator: function(a, b) {
         this.$el.html(tmpl(this.model.toJSON()));
         return this;
     },
-    save: function(e) { 
+    save: function(e) {
       var arr = this.$el.find('form').serializeArray();
       var data = _(arr).reduce(function(acc, field){acc[field.name] = field.value;return acc;}, {});
       var reconnect = (this.model.get("host") != data["host"] || this.model.get("port") != data["port"])
@@ -123,13 +123,13 @@ comparator: function(a, b) {
    });
 
    var RoomLinkView = Backbone.View.extend({
-    className: "room-link", 
+    className: "room-link",
     tagName: "li",
     template: $("#room-link-template").html(),
     initialize: function() {this.model.roomLink = this;},
     render: function () {
         var tmpl = _.template(this.template);
-        var id, link; 
+        var id, link;
         if (this.model instanceof Backbone.Model) { // when model is actually a model, its the view for a room
           id = this.model.get("id");
           link = "#rooms/"+id;
@@ -144,7 +144,7 @@ comparator: function(a, b) {
 
   var PlaceholderView = Backbone.View.extend({
     template: $("#view-placeholder-template").html(),
-    className: "view", 
+    className: "view",
     id: "placeholder-view",
     initialize: function() {this.model.on('add', this.addModel, this);},
     render: function () {this.$el.html( _.template(this.template)(this.model.toJSON()));return this;},
@@ -152,7 +152,7 @@ comparator: function(a, b) {
   });
 
   var RoomView = Backbone.View.extend({
-    className: "view", 
+    className: "view",
     id: "room-view",
 
     initialize: function() {
@@ -160,7 +160,7 @@ comparator: function(a, b) {
         this.collection = this.model.devices;
         this.model.bind('remove', this.removeSelf, this);
         this.model.view = this;
-      } else {// this.model == Rooms collection 
+      } else {// this.model == Rooms collection
         this.collection = this.model;
       }
       this.collection.on('add', this.addDevice, this);
@@ -200,8 +200,8 @@ comparator: function(a, b) {
       "mouseup input[type=range]" : "allowInputUpdates"
     },
     initialize: function() {
-      this.model.on('change:type', this.modelTypeChanged, this);  
-      this.model.on('change:value', this.modelValueChanged, this);  
+      this.model.on('change:type', this.modelTypeChanged, this);
+      this.model.on('change:value', this.modelValueChanged, this);
 
       this.specialize();
       this.model.view = this;
@@ -249,7 +249,7 @@ comparator: function(a, b) {
       this.input.attr('min', this.model.get("min") || 0)
       return this;
     },
-    rangeInhibitInputUpdates: function(e) {this.allowUpdates = false;},    
+    rangeInhibitInputUpdates: function(e) {this.allowUpdates = false;},
     rangeAllowInputUpdates: function(e) {this.allowUpdates = true;},
     rangeInputValueChanged: function(e) {App.publish(this.model.get("topic")+"/on", e.target.value);},
     rangeModelValueChanged: function(m) {if (this.allowUpdates) this.render();},
@@ -297,7 +297,7 @@ comparator: function(a, b) {
   var DeviceSettingsView = Backbone.View.extend({
     template: $("#device-settings-template").html(),
     id: "device-settings-view",
-    className: "view", 
+    className: "view",
     events: {"click .button.save":  "save",},
     initialize: function() {
       this.model.view = this;
@@ -311,7 +311,7 @@ comparator: function(a, b) {
       this.delegateEvents();
       return this;
     },
-    save: function(e) { 
+    save: function(e) {
       var arr = this.$el.find('form').serializeArray();
       var data = _(arr).reduce(function(acc, field){acc[field.name] = field.value;return acc;}, {});
       for(setting in data)
@@ -322,7 +322,7 @@ comparator: function(a, b) {
 
   var DeviceView = Backbone.View.extend({
     template: $("#device-template").html(),
-    className: "card", 
+    className: "card",
     initialize: function() {
       this.model.on('change', this.render, this);
       this.model.on('destroy', this.remove, this);
@@ -330,7 +330,7 @@ comparator: function(a, b) {
       this.model.controls.on('remove', this.render, this);
       this.model.controls.on('sort', this.render, this);
       this.model.view = this;
-    },  
+    },
     render: function() {
       var tmpl = _.template(this.template);
       this.$el.html(tmpl(this.model.toJSON()));
@@ -368,7 +368,7 @@ comparator: function(a, b) {
       this.connectivity.removeClass("visible");
       this.connectivity.html(e.get("connectivity"));
       this.connectivity.addClass("visible");
-      var that = this; 
+      var that = this;
       this.connectivityTimeoutId = setTimeout(function(){that.connectivity.removeClass("visible")}, 5000);
 
     },
@@ -391,11 +391,11 @@ comparator: function(a, b) {
     reconnect: function(){
       console.log("Reconnecting");
       this.disconnect();
-      this.connect(); 
+      this.connect();
     },
     connect: function() {
       Settings.set("connectivity", "connecting");
-      this.mqttClient = new Messaging.Client(Settings.get("host"), parseInt(Settings.get("port")), "homA-web-"+Math.random().toString(36).substring(6));
+      this.mqttClient = new Paho.MQTT.Client(Settings.get("host"), parseInt(Settings.get("port")), "homA-web-"+Math.random().toString(36).substring(6));
       this.mqttClient.onConnectionLost = this.connectionLost;
       this.mqttClient.onMessageArrived = this.messageArrived;
       this.mqttClient.connect({onSuccess:this.connected, useSSL: false});
@@ -405,23 +405,23 @@ comparator: function(a, b) {
       this.mqttClient.subscribe('/devices/+/controls/+/meta/+', 0);
       this.mqttClient.subscribe('/devices/+/controls/+', 0);
       this.mqttClient.subscribe('/devices/+/meta/#', 0);
-      window.onbeforeunload = function(){App.disconnect()}; 
+      window.onbeforeunload = function(){App.disconnect()};
     },
     disconnect: function() {
       if(Settings.get("connectivity") == "connected")
-        this.mqttClient.disconnect(); 
+        this.mqttClient.disconnect();
     },
     disconnected: function() {
       Settings.set("connectivity", "disconnected");
       console.log("Connection terminated");
 
       for (var i = 0, l = Devices.length; i < l; i++)
-        Devices.pop();        
+        Devices.pop();
 
       for (i = 0, l = Rooms.length; i < l; i++)
-        Rooms.pop();        
+        Rooms.pop();
     },
-    connectionLost: function(response){ 
+    connectionLost: function(response){
       if (response.errorCode !== 0) {
         console.log("onConnectionLost:"+response.errorMessage);
         setTimeout(function () {App.connect();}, 5000); // Schedule reconnect if this was not a planned disconnect
@@ -435,24 +435,24 @@ comparator: function(a, b) {
       // topic array index:  0/      1/              2/       3/                     4/   5/   6
       var payload = message.payloadString;
       var topic = message.destinationName.split("/");
-      console.log("-----------RECEIVED-----------\nReceived: "+topic+":"+payload);    
+      console.log("-----------RECEIVED-----------\nReceived: "+topic+":"+payload);
       // Ensure the device for the message exists
       var device = Devices.get(topic[2]);
       if (device == null) {
         device = new Device({id: topic[2]});
         Devices.add(device);
         device.moveToRoom(undefined);
-      } 
+      }
       if(topic[3] == "controls") {
         var control = device.controls.get(topic.slice(0, 5).join());
         if (control == null) {
           control = new Control({id: topic.slice(0, 5).join(), controlName: topic[4]});
           device.controls.add(control);
           control.set("topic", "/devices/"+ topic[2] + "/controls/" + topic[4]);
-        } 
-        if(topic[5] == null)                                       // Control value   
+        }
+        if(topic[5] == null)                                       // Control value
           control.set("value", payload);
-        else if (topic[5] == "meta" && topic[6] != null) {           // Control meta 
+        else if (topic[5] == "meta" && topic[6] != null) {           // Control meta
 
           if(topic[6] == "order") {                                 // Todo: move sorting to a model.on('change:order') event
             control.set("order", parseInt(payload));
@@ -472,10 +472,10 @@ comparator: function(a, b) {
     publish: function(topic, value) {
       value = value != undefined ? value : "";
       console.log("Publishing " + topic+":"+value);
-      var message = new Messaging.Message(value);
+      var message = new Paho.MQTT.Message(value);
       message.destinationName = topic;
       message.retained = true;
-      this.mqttClient.send(message); 
+      this.mqttClient.send(message);
     },
     publishForDevice: function(deviceId, subtopic, value) {
       this.publish("/devices/"+deviceId+subtopic, value);
@@ -497,12 +497,12 @@ comparator: function(a, b) {
     },
     index: function() {
       var indexView = new RoomView({model: Devices});
-      App.showView(indexView);   
+      App.showView(indexView);
     },
     // TODO: the room and deviceSettings route behave exactly the same. They should be merged to a single method
     room: function(id) {
       var room = Rooms.get(id); // Room might not yet exists
-      var view; 
+      var view;
       var matchId = id;
 
       if (room == null)
@@ -513,7 +513,7 @@ comparator: function(a, b) {
     },
     deviceSettings: function(id) {
       var device = Devices.get(id); // Device might not yet exists
-      var view; 
+      var view;
       var matchId = id;
       console.log("Backbone.history");
       console.log(Backbone.history);
