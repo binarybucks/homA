@@ -395,7 +395,7 @@ comparator: function(a, b) {
     },
     connect: function() {
       Settings.set("connectivity", "connecting");
-      this.mqttClient = new Messaging.Client(Settings.get("host"), parseInt(Settings.get("port")), "homA-web-"+Math.random().toString(36).substring(6));
+      this.mqttClient = new Messaging.Client(Settings.get("host"), parseInt(Settings.get("port")), "homA-web-"+Math.random().toString(36).substring(2, 8));
       this.mqttClient.onConnectionLost = this.connectionLost;
       this.mqttClient.onMessageArrived = this.messageArrived;
       this.mqttClient.connect({onSuccess:this.connected, useSSL: false});
