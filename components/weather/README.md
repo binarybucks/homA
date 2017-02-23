@@ -1,6 +1,7 @@
 # HomA - Weather
 This component shows the current temperature in addition to morning, noon, and evening temperatures of today and tomorrow. 
 For an API description see http://openweathermap.org/api. 
+To use the API you need to register at http://openweathermap.org/appid and get an API key (appid).
 
 ### Installation
 ```
@@ -16,6 +17,7 @@ $ ./weather [--brokerHost 127.0.0.1] [--brokerPort 1883] [--systemId $SYSTEMID]
 $ publish.js -t "/sys/$SYSTEMID/latitude" -p "48.802545" -r
 $ publish.js -t "/sys/$SYSTEMID/longitude" -p "9.226254" -r
 $ publish.js -t "/sys/$SYSTEMID/units" -p "metric" -r
+$ publish.js -t "/sys/$SYSTEMID/key" -p "1234" -r
 
 ```
 
