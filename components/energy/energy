@@ -1,0 +1,2 @@
+#!/bin/sh
+sml_server /dev/vzir0 2>/dev/null | ./sml_mqtt.py &
