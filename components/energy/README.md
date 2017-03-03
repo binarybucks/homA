@@ -1,5 +1,5 @@
 # HomA - Energy
-This component shows the current energy and active power read by an IR connector (e.g. IR-Kopf by [volkszaehler.org](http://wiki.volkszaehler.org/)) in the framework's interfaces.
+This component shows the current power and total energy read by an IR connector (e.g. IR-Kopf by [volkszaehler.org](http://wiki.volkszaehler.org/)) in the framework's interfaces.
 
 
 ### Installation
