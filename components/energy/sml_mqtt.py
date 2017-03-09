@@ -3,12 +3,12 @@
 # Reads SML data created by sml_server from stdin and sends it to a 
 # MQTT broker used by HomA framework.
 # Holger Mueller
-# 2017/03/02
+# 2017/03/02, 2017/03/09
 
 import sys
 import os.path
 import paho.mqtt.client as mqtt
-import mqtt_config
+import mqtt_config		# defines secret host, port, user, pwd, ca_certs
 
 # config here ...
 debug = False
@@ -52,6 +52,9 @@ def scan_line(line):
 
 def homa_init():
 	"Publish HomA setup messages to MQTT broker."
+	# check if we need to init HomA
+	if os.path.isfile(init_file):
+		return
 	print("Publishing HomA setup data ...")
 	# set room name
 	mqttc.publish(get_topic("meta/room"), room, retain=True)
@@ -60,11 +63,11 @@ def homa_init():
 	# setup controls
 	for obis_dict in obis_arr:
 		mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/type"), "text", retain=True)
-		#mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/name"), obis_dict['name'], retain=True)
+		mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/name"), obis_dict['name'], retain=True)
 	# create init file
 	file = open(init_file, 'w')
-	#file.write(data)
 	file.close()
+	return
 
 # The callback for when the client receives a CONNACK response from the broker.
 def on_connect(client, userdata, flags, rc):
@@ -91,15 +94,14 @@ mqttc = mqtt.Client()
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message
 mqttc.on_publish = on_publish
-#mqttc.tls_set(ca_certs, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1, ciphers=None)
+if mqtt_config.ca_certs != "":
+	#mqttc.tls_insecure_set(True) # Do not use this "True" in production!
+	mqttc.tls_set(mqtt_config.ca_certs, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1, ciphers=None)
 mqttc.username_pw_set(mqtt_config.user, password=mqtt_config.pwd)
 mqttc.connect(mqtt_config.host, port=mqtt_config.port)
 mqttc.loop_start()
 
-# check if we need to init HomA
-if not os.path.isfile(init_file):
-	# setup MQTT device and control settings
-	homa_init()
+homa_init() # setup MQTT device and control settings
 
 # read from stdin and scan for obis data
 print("Reading sml obis data from stdin forever. Press Ctrl-C to break.")
@@ -116,3 +118,4 @@ while True:
 # wait until all queued topics are published
 print 'Flushing MQTT queue ...'
 mqttc.loop_stop()
+mqttc.disconnect()
