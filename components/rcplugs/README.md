@@ -10,7 +10,9 @@ This component allows the control of generic 433Mhz wireless power outlet socket
 * Install the required dependencies
 ```none
 $ apt-get install wiringpi
-$ git clone https://github.com/hmueller01/433Utils
+$ cd $HOMA_BASEDIR/components/rcplugs
+$ git clone --recursive https://github.com/hmueller01/433Utils
+$ cd 433Utils/RPi_utils
 $ make
 $ sudo ln -s $HOMA_BASEDIR/components/rcplugs/433Utils/RPi_utils/send /usr/local/bin/rfsend
 ```
@@ -26,21 +28,20 @@ ca_certs = ""
 
 ### Usage
 Run the basic setup once
-Start the application manually 
 ```none
 $ ./setup.py
 ```
-
-To add an additional typeA (10 Dip) wireless power socket use
-```
-$ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/CLIENTID/11011-01000" --payload "typeA"
-```
-Where 11011 is the position of the physical socket's group DIP switches, 01000 is the position of the socket's device DIP switches.
 
 Start the application manually 
 ```none
 $ ./rcplugs
 ```
+
+Optional: To add an additional typeA (10 Dip) wireless power socket use
+```
+$ publish.js [--brokerHost 127.0.0.1] [--brokerPort 1883] --topic "/sys/CLIENTID/11011-01000" --payload "typeA"
+```
+Where 11011 is the position of the physical socket's group DIP switches, 01000 is the position of the socket's device DIP switches.
 
 ### Systemd
 If your system supports it, you can start the application as a daemon from systemd by using the provided template.
