@@ -1,0 +1,3 @@
+#!/bin/sh
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd )"
+sml_server /dev/vzir0 2>/dev/null | $SCRIPTPATH/sml_mqtt.py

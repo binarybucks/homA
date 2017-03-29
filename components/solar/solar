@@ -20,8 +20,11 @@ homa.mqttHelper.on('message', function(packet) {
 });
 
 homa.mqttHelper.on('connect', function(packet) {	
-		homa.settings.require('longitude'); // Set required settings
-		homa.settings.require('latitude');
+	homa.settings.require('longitude'); // Set required settings
+	homa.settings.require('latitude');
+	// Some device meta values
+	homa.mqttHelper.publish("/devices/"+ systemId + "/meta/name", "Dawn and Dusk" , true); // Friendly name of the device that is shown in the interface
+	homa.mqttHelper.publish("/devices/"+ systemId + "/meta/room", "Weather" , true); // Room in which the device is
 });
 
 function querySuntimes(){
