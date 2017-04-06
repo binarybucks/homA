@@ -4,35 +4,38 @@
 # Setup rcPlugs is a MQTT RC-Switch bridge used by HomA framework.
 # Creates the following retained topics:
 # /sys/<systemId>/<systemCode>-<unitCode>, payload: <type>
-# /devices/<systemId>/meta/room, payload: room name
-# /devices/<systemId>/meta/name, payload: device name
-# /devices/<systemId>/controls/<systemCode>-<unitCode>/meta/type, payload: switch
-# /devices/<systemId>/controls/<systemCode>-<unitCode>/meta/name, payload: control name
-# /devices/<systemId>/controls/<systemCode>-<unitCode>, payload: 0 (off state)
+# /devices/<systemId>-<systemCode>-<unitCode>/meta/room, payload: room name
+# /devices/<systemId>-<systemCode>-<unitCode>/meta/name, payload: device name
+# /devices/<systemId>-<systemCode>-<unitCode>/controls/Power/meta/type, payload: switch
+# /devices/<systemId>-<systemCode>-<unitCode>/controls/Power, payload: 0 (off state)
+
 # Holger Mueller
 # 2017/03/09 initial revision
+# 2017/04/06 modified to be complient with issue #144 and sockets component
 
+import sys
 import paho.mqtt.client as mqtt
 import mqtt_config		# defines host, port, user, pwd, ca_certs
 
 # config here ...
 debug = False
 systemId = "123456-rcplugs"
-device = "rcPlugs"
-room = "Home"
+#device = "rcPlugs"
+#room = "Home"
 # config plugs here
 # topic is build from <systemCode>-<unitCode>
 mqtt_arr = [
-	{'topic': '11111-10000', 'type': 'typeA', 'name': 'rcPlug A'},
-	{'topic': '11111-01000', 'type': 'typeA', 'name': 'rcPlug B'},
-	{'topic': '11111-00100', 'type': 'typeA', 'name': 'rcPlug C'}]
+	{'topic': '11111-10000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug A'},
+	{'topic': '11111-01000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug B'},
+	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug C'}]
 
 
 def get_topic(t1 = None, t2 = None, t3 = None):
 	"Create topic string."
-	topic = "/devices/"+ systemId
-	if t1:
-		topic += "/"+ t1
+	if not t1:
+		print("ERROR get_topic(): t1 not specified!")
+		sys.exit()
+	topic = "/devices/%s-%s" % (systemId, t1)
 	if t2:
 		topic += "/"+ t2
 	if t3:
@@ -43,19 +46,16 @@ def get_topic(t1 = None, t2 = None, t3 = None):
 def homa_init(mqttc):
 	"Publish HomA setup messages to MQTT broker."
 	print("Publishing HomA setup data (systemId %s) ..." % systemId)
-	# set room name
-	mqttc.publish(get_topic("meta/room"), room, retain=True)
-	# set device name
-	mqttc.publish(get_topic("meta/name"), device, retain=True)
 	# setup controls
-	order = 0
+	order = 1
 	for mqtt_dict in mqtt_arr:
+		mqttc.publish("/sys/%s/%s" % (systemId, mqtt_dict['topic']), mqtt_dict['type'], retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/room"), mqtt_dict['room'], retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/name"), mqtt_dict['device'], retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls/Power/meta/type"), "switch", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls/Power/meta/order"), order, retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls/Power"), 0, retain=True) # default off
 		order += 1
-		mqttc.publish("/sys/%s/%s" % (systemId, mqtt_dict['topic']), "typeA", retain=True)
-		mqttc.publish(get_topic("controls", mqtt_dict['topic'], "meta/type"), "switch", retain=True)
-		mqttc.publish(get_topic("controls", mqtt_dict['topic'], "meta/order"), order, retain=True)
-		mqttc.publish(get_topic("controls", mqtt_dict['topic'], "meta/name"), mqtt_dict['name'], retain=True)
-		mqttc.publish(get_topic("controls", mqtt_dict['topic']), 0, retain=True) # default off
 	return
 
 # The callback for when the client receives a CONNACK response from the broker.
