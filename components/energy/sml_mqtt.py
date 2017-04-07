@@ -4,6 +4,7 @@
 # MQTT broker used by HomA framework.
 # Holger Mueller
 # 2017/03/02, 2017/03/09, 2017/04/04
+# 20017/04/06 added meta/unit topic and removed unit from payload of actual value
 
 import sys
 import os.path
