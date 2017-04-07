@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8
-# $Id$
 # Setup rcPlugs is a MQTT RC-Switch bridge used by HomA framework.
 # Creates the following retained topics:
 # /sys/<systemId>/<systemCode>-<unitCode>, payload: <type>
@@ -11,31 +10,27 @@
 
 # Holger Mueller
 # 2017/03/09 initial revision
-# 2017/04/06 modified to be complient with issue #144 and sockets component
+# 2017/04/07 modified to be complient with issue #144 and sockets component
 
-import sys
 import paho.mqtt.client as mqtt
 import mqtt_config		# defines host, port, user, pwd, ca_certs
 
 # config here ...
 debug = False
 systemId = "123456-rcplugs"
-#device = "rcPlugs"
-#room = "Home"
 # config plugs here
-# topic is build from <systemCode>-<unitCode>
+# topic systemId is build from <systemId>-<systemCode>-<unitCode>
 mqtt_arr = [
 	{'topic': '11111-10000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug A'},
 	{'topic': '11111-01000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug B'},
 	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug C'}]
 
 
-def get_topic(t1 = None, t2 = None, t3 = None):
+def get_topic(systemUnitCode, t1 = None, t2 = None, t3 = None):
 	"Create topic string."
-	if not t1:
-		print("ERROR get_topic(): t1 not specified!")
-		sys.exit()
-	topic = "/devices/%s-%s" % (systemId, t1)
+	topic = "/devices/%s-%s" % (systemId, systemUnitCode)
+	if t1:
+		topic += "/"+ t1
 	if t2:
 		topic += "/"+ t2
 	if t3:
