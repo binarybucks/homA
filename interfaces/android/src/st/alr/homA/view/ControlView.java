@@ -29,7 +29,7 @@ public abstract class ControlView {
     abstract protected void setInteractionListener();
 
     public void setContent(Control c) {
-        setContent(c.getName(), c.getValue());
+        setContent(c.getName(), c.getValue() + c.getMeta("unit", ""));
     }
 
     public ControlView attachToControl(Control control) {
