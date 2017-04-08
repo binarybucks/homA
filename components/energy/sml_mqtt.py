@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
-# $Id$
 # Reads SML data created by sml_server from stdin and sends it to a 
 # MQTT broker used by HomA framework.
 # Holger Mueller
-# 2017/03/02, 2017/03/09
+# 2017/03/02, 2017/03/09, 2017/04/04
+# 2017/04/06 added meta/unit topic and removed unit from payload of actual value
 
 import sys
 import os.path
@@ -20,8 +20,8 @@ init_file = "/dev/shm/homa_init."+ systemId
 
 
 obis_arr = [
-	{'obis': '1-0:1.8.0*255', 'scale': 1000, 'unit': ' kWh', 'topic': 'total', 'name': 'Total Energy'},
-	{'obis': '1-0:16.7.0*255', 'scale': 1, 'unit': ' W', 'topic': 'current', 'name': 'Current Power'}]
+	{'obis': '1-0:16.7.0*255', 'scale': 1, 'unit': ' W', 'topic': 'Current Power'},
+	{'obis': '1-0:1.8.0*255', 'scale': 1000, 'unit': ' kWh', 'topic': 'Total Energy'}]
 
 def get_topic(t1 = None, t2 = None, t3 = None):
 	"Create topic string."
@@ -46,7 +46,7 @@ def scan_line(line):
 			if debug: print("Found obis topic '"+ obis_dict['topic']+ "' = line["+ str(pos_start)+ ":"+ str(pos_end)+ "] = '"+ str(value)+ "'")
 			# scale value as specified
 			value = round(value / obis_dict['scale'], 1)
-			mqttc.publish(get_topic("controls", obis_dict['topic']), str(value)+ obis_dict['unit'], retain=True)
+			mqttc.publish(get_topic("controls", obis_dict['topic']), str(value), retain=True)
 			return True
 	return False
 
@@ -61,9 +61,12 @@ def homa_init():
 	# set device name
 	mqttc.publish(get_topic("meta/name"), device, retain=True)
 	# setup controls
+	order = 1
 	for obis_dict in obis_arr:
 		mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/type"), "text", retain=True)
-		mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/name"), obis_dict['name'], retain=True)
+		mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/unit"), obis_dict['unit'], retain=True)
+		mqttc.publish(get_topic("controls", obis_dict['topic'], "meta/order"), order, retain=True)
+		order += 1
 	# create init file
 	file = open(init_file, 'w')
 	file.close()
