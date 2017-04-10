@@ -41,6 +41,18 @@
               <input type="text" value="<%= port %>" name="port" />
             </div>
             <div class="subview">
+              <h2>
+                Username
+              </h2>
+              <input type="text" value="<%= userName %>" name="userName" />
+            </div>
+            <div class="subview">
+              <h2>
+                Password
+              </h2>
+              <input type="password" value="<%= password %>" name="password" />
+            </div>
+            <div class="subview">
               <div class="button save">Save</div>
             </div>
           </form>
@@ -129,7 +141,7 @@
       <h2>
         <%= controlName %>
       </h2>
-      <span><%= value %></span> 
+      <span><%= value %><%= unit %></span>
     </script>
     <script id="image-control-template" type="text/template">
       <h2>

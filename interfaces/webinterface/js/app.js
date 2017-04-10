@@ -16,7 +16,9 @@
     defaults: { connectivity: "disconnected",
                 logging: "0",
                 port: "18883",
-                host: document.location.hostname || "127.0.0.1"
+                host: document.location.hostname || "127.0.0.1",
+                userName: "",
+                password: ""
               },
 
     initialize: function() {
@@ -44,7 +46,7 @@
   });
 
   var Control = Backbone.Model.extend({
-    defaults: function() {return {value: 0, type: "undefined", topic: null, order: 0 };},
+    defaults: function() {return {value: 0, type: "undefined", topic: null, order: 0, unit: "" };},
   });
 
   var Device = Backbone.Model.extend({
@@ -398,7 +400,7 @@ comparator: function(a, b) {
       this.mqttClient = new Paho.MQTT.Client(Settings.get("host"), parseInt(Settings.get("port")), "homA-web-"+Math.random().toString(36).substring(2, 8));
       this.mqttClient.onConnectionLost = this.connectionLost;
       this.mqttClient.onMessageArrived = this.messageArrived;
-      this.mqttClient.connect({onSuccess:this.connected, useSSL: false});
+      this.mqttClient.connect({onSuccess:this.connected, useSSL: false, userName: Settings.get("userName"), password: Settings.get("password")});
     },
     connected: function(response){
       Settings.set("connectivity", "connected");
