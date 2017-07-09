@@ -38,6 +38,7 @@ struct single_key_param {
     os_timer_t key_50ms;
     key_function short_press;
     key_function long_press;
+    bool fast_mode;
 };
 
 struct keys_param {
@@ -45,7 +46,7 @@ struct keys_param {
     struct single_key_param **single_key;
 };
 
-struct single_key_param *key_init_single(uint8 gpio_id, uint32 gpio_name, uint8 gpio_func, key_function long_press, key_function short_press);
+struct single_key_param *key_init_single(uint8 gpio_id, uint32 gpio_name, uint8 gpio_func, key_function long_press, key_function short_press, bool fast_mode);
 void key_init(struct keys_param *key);
 
 #endif

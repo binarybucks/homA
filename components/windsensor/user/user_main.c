@@ -1,14 +1,22 @@
 /**
  * @file
  * @brief Windsensor main application
- * $Id$
  *
  * This is a HomA/MQTT Windsensor unit.
  *
  * Params are loaded, WiFi init, MQTT setup and GPIO keys are set.
  * Sensor pulses are counted using an interrupt.
- * Wind speed is calculated and published within a timer.
+ * Wind speed is calculated and published to broker within a timer.
+ *
+ * All configuration is done in "user_config.h".
  */
+ 
+/*
+Programming Best Practices
+http://www.danielcasner.org/guidelines-for-writing-code-for-the-esp8266/
+- Application code should have the ICACHE_FLASH_ATTR decorator unless it is executed very often.
+- All interrupt handlers must not have the ICACHE_FLASH_ATTR decorator and any code which executes very often should not have the decorator.
+*/
 
 #include <ets_sys.h>
 #include <osapi.h>
@@ -27,7 +35,7 @@
 #include "config.h"
 #include "key.h"
 #include "wifi.h"
-//#include "timezone.h"
+#include "dst.h"
 
 // global variables
 LOCAL MQTT_Client mqttClient;
@@ -49,20 +57,24 @@ const char *rst_reason_text[] = {
 };
 
 uint32 user_rf_cal_sector_set(void);
-void user_init (void);
+void user_init(void);
 
-/******************************************************************************
- * FunctionName : user_rf_cal_sector_set
- * Description  : SDK just reversed 4 sectors, used for rf init data and paramters.
- *                We add this function to force users to set rf cal sector, since
- *                we don't know which sector is free in user's application.
- *                sector map for last several sectors : ABCCC
- *                A : rf cal
- *                B : rf init data
- *                C : sdk parameters
- * Parameters   : none
- * Returns      : rf cal sector
- *******************************************************************************/
+
+/**
+ ******************************************************************
+ * @brief  SDK just reversed 4 sectors, used for rf init data and paramters.
+ * @author Holger Mueller
+ * @date   2017-06-08
+ * We add this function to force users to set rf cal sector, since
+ * we don't know which sector is free in user's application.
+ * Sector map for last several sectors: ABCCC
+ * A : rf cal
+ * B : rf init data
+ * C : sdk parameters
+ *
+ * @return rf cal sector
+ ******************************************************************
+ */
 uint32 ICACHE_FLASH_ATTR
 user_rf_cal_sector_set(void)
 {
@@ -110,7 +122,7 @@ user_rf_cal_sector_set(void)
  ******************************************************************
  * @brief  MQTT callback broker connected.
  * @author Holger Mueller
- * @date   2017-06-08
+ * @date   2017-06-08, 2017-07-06
  * Subscribes to /sys topics, publishes HomA /devices/ structure.
  *
  * @param  args - MQTT_Client structure pointer.
@@ -119,24 +131,33 @@ user_rf_cal_sector_set(void)
 LOCAL void ICACHE_FLASH_ATTR
 MqttConnected_Cb(uint32_t *args)
 {
+	char app_version[20];
 	MQTT_Client *client = (MQTT_Client *) args;
+	
 	INFO("MQTT: Connected" CRLF);
 	mqtt_connected = true;
 	
-	char app_version[20];
-	itoa(app_version, APP_VERSION);
-	MQTT_Publish(client, "/sys/" HOMA_SYSTEM_ID "/version", 
-		app_version, os_strlen(app_version), 0, 1);
-	MQTT_Publish(client, "/sys/" HOMA_SYSTEM_ID "/device_id", 
-		sysCfg.device_id, os_strlen(sysCfg.device_id), 0, 1);
 	MQTT_Subscribe(client, "/sys/" HOMA_SYSTEM_ID "/#", 0);
 
 	// setup HomA device topics
 	//MQTT_Publish(*client, topic, data, data_length, qos, retain)
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/room", HOMA_ROOM, os_strlen(HOMA_ROOM), 0, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/name", HOMA_DEVICE, os_strlen(HOMA_DEVICE), 0, 1);
+	
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/type", "text", 4, 0, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/unit", " km/h", 5, 0, 1);
+	
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/order", "1", 1, 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count/meta/order", "2", 1, 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "3", 1, 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "4", 1, 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "5", 1, 0, 1);
+	
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id",
+		sysCfg.device_id, os_strlen(sysCfg.device_id), 0, 1);
+	itoa(app_version, APP_VERSION);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version",  
+		app_version, os_strlen(app_version), 0, 1);
 }
 
 /**
@@ -219,7 +240,7 @@ MqttData_Cb(uint32_t * args, const char *topic, uint32_t topic_len, const char *
  ******************************************************************
  * @brief  NTP timer callback. 
  * @author Holger Mueller
- * @date   2017-06-11
+ * @date   2017-06-11, 2017-07-06
  *
  * @param  arg - NULL, not used.
  ******************************************************************
@@ -230,16 +251,17 @@ CheckSntpStamp_Cb(void *arg)
 	uint32 current_stamp;
 	char *time_str;
 	
-	current_stamp = sntp_get_current_timestamp();
+	current_stamp = applyDST(sntp_get_current_timestamp());
 	if (current_stamp == 0) {
 		os_timer_arm(&sntp_timer, 100, 0);
 	} else{
 		os_timer_disarm(&sntp_timer);
-		//time_str = asctime(GetRealDaylightSavingTime(current_stamp));
 		time_str = sntp_get_real_time(current_stamp);
-		INFO("sntp: %d, %s" CRLF, current_stamp,
-			time_str);
-		MQTT_Publish(&mqttClient, "/sys/" HOMA_SYSTEM_ID "/uptime", 
+		if (os_strlen(time_str) > 0)
+			time_str[os_strlen(time_str)-1] = 0; // remove tailing \n
+		INFO("sntp: %d, %s" CRLF, current_stamp, time_str);
+		MQTT_Publish(&mqttClient, 
+			"/devices/" HOMA_SYSTEM_ID "/controls/Start time",
 			time_str, os_strlen(time_str), 0, 1);
 	}
 }
@@ -260,7 +282,7 @@ WifiGotIp(void)
 	sntp_setservername(0, "de.pool.ntp.org"); // set server 0 by domain name
 	sntp_setservername(1, "europe.pool.ntp.org"); // set server 1 by domain name
 	sntp_setservername(2, "time.nist.gov"); // set server 2 by domain name
-	sntp_set_timezone(1); // daylight savings is currently ignored ...
+	sntp_set_timezone(1); // set Berlin timezone (GMT+1)
 	sntp_init();
 
 	os_timer_disarm(&sntp_timer);
@@ -393,11 +415,13 @@ WpsKeyLongPress_Cb(void)
  ******************************************************************
  * @brief  Speed key's short press function, needed to be installed.
  *         Counts pulses from rotor sensor.
+ *         Do keep this in RAM (no ICACHE_FLASH_ATTR), as it is
+ *         called very often.
  * @author Holger Mueller
  * @date   2017-06-07
  ******************************************************************
  */
-LOCAL void ICACHE_FLASH_ATTR
+LOCAL void
 SpeedKeyShortPress_Cb(void)
 {
 	INFO("%s" CRLF, __FUNCTION__);
@@ -406,20 +430,9 @@ SpeedKeyShortPress_Cb(void)
 
 /**
  ******************************************************************
- * @brief  Speed key's long press function, needed to be installed.
- * @author Holger Mueller
- * @date   2017-06-07
- ******************************************************************
- */
-LOCAL void ICACHE_FLASH_ATTR
-SpeedKeyLongPress_Cb(void)
-{
-	INFO("%s" CRLF, __FUNCTION__);
-}
-
-/**
- ******************************************************************
  * @brief  Timer callback for speed sensor timebase.
+ *         Do keep this in RAM (no ICACHE_FLASH_ATTR), as it is
+ *         called very often.
  * @author Holger Mueller
  * @date   2017-06-08
  *
@@ -427,7 +440,7 @@ SpeedKeyLongPress_Cb(void)
  *                not used.
  ******************************************************************
  */
-LOCAL void ICACHE_FLASH_ATTR
+LOCAL void
 SpeedLoop_Cb(void *arg)
 {
 	float windspeed;
@@ -460,6 +473,13 @@ SpeedLoop_Cb(void *arg)
 	}
 }
 
+/**
+ ******************************************************************
+ * @brief  Main user init function.
+ * @author Holger Mueller
+ * @date   2017-06-08, 2017-07-05
+ ******************************************************************
+ */
 void ICACHE_FLASH_ATTR
 user_init(void)
 {
@@ -483,10 +503,10 @@ user_init(void)
 
 	// setup windsensor WPS button pin
 	single_key[0] = key_init_single(KEY_0_IO_NUM, KEY_0_IO_MUX,
-	  KEY_0_IO_FUNC, WpsKeyLongPress_Cb, WpsKeyShortPress_Cb);
+	  KEY_0_IO_FUNC, WpsKeyLongPress_Cb, WpsKeyShortPress_Cb, FALSE);
 	// setup windsensor speed sensor pin
 	single_key[1] = key_init_single(KEY_1_IO_NUM, KEY_1_IO_MUX,
-	  KEY_1_IO_FUNC, SpeedKeyLongPress_Cb, SpeedKeyShortPress_Cb);
+	  KEY_1_IO_FUNC, NULL, SpeedKeyShortPress_Cb, TRUE);
 	keys.key_num = KEY_NUM;
 	keys.single_key = single_key;
 	key_init(&keys);

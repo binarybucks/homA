@@ -1,7 +1,7 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define APP_VERSION 10
+#define APP_VERSION 14
 
 #define WPS						// enable WPS
 
@@ -18,7 +18,7 @@
 #define HOMA_ROOM		"Home"
 
 // definitions of the wind speed sensor (e.g. "Schalenanemometer")
-#define SPEED_TB	10	// time base[s] of measurement (speed_timer)
+#define SPEED_TB	1	// time base[s] of measurement (speed_timer)
 #define CIRCUM	0.434	// circumference[m] of anemometer
 #define TSR		0.4		// Schnelllaufzahl (SLZ) / tip speed ratio (TSR)
 #define PPR		2		// pulses per rotation (speed_count per rotation)

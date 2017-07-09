@@ -1,9 +1,8 @@
 /**
  * @file
  * @brief Common user functions
- * $Id: user_common.c 16 2015-10-29 21:49:45Z hmueller $
  */
-#include <ets_sys.h>
+#include <osapi.h>
 #include "user_common.h"
 
 
