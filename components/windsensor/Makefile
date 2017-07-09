@@ -77,7 +77,7 @@ MODULES		= modules mqtt user
 EXTRA_INCDIR	= include include/modules include/mqtt
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc hal pp phy net80211 lwip wpa wps crypto mbedtls upgrade main
+LIBS		= c gcc hal pp phy net80211 lwip wpa wps crypto upgrade main
 
 # compiler flags using during compilation of source files
 CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wmissing-prototypes -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH

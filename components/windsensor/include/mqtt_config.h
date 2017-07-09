@@ -8,15 +8,16 @@
 #define CFG_HOLDER	0x00FF55A1	// Change this value to load default configurations
 #define CFG_LOCATION	0x79	// Please don't change or if you know what you doing
 
-#define MQTT_SSL_ENABLE
-
 // MQTT boker host settings
 #define MQTT_SECURITY		0			// 0:non-SSL, 1:SSL
 #define MQTT_HOST			"mqtt.euhm"	// IP or domain name
 #if MQTT_SECURITY == 0
 #define MQTT_PORT			1883
 #else
+// not yet full supported, does not work
 #define MQTT_PORT			8883
+#define MQTT_SSL_ENABLE
+// also add mbedtls to the Makefile LIBS
 #endif
 #define MQTT_BUF_SIZE		1024
 #define MQTT_KEEPALIVE		120			// seconds
