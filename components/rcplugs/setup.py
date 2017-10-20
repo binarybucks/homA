@@ -2,15 +2,16 @@
 # -*- coding: utf-8
 # Setup rcPlugs is a MQTT RC-Switch bridge used by HomA framework.
 # Creates the following retained topics:
-# /sys/<systemId>/<systemCode>-<unitCode>, payload: <type>
+# /sys/<systemId>/<systemCode>-<unitCode>/<control>, payload: <type>
 # /devices/<systemId>-<systemCode>-<unitCode>/meta/room, payload: room name
 # /devices/<systemId>-<systemCode>-<unitCode>/meta/name, payload: device name
-# /devices/<systemId>-<systemCode>-<unitCode>/controls/Power/meta/type, payload: switch
-# /devices/<systemId>-<systemCode>-<unitCode>/controls/Power, payload: 0 (off state)
+# /devices/<systemId>-<systemCode>-<unitCode>/controls/<control>/meta/type, payload: switch
+# /devices/<systemId>-<systemCode>-<unitCode>/controls/<control>, payload: 0 (off state)
 
 # Holger Mueller
 # 2017/03/09 initial revision
 # 2017/04/07 modified to be complient with issue #144 and sockets component
+# 2017/10/18 made control name (before fix "Power") configurable
 
 import paho.mqtt.client as mqtt
 import mqtt_config		# defines host, port, user, pwd, ca_certs
@@ -21,9 +22,9 @@ systemId = "123456-rcplugs"
 # config plugs here
 # topic systemId is build from <systemId>-<systemCode>-<unitCode>
 mqtt_arr = [
-	{'topic': '11111-10000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug A'},
-	{'topic': '11111-01000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug B'},
-	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug C'}]
+	{'topic': '11111-10000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug A', 'control': 'Power 1'},
+	{'topic': '11111-01000', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug B', 'control': 'Power 2'},
+	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'rcPlug C', 'control': 'Power 3'}]
 
 
 def get_topic(systemUnitCode, t1 = None, t2 = None, t3 = None):
@@ -44,12 +45,12 @@ def homa_init(mqttc):
 	# setup controls
 	order = 1
 	for mqtt_dict in mqtt_arr:
-		mqttc.publish("/sys/%s/%s" % (systemId, mqtt_dict['topic']), mqtt_dict['type'], retain=True)
+		mqttc.publish("/sys/%s/%s/%s" % (systemId, mqtt_dict['topic'], mqtt_dict['control']), mqtt_dict['type'], retain=True)
 		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/room"), mqtt_dict['room'], retain=True)
 		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/name"), mqtt_dict['device'], retain=True)
-		mqttc.publish(get_topic(mqtt_dict['topic'], "controls/Power/meta/type"), "switch", retain=True)
-		mqttc.publish(get_topic(mqtt_dict['topic'], "controls/Power/meta/order"), order, retain=True)
-		mqttc.publish(get_topic(mqtt_dict['topic'], "controls/Power"), 0, retain=True) # default off
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/type"), "switch", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/order"), order, retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control']), 0, retain=True) # default off
 		order += 1
 	return
 

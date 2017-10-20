@@ -6,6 +6,7 @@
 # Holger Mueller
 # 2017/03/07 - 2017/03/09 initial revision
 # 2017/04/06 modified to be complient with issue #144 and sockets component
+# 2017/10/18 made control name (before fix "Power") configurable
 
 import sys
 import time
@@ -44,33 +45,34 @@ def getPlug(systemCode, unitCode):
 	if debug: print("getPlug(): Plug systemCode: %s, unitCode: %s NOT found." % (systemCode, unitCode))
 	return False
 
-def addPlug(client, systemCode, unitCode, type):
+def addPlug(client, systemCode, unitCode, control, type):
 	plug_dict = getPlug(systemCode, unitCode)
 	if plug_dict == False:
-		if debug: print("Plug systemCode: %s, unitCode: %s, type: %s added." % (systemCode, unitCode, type))
-		plug_arr.append({'systemCode': systemCode, 'unitCode': unitCode, 'type': type})
+		if debug: print("Plug systemCode: %s, unitCode: %s, control: %s, type: %s added." % (systemCode, unitCode, control, type))
+		plug_arr.append({'systemCode': systemCode, 'unitCode': unitCode, 'control': control, 'type': type})
 		if debug: print plug_arr
-		# subscribe topic "/devices/<systemId>-<systemCode>-<unitCode>/controls/Power/on"
+		# subscribe topic "/devices/<systemId>-<systemCode>-<unitCode>/controls/<control>/on"
 		# e.g. "/devices/123456-rcplugs-11011-01000/controls/Power/on"
-		client.subscribe(build_topic(systemCode, unitCode, "controls/Power/on"))
+		client.subscribe(build_topic(systemCode, unitCode, "controls", control, "on"))
 	else:
-		if debug: print("Plug systemCode: %s, unitCode: %s, type: %s updated." % (systemCode, unitCode, type))
+		if debug: print("Plug systemCode: %s, unitCode: %s, control: %s, type: %s updated." % (systemCode, unitCode, control, type))
+		plug_dict['control'] = control
 		plug_dict['type'] = type
 		if debug: print plug_arr
 	return
  
 def removePlug(client, systemCode, unitCode):
 	# Topic and array cleanup:  
-	# unsubscribe("/devices/<systemId>-<systemCode>-<unitCode>/controls/Power/on")
-	# publish("/devices/<systemId>-<systemCode>-<unitCode>/controls/Power", "")
-	# publish("/devices/<systemId>-<systemCode>-<unitCode>/controls/Power/on", "")
+	# unsubscribe("/devices/<systemId>-<systemCode>-<unitCode>/controls/<control>/on")
+	# publish("/devices/<systemId>-<systemCode>-<unitCode>/controls/<control>", "")
+	# publish("/devices/<systemId>-<systemCode>-<unitCode>/controls/<control>/on", "")
 	plug_dict = getPlug(systemCode, unitCode)
 	if plug_dict != False:
 		if debug: print("Plug systemCode: %s, unitCode: %s removed." % (systemCode, unitCode))
-		client.unsubscribe(build_topic(systemCode, unitCode, "controls/Power/on"))
+		client.unsubscribe(build_topic(systemCode, unitCode, "controls", plug_dict['control'], "on"))
 		# remove topics
-		client.publish(build_topic(systemCode, unitCode, "controls/Power/on"), "", retain=True)
-		client.publish(build_topic(systemCode, unitCode, "controls/Power"), "", retain=True)
+		client.publish(build_topic(systemCode, unitCode, "controls", plug_dict['control'], "on"), "", retain=True)
+		client.publish(build_topic(systemCode, unitCode, "controls", plug_dict['control']), "", retain=True)
 		plug_arr.remove(plug_dict)
 	return
 
@@ -101,19 +103,19 @@ def on_connect(client, userdata, flags, rc):
 
 	# Subscribing in on_connect() means that if we lose the connection and
 	# reconnect then subscriptions will be renewed.
-	# subscribe topic "/sys/<systemId>/<systemCode>-<unitCode>"
-	# e.g. "/sys/123456-rcplugs/11011-01000", payload: typeA
-	client.subscribe("/sys/%s/#" % systemId)
+	# subscribe topic "/sys/<systemId>/<systemCode>-<unitCode>/<control>"
+	# e.g. "/sys/123456-rcplugs/11011-01000/Power", payload: typeA
+	client.subscribe("/sys/%s/+/+" % systemId)
 	return
 
 # The callback for when a PUBLISH message is received from the broker.
 def on_message(client, userdata, msg):
 	if debug: print("on_message(): "+ msg.topic+ ":"+ str(msg.payload))
 	# subscribed topics:
-	# /sys/<systemId>/<systemCode>-<unitCode>, payload: type
-	# /devices/<systemId>-<systemCode>-<unitCode>/controls/Power/on, payload: state
+	# /sys/<systemId>/<systemCode>-<unitCode>/<control>, payload: type
+	# /devices/<systemId>-<systemCode>-<unitCode>/controls/<control>/on, payload: state
 	# e.g.:
-	# /sys/123456-rcplug/11011-01000, payload: typeA
+	# /sys/123456-rcplug/11011-01000/Power, payload: typeA
 	# /devices/123456-rcplug-11011-01000/controls/Power/on, payload: 1
 	topic = msg.topic.split("/") # topic[0] is "" (string before first "/")
 	topic.remove("") #  remove this first empty topic
@@ -122,17 +124,17 @@ def on_message(client, userdata, msg):
 		if msg.payload == "":
 			removePlug(client, systemCode, unitCode)
 		else:
-			addPlug(client, systemCode, unitCode, msg.payload)
+			addPlug(client, systemCode, unitCode, topic[3], msg.payload)
 	elif topic[0] == "devices" and topic[2] == "controls" and topic[4] == "on":
 		systemId1, systemId2, systemCode, unitCode = topic[1].split("-")
 		if systemId1+ "-"+ systemId2 == systemId:
 			ret = sendPlug(systemCode, unitCode, msg.payload)
 			# echo back state
 			if ret:
-				client.publish(build_topic(systemCode, unitCode, "controls/Power"), msg.payload, retain=True)
+				client.publish(build_topic(systemCode, unitCode, "controls", topic[3]), msg.payload, retain=True)
 			else:
 				# turn switch back, if sendPlug() failed
-				client.publish(build_topic(systemCode, unitCode, "controls/Power"), 0 if msg.payload else 1, retain=True)
+				client.publish(build_topic(systemCode, unitCode, "controls", topic[3]), 0 if msg.payload else 1, retain=True)
 		else:
 			print("on_message(): Unkown topic '%s'." % msg.topic)
 	else:
