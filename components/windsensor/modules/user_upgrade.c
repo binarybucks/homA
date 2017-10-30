@@ -21,7 +21,7 @@ LOCAL struct espconn gethostname_conn;
  ******************************************************************
  * @brief  System callback after system_upgrade_start() finished.
  * @author Holger Mueller
- * @date   2017-06-03
+ * @date   2017-06-03, 2017-10-30
  *
  * @param  arg - Pointer to upgrade_server_info structure.
  ******************************************************************
@@ -35,6 +35,7 @@ ota_finished_callback(void *arg)
 		system_upgrade_reboot();
 	} else {
 		os_printf("[OTA]failed!" CRLF);
+		system_restart();
 	}
 
 	os_free(update->pespconn);

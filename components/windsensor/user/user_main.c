@@ -122,7 +122,7 @@ user_rf_cal_sector_set(void)
  ******************************************************************
  * @brief  MQTT callback broker connected.
  * @author Holger Mueller
- * @date   2017-06-08, 2017-07-06
+ * @date   2017-06-08, 2017-07-06, 2017-07-11,2017-10-30
  * Subscribes to /sys topics, publishes HomA /devices/ structure.
  *
  * @param  args - MQTT_Client structure pointer.
@@ -132,32 +132,37 @@ LOCAL void ICACHE_FLASH_ATTR
 MqttConnected_Cb(uint32_t *args)
 {
 	char app_version[20];
+	char *rst_reason;
 	MQTT_Client *client = (MQTT_Client *) args;
 	
 	INFO("MQTT: Connected" CRLF);
 	mqtt_connected = true;
 	
-	MQTT_Subscribe(client, "/sys/" HOMA_SYSTEM_ID "/#", 0);
+	MQTT_Subscribe(client, "/sys/" HOMA_SYSTEM_ID "/#", 2);
 
 	// setup HomA device topics
 	//MQTT_Publish(*client, topic, data, data_length, qos, retain)
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/room", HOMA_ROOM, os_strlen(HOMA_ROOM), 0, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/name", HOMA_DEVICE, os_strlen(HOMA_DEVICE), 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/room", HOMA_ROOM, os_strlen(HOMA_ROOM), 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/name", HOMA_DEVICE, os_strlen(HOMA_DEVICE), 1, 1);
 	
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/type", "text", 4, 0, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/unit", " km/h", 5, 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/type", "text", 4, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/unit", " km/h", 5, 1, 1);
 	
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/order", "1", 1, 0, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count/meta/order", "2", 1, 0, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "3", 1, 0, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "4", 1, 0, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "5", 1, 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/order", "1", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count/meta/order", "2", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "3", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason/meta/order", "4", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "5", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "6", 1, 1, 1);
 	
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id",
-		sysCfg.device_id, os_strlen(sysCfg.device_id), 0, 1);
+		sysCfg.device_id, os_strlen(sysCfg.device_id), 1, 1);
 	itoa(app_version, APP_VERSION);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version",  
-		app_version, os_strlen(app_version), 0, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version",
+		app_version, os_strlen(app_version), 1, 1);
+	rst_reason = (char *) rst_reason_text[system_get_rst_info()->reason];
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason",
+		rst_reason, os_strlen(rst_reason), 1, 1);
 }
 
 /**
@@ -262,7 +267,7 @@ CheckSntpStamp_Cb(void *arg)
 		INFO("sntp: %d, %s" CRLF, current_stamp, time_str);
 		MQTT_Publish(&mqttClient, 
 			"/devices/" HOMA_SYSTEM_ID "/controls/Start time",
-			time_str, os_strlen(time_str), 0, 1);
+			time_str, os_strlen(time_str), 1, 1);
 	}
 }
 

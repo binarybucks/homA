@@ -206,11 +206,10 @@ $(FW_BASE)/%.bin: $(TARGET_OUT) | $(FW_BASE)
 	  $(Q) $(OBJCOPY) --only-section .data -O binary $< eagle.app.v6.data.bin
 	  $(Q) $(OBJCOPY) --only-section .rodata -O binary $< eagle.app.v6.rodata.bin
 	  $(Q) $(OBJCOPY) --only-section .irom0.text -O binary $< eagle.app.v6.irom0text.bin
-	  $(Q) export COMPILE
       ifeq ($(BOOT), old)
-	    $(Q) $(GEN_APPBIN) $< 1 $(SPI_MODE) $(SPI_SPEED) $(SIZE_MAP) $(APP)
+	    $(Q) env COMPILE=$(COMPILE) $(GEN_APPBIN) $< 1 $(SPI_MODE) $(SPI_SPEED) $(SIZE_MAP) $(APP)
       else
-	    $(Q) $(GEN_APPBIN) $< 2 $(SPI_MODE) $(SPI_SPEED) $(SIZE_MAP) $(APP)
+	    $(Q) env COMPILE=$(COMPILE) $(GEN_APPBIN) $< 2 $(SPI_MODE) $(SPI_SPEED) $(SIZE_MAP) $(APP)
       endif
 	  $(Q) mv eagle.app.flash.bin $(FW_FILE_OTA)
 	  $(Q) rm eagle.app.v6.*
@@ -258,10 +257,10 @@ flash: $(FW_FILE_OTA)
 endif
 
 connect:
-	picocom -b 115200 --omap crcrlf $(ESPPORT)
+	picocom -b 76800 --omap crcrlf $(ESPPORT)
 
 publish:
-	$(MQTT_PUB) -h $(MQTT_HOST) -u $(MQTT_USER) -P $(MQTT_PASS) -t "/sys/$(system_id)/server_version" -m $(app_version)
+	$(MQTT_PUB) -h $(MQTT_HOST) -u "$(MQTT_USER)" -P "$(MQTT_PASS)" -q 2 -t "/sys/$(system_id)/server_version" -m "$(app_version)"
 
 clean:
 	$(Q) rm -rf $(FW_BASE) $(BUILD_BASE)

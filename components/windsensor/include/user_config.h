@@ -1,7 +1,7 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define APP_VERSION 14
+#define APP_VERSION 18
 
 #define WPS						// enable WPS
 
@@ -15,7 +15,7 @@
 // HomA definitions
 #define HOMA_SYSTEM_ID	"123456-windsensor"
 #define HOMA_DEVICE		"Windsensor"
-#define HOMA_ROOM		"Home"
+#define HOMA_ROOM		"Sensors"
 
 // definitions of the wind speed sensor (e.g. "Schalenanemometer")
 #define SPEED_TB	1	// time base[s] of measurement (speed_timer)
