@@ -40,20 +40,22 @@ http://www.danielcasner.org/guidelines-for-writing-code-for-the-esp8266/
 // global variables
 LOCAL MQTT_Client mqttClient;
 LOCAL bool mqtt_connected = false;
+LOCAL bool send_start_time = false;
 LOCAL struct keys_param keys;
 LOCAL struct single_key_param *single_key[KEY_NUM];
 LOCAL os_timer_t speed_timer;
 LOCAL uint16_t speed_count; // counts speed sensor pulses
+LOCAL uint16_t speed_count_stored; // last count pulses
 LOCAL os_timer_t sntp_timer; // time for NTP service
 
 const char *rst_reason_text[] = {
-	"normal startup by power on", // REANSON_DEFAULT_RST = 0
-	"hardware watch dog reset", // REANSON_WDT_RST = 1
-	"exception reset", // REANSON_EXCEPTION_RST = 2
-	"software watch dog reset", // REANSON_SOFT_WDT_RST = 3
-	"software restart", // REANSON_SOFT_RESTART = 4
-	"wake up from deep-sleep", //REANSON_DEEP_SLEEP_AWAKE = 5
-	"external system reset" // REANSON_EXT_SYS_RST = 6
+	"normal startup by power on", // REASON_DEFAULT_RST = 0
+	"hardware watch dog reset",   // REASON_WDT_RST = 1
+	"exception reset",            // REASON_EXCEPTION_RST = 2
+	"software watch dog reset",   // REASON_SOFT_WDT_RST = 3
+	"sw restart, system_restart()", // REASON_SOFT_RESTART = 4
+	"wake up from deep-sleep",    // REASON_DEEP_SLEEP_AWAKE = 5
+	"external system reset"       // REASON_EXT_SYS_RST = 6
 };
 
 uint32 user_rf_cal_sector_set(void);
@@ -120,9 +122,40 @@ user_rf_cal_sector_set(void)
 
 /**
  ******************************************************************
+ * @brief  NTP timer callback.
+ * @author Holger Mueller
+ * @date   2017-06-11, 2017-07-06, 2017-10-30
+ *
+ * @param  arg - NULL, not used.
+ ******************************************************************
+ */
+LOCAL void ICACHE_FLASH_ATTR
+CheckSntpStamp_Cb(void *arg)
+{
+	uint32 current_stamp;
+	char *time_str;
+
+	current_stamp = applyDST(sntp_get_current_timestamp());
+	if (current_stamp == 0) {
+		os_timer_arm(&sntp_timer, 100, 0);
+	} else {
+		os_timer_disarm(&sntp_timer);
+		time_str = sntp_get_real_time(current_stamp);
+		if (os_strlen(time_str) > 0)
+			time_str[os_strlen(time_str)-1] = 0; // remove tailing \n
+		INFO("sntp: %d, %s" CRLF, current_stamp, time_str);
+		MQTT_Publish(&mqttClient,
+			"/devices/" HOMA_SYSTEM_ID "/controls/Start time",
+			time_str, os_strlen(time_str), 1, 1);
+		send_start_time = true; // do not resend start time until we reboot
+	}
+}
+
+/**
+ ******************************************************************
  * @brief  MQTT callback broker connected.
  * @author Holger Mueller
- * @date   2017-06-08, 2017-07-06, 2017-07-11,2017-10-30
+ * @date   2017-06-08, 2017-07-06, 2017-07-11, 2017-10-31
  * Subscribes to /sys topics, publishes HomA /devices/ structure.
  *
  * @param  args - MQTT_Client structure pointer.
@@ -149,7 +182,7 @@ MqttConnected_Cb(uint32_t *args)
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/unit", " km/h", 5, 1, 1);
 	
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/order", "1", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count/meta/order", "2", 1, 1, 1);
+	//MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count/meta/order", "2", 1, 1, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "3", 1, 1, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason/meta/order", "4", 1, 1, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "5", 1, 1, 1);
@@ -163,6 +196,18 @@ MqttConnected_Cb(uint32_t *args)
 	rst_reason = (char *) rst_reason_text[system_get_rst_info()->reason];
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason",
 		rst_reason, os_strlen(rst_reason), 1, 1);
+
+	// do only resend start time if we reboot,
+	// do not if we got a Wifi reconnect ...
+	if (!send_start_time) {
+		os_timer_disarm(&sntp_timer);
+		os_timer_setfn(&sntp_timer, (os_timer_func_t *)CheckSntpStamp_Cb, NULL);
+		os_timer_arm(&sntp_timer, 100, 0);
+	}
+
+	// (re-)start speed timer
+	speed_count = 0;
+	os_timer_arm(&speed_timer, SPEED_TB * 1000, true);	// trigger timer every SPEED_TB seconds
 }
 
 /**
@@ -243,39 +288,9 @@ MqttData_Cb(uint32_t * args, const char *topic, uint32_t topic_len, const char *
 
 /**
  ******************************************************************
- * @brief  NTP timer callback. 
- * @author Holger Mueller
- * @date   2017-06-11, 2017-07-06
- *
- * @param  arg - NULL, not used.
- ******************************************************************
- */
-LOCAL void ICACHE_FLASH_ATTR
-CheckSntpStamp_Cb(void *arg)
-{
-	uint32 current_stamp;
-	char *time_str;
-	
-	current_stamp = applyDST(sntp_get_current_timestamp());
-	if (current_stamp == 0) {
-		os_timer_arm(&sntp_timer, 100, 0);
-	} else{
-		os_timer_disarm(&sntp_timer);
-		time_str = sntp_get_real_time(current_stamp);
-		if (os_strlen(time_str) > 0)
-			time_str[os_strlen(time_str)-1] = 0; // remove tailing \n
-		INFO("sntp: %d, %s" CRLF, current_stamp, time_str);
-		MQTT_Publish(&mqttClient, 
-			"/devices/" HOMA_SYSTEM_ID "/controls/Start time",
-			time_str, os_strlen(time_str), 1, 1);
-	}
-}
-
-/**
- ******************************************************************
  * @brief  Do all the stuff that need network after we got an ip.
  * @author Holger Mueller
- * @date   2017-06-08
+ * @date   2017-06-08, 2017-10-31
  ******************************************************************
  */
 LOCAL void ICACHE_FLASH_ATTR
@@ -289,14 +304,6 @@ WifiGotIp(void)
 	sntp_setservername(2, "time.nist.gov"); // set server 2 by domain name
 	sntp_set_timezone(1); // set Berlin timezone (GMT+1)
 	sntp_init();
-
-	os_timer_disarm(&sntp_timer);
-	os_timer_setfn(&sntp_timer, (os_timer_func_t *)CheckSntpStamp_Cb, NULL);
-	os_timer_arm(&sntp_timer, 100, 0);
-
-	// start speed timer
-	speed_count = 0;
-	os_timer_arm(&speed_timer, SPEED_TB * 1000, true);	// trigger timer every SPEED_TB seconds
 }
 
 #ifdef WPS
@@ -344,6 +351,7 @@ WifiWpsHandleEvent_Cb(System_Event_t *evt_p)
 		INFO("%s: disconnect from ssid %s, reason %d" CRLF, __FUNCTION__,
 				evt_p->event_info.disconnected.ssid,
 				evt_p->event_info.disconnected.reason);
+		os_timer_disarm(&speed_timer); // disable speed timer, as we can not send data anymore
 		MQTT_Disconnect(&mqttClient);
 		break;
 	case EVENT_STAMODE_GOT_IP:
@@ -439,7 +447,7 @@ SpeedKeyShortPress_Cb(void)
  *         Do keep this in RAM (no ICACHE_FLASH_ATTR), as it is
  *         called very often.
  * @author Holger Mueller
- * @date   2017-06-08
+ * @date   2017-06-08, 2017-10-30
  *
  * @param  *arg - callback function parameter set by os_timer_setfn(),
  *                not used.
@@ -452,29 +460,38 @@ SpeedLoop_Cb(void *arg)
 	uint16_t speed_count_copy;
 	char speed_str[20];
 
+	// first thing to do: save and reset speed_counter
 	speed_count_copy = speed_count;
 	speed_count = 0;	// reset global speed counter
 
-	// Calculation of wind speed for the used "Schalenanemometer"
-	// see https://de.wikipedia.org/wiki/Anemometer
-	// and http://www.kleinwindanlagen.de/Forum/cf3/topic.php?t=2779
-	// 1 km/h = 1000 m / 3600 s = 1 / 3.6 m/s; 1 m/s = 3.6 km/h
-	// Schnelllaufzahl (SLZ) / tip speed ratio (TSR): 0.3 to 0.4
-	// Rotations per second = TSR x Wind speed[m/s] / circumference[m]
-	// Wind speed[km/h] = circumference[m] x speed_count / TSR / pulses per rotation * 3.6
-	windspeed = CIRCUM * (float) speed_count_copy / SPEED_TB / TSR / PPR * 3.6;
+	// produce less traffic, send only if wind counter changed
+	if (speed_count_stored != speed_count_copy) {
+		speed_count_stored = speed_count_copy;
 
-	ftoa(speed_str, windspeed);
-	INFO("%s: windspeed=%s" CRLF, __FUNCTION__, speed_str);
-	if (mqtt_connected) {
-		MQTT_Publish(&mqttClient, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed", 
-			speed_str, os_strlen(speed_str), 0, 1);
-	}
-	itoa(speed_str, speed_count_copy);
-	INFO("%s: speed_count=%s" CRLF, __FUNCTION__, speed_str);
-	if (mqtt_connected) {
-		MQTT_Publish(&mqttClient, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count", 
-			speed_str, os_strlen(speed_str), 0, 1);
+		// Calculation of wind speed for the used "Schalenanemometer"
+		// see https://de.wikipedia.org/wiki/Anemometer
+		// and http://www.kleinwindanlagen.de/Forum/cf3/topic.php?t=2779
+		// 1 km/h = 1000 m / 3600 s = 1 / 3.6 m/s; 1 m/s = 3.6 km/h
+		// Schnelllaufzahl (SLZ) / tip speed ratio (TSR): 0.3 to 0.4
+		// Rotations per second = TSR x Wind speed[m/s] / circumference[m]
+		// Wind speed[km/h] = circumference[m] x speed_count / TSR / pulses per rotation * 3.6
+		windspeed = CIRCUM * (float) speed_count_copy / SPEED_TB / TSR / PPR * 3.6;
+
+		ftoa(speed_str, windspeed);
+		INFO("%s: windspeed=%s" CRLF, __FUNCTION__, speed_str);
+		if (mqtt_connected) {
+			MQTT_Publish(&mqttClient, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed",
+				speed_str, os_strlen(speed_str), 0, 1);
+		}
+		/*
+		// uncomment this, if you want to debug the speed counter
+		itoa(speed_str, speed_count_copy);
+		INFO("%s: speed_count=%s" CRLF, __FUNCTION__, speed_str);
+		if (mqtt_connected) {
+			MQTT_Publish(&mqttClient, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count",
+				speed_str, os_strlen(speed_str), 0, 1);
+		}
+		*/
 	}
 }
 
@@ -494,6 +511,8 @@ user_init(void)
 	INFO("Windsensor version %d" CRLF, APP_VERSION);
 	INFO("Reset reason: %s" CRLF, rst_reason_text[system_get_rst_info()->reason]);
 
+	mqtt_connected = false;
+	send_start_time = false;
 	CFG_Load();
 
 #ifdef WPS
@@ -518,6 +537,7 @@ user_init(void)
 	
 	// setup speed counter and timer, but do not arm timer
 	speed_count = 0;
+	speed_count_stored = 0xFFFE; // set an impossible value
 	os_timer_disarm(&speed_timer);
 	os_timer_setfn(&speed_timer, SpeedLoop_Cb, NULL);
 

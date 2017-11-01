@@ -257,7 +257,7 @@ flash: $(FW_FILE_OTA)
 endif
 
 connect:
-	picocom -b 76800 --omap crcrlf $(ESPPORT)
+	picocom -b 74880 --omap crcrlf $(ESPPORT)
 
 publish:
 	$(MQTT_PUB) -h $(MQTT_HOST) -u "$(MQTT_USER)" -P "$(MQTT_PASS)" -q 2 -t "/sys/$(system_id)/server_version" -m "$(app_version)"

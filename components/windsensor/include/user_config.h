@@ -1,7 +1,7 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define APP_VERSION 18
+#define APP_VERSION 20
 
 #define WPS						// enable WPS
 
