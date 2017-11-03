@@ -44,10 +44,19 @@ LOCAL bool send_start_time = false;
 LOCAL struct keys_param keys;
 LOCAL struct single_key_param *single_key[KEY_NUM];
 LOCAL os_timer_t speed_timer;
-LOCAL uint16_t speed_count; // counts speed sensor pulses
-LOCAL uint16_t speed_count_stored; // last count pulses
+LOCAL uint16_t server_version;
+LOCAL uint16_t speed_count_0; // counts current speed sensor pulses
+LOCAL uint16_t speed_count_1; // last count pulses
+LOCAL uint16_t speed_count_2; // before last count pulses
 LOCAL os_timer_t sntp_timer; // time for NTP service
-
+#define SPEED_TASK_PRIO        USER_TASK_PRIO_0
+#define SPEED_TASK_QUEUE_LEN   1
+LOCAL os_event_t speed_task_queue[SPEED_TASK_QUEUE_LEN];
+// user main task signals
+enum sig_speed_task {
+	SIG_SEND = 0,
+	SIG_UPGRADE
+};
 const char *rst_reason_text[] = {
 	"normal startup by power on", // REASON_DEFAULT_RST = 0
 	"hardware watch dog reset",   // REASON_WDT_RST = 1
@@ -60,6 +69,7 @@ const char *rst_reason_text[] = {
 
 uint32 user_rf_cal_sector_set(void);
 void user_init(void);
+LOCAL void SpeedLoop_Setup(void);
 
 
 /**
@@ -124,7 +134,7 @@ user_rf_cal_sector_set(void)
  ******************************************************************
  * @brief  NTP timer callback.
  * @author Holger Mueller
- * @date   2017-06-11, 2017-07-06, 2017-10-30
+ * @date   2017-06-11, 2017-07-06, 2017-11-02
  *
  * @param  arg - NULL, not used.
  ******************************************************************
@@ -136,9 +146,7 @@ CheckSntpStamp_Cb(void *arg)
 	char *time_str;
 
 	current_stamp = applyDST(sntp_get_current_timestamp());
-	if (current_stamp == 0) {
-		os_timer_arm(&sntp_timer, 100, 0);
-	} else {
+	if (current_stamp != 0) {
 		os_timer_disarm(&sntp_timer);
 		time_str = sntp_get_real_time(current_stamp);
 		if (os_strlen(time_str) > 0)
@@ -155,7 +163,7 @@ CheckSntpStamp_Cb(void *arg)
  ******************************************************************
  * @brief  MQTT callback broker connected.
  * @author Holger Mueller
- * @date   2017-06-08, 2017-07-06, 2017-07-11, 2017-10-31
+ * @date   2017-06-08, 2017-07-06, 2017-07-11, 2017-11-02
  * Subscribes to /sys topics, publishes HomA /devices/ structure.
  *
  * @param  args - MQTT_Client structure pointer.
@@ -182,11 +190,10 @@ MqttConnected_Cb(uint32_t *args)
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/unit", " km/h", 5, 1, 1);
 	
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/order", "1", 1, 1, 1);
-	//MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count/meta/order", "2", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "3", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason/meta/order", "4", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "5", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "6", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "2", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason/meta/order", "3", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "4", 1, 1, 1);
+	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "5", 1, 1, 1);
 	
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id",
 		sysCfg.device_id, os_strlen(sysCfg.device_id), 1, 1);
@@ -202,12 +209,11 @@ MqttConnected_Cb(uint32_t *args)
 	if (!send_start_time) {
 		os_timer_disarm(&sntp_timer);
 		os_timer_setfn(&sntp_timer, (os_timer_func_t *)CheckSntpStamp_Cb, NULL);
-		os_timer_arm(&sntp_timer, 100, 0);
+		os_timer_arm(&sntp_timer, 100, true);
 	}
 
-	// (re-)start speed timer
-	speed_count = 0;
-	os_timer_arm(&speed_timer, SPEED_TB * 1000, true);	// trigger timer every SPEED_TB seconds
+	// start speed timer
+	SpeedLoop_Setup();
 }
 
 /**
@@ -247,7 +253,7 @@ MqttPublished_Cb(uint32_t * args)
  ******************************************************************
  * @brief  MQTT callback message/topic received.
  * @author Holger Mueller
- * @date   2017-06-08
+ * @date   2017-06-08, 2017-11-02
  *
  * @param  args - MQTT_Client structure pointer.
  ******************************************************************
@@ -255,6 +261,7 @@ MqttPublished_Cb(uint32_t * args)
 LOCAL void ICACHE_FLASH_ATTR
 MqttData_Cb(uint32_t * args, const char *topic, uint32_t topic_len, const char *data, uint32_t data_len)
 {
+	char versionBuf[20];
 	char *topicBuf = (char *)os_zalloc(topic_len + 1);
 	char *dataBuf = (char *)os_zalloc(data_len + 1);
 
@@ -269,16 +276,21 @@ MqttData_Cb(uint32_t * args, const char *topic, uint32_t topic_len, const char *
 	INFO("Receive topic: %s, data: %s" CRLF, topicBuf, dataBuf);
 
 	if (strcmp(topicBuf, "/sys/" HOMA_SYSTEM_ID "/server_version") == 0) {
-		uint16_t server_version = atoi(dataBuf);
-		bool ret;
+		server_version = atoi(dataBuf);
 		INFO("Received server version %d" CRLF, server_version);
-		// stop speed timer as long as we do the upgrade
-		os_timer_disarm(&speed_timer);
-		ret = OtaUpgrade(server_version);
-		if (!ret) {
-			// No upgrade will be done, restart speed timer
-			speed_count = 0;
-			os_timer_arm(&speed_timer, SPEED_TB * 1000, true);	// trigger timer every SPEED_TB seconds
+		if (server_version <= APP_VERSION) {
+			INFO("%s: No upgrade. Server version=%d, local version=%d" CRLF, 
+				__FUNCTION__, server_version, APP_VERSION);
+			server_version = 0; // reset server version
+		} else {
+			// stop speed timer as long as we do the upgrade
+			os_timer_disarm(&speed_timer);
+			// tell user that upgrade is in progress
+			os_sprintf(versionBuf, "upgrading to %d", server_version);
+			MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version",
+				versionBuf, os_strlen(versionBuf), 1, 1);
+			// do the main work in a Task, not here in the callback
+			system_os_post(SPEED_TASK_PRIO, SIG_UPGRADE, 0);
 		}
 	}
 
@@ -327,7 +339,7 @@ UserWpsStatus_Cb(int status)
 		break;
 	case WPS_CB_ST_FAILED:
 	case WPS_CB_ST_TIMEOUT:
-		INFO("%s: WPS_CB_ST_FAILED or WPS_CB_ST_TIMEOUT" CRLF, __FUNCTION__);
+		ERROR("%s: WPS_CB_ST_FAILED or WPS_CB_ST_TIMEOUT" CRLF, __FUNCTION__);
 		wifi_wps_start();
 		break;
 	}
@@ -345,7 +357,7 @@ UserWpsStatus_Cb(int status)
 LOCAL void ICACHE_FLASH_ATTR
 WifiWpsHandleEvent_Cb(System_Event_t *evt_p)
 {
-	//DEBUG("%s: %s" CRLF, __FUNCTION__, wifi_event[evt->event]);
+	//INFO("%s: %s" CRLF, __FUNCTION__, wifi_event[evt->event]);
 	switch (evt_p->event) {
 	case EVENT_STAMODE_DISCONNECTED:
 		INFO("%s: disconnect from ssid %s, reason %d" CRLF, __FUNCTION__,
@@ -401,7 +413,7 @@ WifiConnect_Cb(uint8_t status)
 LOCAL void ICACHE_FLASH_ATTR
 WpsKeyShortPress_Cb(void)
 {
-	INFO("%s" CRLF, __FUNCTION__);
+	//INFO("%s" CRLF, __FUNCTION__);
 }
 
 /**
@@ -431,42 +443,36 @@ WpsKeyLongPress_Cb(void)
  *         Do keep this in RAM (no ICACHE_FLASH_ATTR), as it is
  *         called very often.
  * @author Holger Mueller
- * @date   2017-06-07
+ * @date   2017-06-07, 2017-11-02
  ******************************************************************
  */
 LOCAL void
 SpeedKeyShortPress_Cb(void)
 {
-	INFO("%s" CRLF, __FUNCTION__);
-	speed_count++;
+	// Keep the Interrupt Service Routine (ISR) / callback short.
+	// Do not use “serial print” commands in an ISR. These can hang the system.
+	//INFO("%s" CRLF, __FUNCTION__);
+	speed_count_0++;
 }
 
 /**
  ******************************************************************
- * @brief  Timer callback for speed sensor timebase.
- *         Do keep this in RAM (no ICACHE_FLASH_ATTR), as it is
- *         called very often.
+ * @brief  Main speed task for publishing data.
  * @author Holger Mueller
- * @date   2017-06-08, 2017-10-30
+ * @date   2017-11-02
  *
- * @param  *arg - callback function parameter set by os_timer_setfn(),
- *                not used.
+ * @param  *event_p - message queue pointer set by system_os_post().
  ******************************************************************
  */
-LOCAL void
-SpeedLoop_Cb(void *arg)
+LOCAL void ICACHE_FLASH_ATTR
+Speed_Task(os_event_t *event_p)
 {
 	float windspeed;
-	uint16_t speed_count_copy;
 	char speed_str[20];
 
-	// first thing to do: save and reset speed_counter
-	speed_count_copy = speed_count;
-	speed_count = 0;	// reset global speed counter
-
-	// produce less traffic, send only if wind counter changed
-	if (speed_count_stored != speed_count_copy) {
-		speed_count_stored = speed_count_copy;
+	switch (event_p->sig) {
+	case SIG_SEND:
+		INFO("%s: Got signal 'SIG_SEND'." CRLF, __FUNCTION__);
 
 		// Calculation of wind speed for the used "Schalenanemometer"
 		// see https://de.wikipedia.org/wiki/Anemometer
@@ -475,7 +481,7 @@ SpeedLoop_Cb(void *arg)
 		// Schnelllaufzahl (SLZ) / tip speed ratio (TSR): 0.3 to 0.4
 		// Rotations per second = TSR x Wind speed[m/s] / circumference[m]
 		// Wind speed[km/h] = circumference[m] x speed_count / TSR / pulses per rotation * 3.6
-		windspeed = CIRCUM * (float) speed_count_copy / SPEED_TB / TSR / PPR * 3.6;
+		windspeed = CIRCUM * (float) speed_count_1 / SPEED_TB / TSR / PPR * 3.6;
 
 		ftoa(speed_str, windspeed);
 		INFO("%s: windspeed=%s" CRLF, __FUNCTION__, speed_str);
@@ -485,21 +491,80 @@ SpeedLoop_Cb(void *arg)
 		}
 		/*
 		// uncomment this, if you want to debug the speed counter
-		itoa(speed_str, speed_count_copy);
+		itoa(speed_str, speed_count_1);
 		INFO("%s: speed_count=%s" CRLF, __FUNCTION__, speed_str);
 		if (mqtt_connected) {
 			MQTT_Publish(&mqttClient, "/devices/" HOMA_SYSTEM_ID "/controls/Wind count",
 				speed_str, os_strlen(speed_str), 0, 1);
 		}
 		*/
+		break;
+	case SIG_UPGRADE:
+		INFO("%s: Got signal 'SIG_UPGRADE'." CRLF, __FUNCTION__);
+		if (!OtaUpgrade(server_version)) {
+			// No upgrade will be done, restart speed timer
+			SpeedLoop_Setup();
+		}
+		server_version = 0; // reset server version
+		break;
+	default:
+		ERROR("%s: Unknown signal %d." CRLF, __FUNCTION__, event_p->sig);
+		break;
 	}
+} // Speed_Task
+
+/**
+ ******************************************************************
+ * @brief  Timer callback for speed sensor timebase.
+ *         Do keep this in RAM (no ICACHE_FLASH_ATTR), as it is
+ *         called very often.
+ * @author Holger Mueller
+ * @date   2017-06-08, 2017-11-03
+ *
+ * @param  *arg - callback function parameter set by os_timer_setfn(),
+ *                not used.
+ ******************************************************************
+ */
+LOCAL void
+SpeedLoop_Cb(void *arg)
+{
+	// first thing to do: save and reset speed_counter
+	ETS_GPIO_INTR_DISABLE();	// lock interrupts until we copied the counter
+	speed_count_2 = speed_count_1;
+	speed_count_1 = speed_count_0;
+	speed_count_0 = 0;	// reset global speed counter
+	ETS_GPIO_INTR_ENABLE();
+
+	// produce less traffic, send only if wind counter changed
+	if (speed_count_1 != speed_count_2) {
+		// do the main work in a Task, not here in the callback
+		system_os_post(SPEED_TASK_PRIO, SIG_SEND, 0);
+	}
+}
+
+/**
+ ******************************************************************
+ * @brief  Setup speed loop timer
+ * @author Holger Mueller
+ * @date   2017-11-02
+ ******************************************************************
+ */
+LOCAL void ICACHE_FLASH_ATTR
+SpeedLoop_Setup(void)
+{
+	// setup speed counter and timer, but do not arm timer
+	speed_count_0 = 0;
+	speed_count_1 = 0xFFFE; // set an impossible value
+	os_timer_disarm(&speed_timer);
+	os_timer_setfn(&speed_timer, SpeedLoop_Cb, NULL);
+	os_timer_arm(&speed_timer, SPEED_TB * 1000, true);	// trigger timer every SPEED_TB seconds
 }
 
 /**
  ******************************************************************
  * @brief  Main user init function.
  * @author Holger Mueller
- * @date   2017-06-08, 2017-07-05
+ * @date   2017-06-08, 2017-07-05, 2017-11-02
  ******************************************************************
  */
 void ICACHE_FLASH_ATTR
@@ -535,11 +600,8 @@ user_init(void)
 	keys.single_key = single_key;
 	key_init(&keys);
 	
-	// setup speed counter and timer, but do not arm timer
-	speed_count = 0;
-	speed_count_stored = 0xFFFE; // set an impossible value
-	os_timer_disarm(&speed_timer);
-	os_timer_setfn(&speed_timer, SpeedLoop_Cb, NULL);
+	// setup Speed_Task (for sending data)
+	system_os_task(Speed_Task, SPEED_TASK_PRIO, speed_task_queue, SPEED_TASK_QUEUE_LEN);
 
 	// setup MQTT
 	//MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);

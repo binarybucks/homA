@@ -90,8 +90,9 @@ LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
 FW_ADDR_1	= 0x00000
 FW_ADDR_2	= 0x10000
 FW_ADDR_OTA	= 0x01000
+FW_ADDR_OTA2	= 0x81000
 ifeq ($(APP), 2)
-    FW_ADDR_OTA	= 0x81000
+    FW_ADDR_OTA	= $(FW_ADDR_OTA2)
 endif
 # 512KB Flash
 ifeq ($(FLASH_SIZE), 512)
@@ -111,6 +112,7 @@ FW_FILE_ESP_INIT	:= $(SDK_BASE)/bin/esp_init_data_default.bin
 FW_FILE_ESP_BLANK	:= $(SDK_BASE)/bin/blank.bin
 FW_FILE_ESP_BOOT	:= $(SDK_BASE)/bin/boot_v1.7.bin
 FW_FILE_OTA	:= $(FW_BASE)/user$(APP).$(FLASH_SIZE).$(BOOT).$(SIZE_MAP).bin
+FW_FILE_OTA2	:= $(FW_BASE)/user2.$(FLASH_SIZE).$(BOOT).$(SIZE_MAP).bin
 
 
 ####
@@ -251,9 +253,9 @@ flash: $(FW_FILE_1) $(FW_FILE_2)
 	#$(ESPTOOL) --port $(ESPPORT) write_flash -fm dio $(FW_ADDR_1) $(FW_FILE_1) $(FW_ADDR_2) $(FW_FILE_2) 0x3D000 $(FW_FILE_ESP_BLANK)
 	# only write compiled code
 	#$(ESPTOOL) --port $(ESPPORT) write_flash -fm dio $(FW_ADDR_1) $(FW_FILE_1) $(FW_ADDR_2) $(FW_FILE_2)
-else
+else ifeq ($(APP), 1)
 flash: $(FW_FILE_OTA)
-	$(ESPTOOL) --port $(ESPPORT) write_flash -fm dio 0x00000 $(FW_FILE_ESP_BOOT) $(FW_ADDR_OTA) $(FW_FILE_OTA) $(FW_ADDR_ESP_INIT) $(FW_FILE_ESP_INIT)
+	$(ESPTOOL) --port $(ESPPORT) write_flash -fm dio 0x00000 $(FW_FILE_ESP_BOOT) $(FW_ADDR_OTA) $(FW_FILE_OTA) $(FW_ADDR_OTA2) $(FW_FILE_OTA2) $(FW_ADDR_ESP_INIT) $(FW_FILE_ESP_INIT)
 endif
 
 connect:

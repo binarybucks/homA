@@ -1,7 +1,7 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define APP_VERSION 20
+#define APP_VERSION 21
 
 #define WPS						// enable WPS
 
@@ -39,6 +39,7 @@
 //#define KEY_0_IO_FUNC	FUNC_GPIO14
 
 #define USE_OPTIMIZE_PRINTF
+#define ERROR(format, ...) os_printf(format, ## __VA_ARGS__)
 #define CRLF "\r\n"
 
 #endif
