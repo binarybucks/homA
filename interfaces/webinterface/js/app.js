@@ -249,6 +249,7 @@ comparator: function(a, b) {
       this.input = this.$('input');
       this.input.attr('max', this.model.get("max") || 255)
       this.input.attr('min', this.model.get("min") || 0)
+      this.input.attr('value', this.model.get("value"))
       return this;
     },
     rangeInhibitInputUpdates: function(e) {this.allowUpdates = false;},
