@@ -78,8 +78,8 @@ WIFI_Connect(uint8_t* ssid, uint8_t* pass, WifiCallback cb)
 
 	os_memset(&stationConf, 0, sizeof(struct station_config));
 
-	os_sprintf(stationConf.ssid, "%s", ssid);
-	os_sprintf(stationConf.password, "%s", pass);
+	os_sprintf((char*) stationConf.ssid, "%s", ssid);
+	os_sprintf((char*) stationConf.password, "%s", pass);
 
 	wifi_station_set_config_current(&stationConf);
 

@@ -3,6 +3,7 @@
  * @brief Common user functions
  */
 #include <osapi.h>
+#include <stdlib.h>
 #include "user_common.h"
 
 

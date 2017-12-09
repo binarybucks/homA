@@ -5,3 +5,5 @@ firmware/
 *.s#?
 *.b#?
 *.l#?
+.cproject
+.project

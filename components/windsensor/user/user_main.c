@@ -67,8 +67,15 @@ const char *rst_reason_text[] = {
 	"external system reset"       // REASON_EXT_SYS_RST = 6
 };
 
-uint32 user_rf_cal_sector_set(void);
-void user_init(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
+	uint32 user_rf_cal_sector_set(void);
+	void user_init(void);
+#ifdef __cplusplus
+}
+#endif
+
 LOCAL void SpeedLoop_Setup(void);
 
 
@@ -311,9 +318,9 @@ WifiGotIp(void)
 	MQTT_Connect(&mqttClient);
 
 	// setup NTP
-	sntp_setservername(0, "de.pool.ntp.org"); // set server 0 by domain name
-	sntp_setservername(1, "europe.pool.ntp.org"); // set server 1 by domain name
-	sntp_setservername(2, "time.nist.gov"); // set server 2 by domain name
+	sntp_setservername(0, (char*) "de.pool.ntp.org"); // set server 0 by domain name
+	sntp_setservername(1, (char*) "europe.pool.ntp.org"); // set server 1 by domain name
+	sntp_setservername(2, (char*) "time.nist.gov"); // set server 2 by domain name
 	sntp_set_timezone(1); // set Berlin timezone (GMT+1)
 	sntp_init();
 }

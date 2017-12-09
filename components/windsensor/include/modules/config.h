@@ -34,15 +34,15 @@
 #include "user_config.h"
 typedef struct{
 	uint32_t cfg_holder;
-	uint8_t device_id[32];
+	char device_id[32];
 
-	uint8_t sta_ssid[64];
-	uint8_t sta_pwd[64];
+	char sta_ssid[64];
+	char sta_pwd[64];
 
-	uint8_t mqtt_host[64];
+	char mqtt_host[64];
 	uint32_t mqtt_port;
-	uint8_t mqtt_user[32];
-	uint8_t mqtt_pass[32];
+	char mqtt_user[32];
+	char mqtt_pass[32];
 	uint32_t mqtt_keepalive;
 	uint8_t security;
 } SYSCFG;

@@ -12,7 +12,8 @@
 #include "mem.h"
 #include "espconn.h"
 #include "upgrade.h"
-#include "debug.h"
+#include "mqtt/debug.h"
+#include "mqtt/utils.h"
 
 // global variables
 LOCAL struct espconn gethostname_conn;
@@ -29,7 +30,7 @@ LOCAL struct espconn gethostname_conn;
 static void ICACHE_FLASH_ATTR 
 ota_finished_callback(void *arg)
 {
-	struct upgrade_server_info *update = arg;
+	struct upgrade_server_info *update = (struct upgrade_server_info*) arg;
 	if (update->upgrade_flag == true) {
 		os_printf("[OTA]success; rebooting!" CRLF);
 		system_upgrade_reboot();
