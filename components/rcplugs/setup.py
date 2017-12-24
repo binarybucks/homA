@@ -13,12 +13,15 @@
 # 2017/04/07 modified to be complient with issue #144 and sockets component
 # 2017/10/18 made control name (before fix "Power") configurable
 
+import sys
+import getopt
 import paho.mqtt.client as mqtt
 import mqtt_config		# defines host, port, user, pwd, ca_certs
 
 # config here ...
 debug = False
 systemId = "123456-rcplugs"
+room = "rcPlugs"
 # config plugs here
 # topic systemId is build from <systemId>-<systemCode>-<unitCode>
 mqtt_arr = [
@@ -46,12 +49,27 @@ def homa_init(mqttc):
 	order = 1
 	for mqtt_dict in mqtt_arr:
 		mqttc.publish("/sys/%s/%s/%s" % (systemId, mqtt_dict['topic'], mqtt_dict['control']), mqtt_dict['type'], retain=True)
-		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/room"), mqtt_dict['room'], retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/room"), room, retain=True)
 		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/name"), mqtt_dict['device'], retain=True)
 		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/type"), "switch", retain=True)
 		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/order"), order, retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/room"), mqtt_dict['room'], retain=True)
 		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control']), 0, retain=True) # default off
 		order += 1
+	return
+
+def homa_remove(mqttc):
+	"Remove HomA rcplugs messages from MQTT broker."
+	print("Removing HomA rcplugs data (systemId %s) ..." % systemId)
+	# setup controls
+	for mqtt_dict in mqtt_arr:
+		mqttc.publish("/sys/%s/%s/%s" % (systemId, mqtt_dict['topic'], mqtt_dict['control']), "", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/room"), "", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "meta/name"), "", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/type"), "", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/order"), "", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control'], "meta/room"), "", retain=True)
+		mqttc.publish(get_topic(mqtt_dict['topic'], "controls", mqtt_dict['control']), "", retain=True)
 	return
 
 # The callback for when the client receives a CONNACK response from the broker.
@@ -71,7 +89,36 @@ def on_publish(client, userdata, mid):
 	if debug: print("on_publish(): message send "+ str(mid))
 	return
 
+def usage():
+	print("Setup rcPlugs is a MQTT RC-Switch bridge used by HomA framework.")
+	print("%s [-h] [--help] [-d] [-r]" % sys.argv[0])
+	print("-h, --help        Shows this help")
+	print("-d                Enable debug output")
+	print("-r                Remove HomA rcPlugs messages")
+	return
+
 def main():
+	global debug
+	remove = False
+
+	# parse command line options
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hdr", ["help"])
+	except getopt.GetoptError:
+		print("Error. Invalid argument.")
+		usage()
+		sys.exit(2)
+	for opt, arg in opts:
+		if opt in ("-h", "--help"):
+			usage()
+			sys.exit()
+		elif opt == '-d':
+			debug = True
+			print("Debug output enabled.")
+		elif opt in ("-r"):
+			remove = True
+			if debug: print("Remove switch found.")
+
 	# connect to MQTT broker
 	mqttc = mqtt.Client()
 	mqttc.on_connect = on_connect
@@ -83,8 +130,11 @@ def main():
 	mqttc.username_pw_set(mqtt_config.user, password=mqtt_config.pwd)
 	mqttc.connect(mqtt_config.host, port=mqtt_config.port)
 	mqttc.loop_start()
-
-	homa_init(mqttc)        # setup HomA MQTT device and control settings
+	
+	if remove:
+		homa_remove(mqttc)      # remove HomA MQTT device and control settings
+	else:
+		homa_init(mqttc)        # setup HomA MQTT device and control settings
 
 	# wait until all queued topics are published
 	mqttc.loop_stop()
