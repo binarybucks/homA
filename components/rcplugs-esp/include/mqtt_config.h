@@ -1,6 +1,7 @@
 #ifndef __MQTT_CONFIG_H__
 #define __MQTT_CONFIG_H__
 
+#include <c_types.h>
 #include "user_secret.h"
 
 #define MQTT_DEBUG_ON			// define if you want debug info messages
@@ -47,5 +48,17 @@
 
 //#define PROTOCOL_NAMEv31	// MQTT version 3.1 compatible with Mosquitto v0.15
 #define PROTOCOL_NAMEv311	// MQTT version 3.11 compatible with https://eclipse.org/paho/clients/testing/
+
+
+// fix bug in c_types.h include, not defining BOOL, TRUE, FALSE for c++
+#ifndef BOOL
+#	define BOOL bool
+#endif
+#ifndef TRUE
+#	define TRUE true
+#endif
+#ifndef FALSE
+#	define FALSE false
+#endif
 
 #endif // __MQTT_CONFIG_H__
