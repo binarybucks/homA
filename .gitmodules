@@ -7,3 +7,6 @@
 [submodule "misc/libraries/arduino/pubsubclient"]
 	path = misc/libraries/arduino/pubsubclient
 	url = https://github.com/knolleary/pubsubclient
+[submodule "components/rcplugs-esp/wiringESP"]
+	path = components/rcplugs-esp/wiringESP
+	url = https://github.com/hmueller01/wiringESP
