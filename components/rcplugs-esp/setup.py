@@ -29,7 +29,9 @@ room = "rcSwitch"
 mqtt_arr = [
 	{'topic': '11111-10000', 'type': 'typeA', 'room': 'Home', 'device': 'Stern', 'control': 'Power A'},
 	{'topic': '11111-01000', 'type': 'typeA', 'room': 'Home', 'device': 'Weihnachtsbaum', 'control': 'Power B'},
-	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'Lichterkette aussen', 'control': 'Power C'}]
+	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'Lichterkette aussen', 'control': 'Power C'},
+	{'topic': '11111-00010', 'type': 'typeA', 'room': '', 'device': 'Power D', 'control': 'Power D'},
+	{'topic': '11111-00001', 'type': 'typeA', 'room': '', 'device': 'Power E', 'control': 'Power E'}]
 
 
 def get_topic(systemUnitCode, t1 = None, t2 = None, t3 = None):
