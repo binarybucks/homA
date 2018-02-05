@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
@@ -6718,20 +6718,6 @@ GND</text>
 <pinref part="IC2" gate="G$1" pin="VCC"/>
 </segment>
 </net>
-<net name="N$2" class="0">
-<segment>
-<wire x1="38.1" y1="121.92" x2="73.66" y2="121.92" width="0.1524" layer="91"/>
-<pinref part="IC2" gate="G$1" pin="TX"/>
-<pinref part="JP3" gate="A" pin="4"/>
-</segment>
-</net>
-<net name="N$3" class="0">
-<segment>
-<wire x1="38.1" y1="119.38" x2="73.66" y2="119.38" width="0.1524" layer="91"/>
-<pinref part="IC2" gate="G$1" pin="RX"/>
-<pinref part="JP3" gate="A" pin="5"/>
-</segment>
-</net>
 <net name="N$4" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="GPIO16"/>
@@ -6825,6 +6811,24 @@ GND</text>
 <wire x1="88.9" y1="116.84" x2="86.36" y2="116.84" width="0.1524" layer="91"/>
 <junction x="96.52" y="91.44"/>
 <junction x="104.14" y="91.44"/>
+</segment>
+</net>
+<net name="N$2" class="0">
+<segment>
+<pinref part="IC2" gate="G$1" pin="TX"/>
+<wire x1="38.1" y1="121.92" x2="48.26" y2="121.92" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="121.92" x2="50.8" y2="119.38" width="0.1524" layer="91"/>
+<pinref part="JP3" gate="A" pin="5"/>
+<wire x1="50.8" y1="119.38" x2="73.66" y2="119.38" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$3" class="0">
+<segment>
+<pinref part="IC2" gate="G$1" pin="RX"/>
+<wire x1="38.1" y1="119.38" x2="48.26" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="119.38" x2="50.8" y2="121.92" width="0.1524" layer="91"/>
+<pinref part="JP3" gate="A" pin="4"/>
+<wire x1="50.8" y1="121.92" x2="73.66" y2="121.92" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

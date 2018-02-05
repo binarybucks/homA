@@ -30,8 +30,8 @@ mqtt_arr = [
 	{'topic': '11111-10000', 'type': 'typeA', 'room': 'Home', 'device': 'Stern', 'control': 'Power A'},
 	{'topic': '11111-01000', 'type': 'typeA', 'room': 'Home', 'device': 'Weihnachtsbaum', 'control': 'Power B'},
 	{'topic': '11111-00100', 'type': 'typeA', 'room': 'Home', 'device': 'Lichterkette aussen', 'control': 'Power C'},
-	{'topic': '11111-00010', 'type': 'typeA', 'room': '', 'device': 'Power D', 'control': 'Power D'},
-	{'topic': '11111-00001', 'type': 'typeA', 'room': '', 'device': 'Power E', 'control': 'Power E'}]
+	{'topic': '11111-00010', 'type': 'typeA', 'room': '', 'device': '11111-00010', 'control': 'Power D'},
+	{'topic': '11111-00001', 'type': 'typeA', 'room': '', 'device': '11111-00001', 'control': 'Power E'}]
 
 
 def get_topic(systemUnitCode, t1 = None, t2 = None, t3 = None):
@@ -49,6 +49,8 @@ def get_topic(systemUnitCode, t1 = None, t2 = None, t3 = None):
 def homa_init(mqttc):
 	"Publish HomA setup messages to MQTT broker."
 	print("Publishing HomA setup data (systemId %s) ..." % systemId)
+	mqttc.publish("/devices/%s/meta/room" % systemId, room, retain=True)
+	mqttc.publish("/devices/%s/meta/name" % systemId, ".Info", retain=True)
 	# setup controls
 	order = 1
 	for mqtt_dict in mqtt_arr:
@@ -65,6 +67,8 @@ def homa_init(mqttc):
 def homa_remove(mqttc):
 	"Remove HomA rcplugs messages from MQTT broker."
 	print("Removing HomA rcplugs data (systemId %s) ..." % systemId)
+	mqttc.publish("/devices/%s/meta/room" % systemId, "", retain=True)
+	mqttc.publish("/devices/%s/meta/name" % systemId, "", retain=True)
 	# setup controls
 	for mqtt_dict in mqtt_arr:
 		mqttc.publish("/sys/%s/%s/%s" % (systemId, mqtt_dict['topic'], mqtt_dict['control']), "", retain=True)
