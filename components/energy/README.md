@@ -7,7 +7,7 @@ Install the required dependencies
 ```none
 $ git clone https://github.com/hmueller01/libsml.git
 $ make
-$ sudo ln -s $HOMA_BASEDIR/components/energy/libsml.git/examples/sml_server /usr/local/bin/sml_server
+$ sudo make install
 ```
 Create a ```mqtt_config.py``` file with this content:
 ```none
