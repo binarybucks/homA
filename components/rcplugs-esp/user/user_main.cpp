@@ -172,7 +172,7 @@ CheckSntpStamp_Cb(void *arg)
  ******************************************************************
  * @brief  MQTT callback broker connected.
  * @author Holger Mueller
- * @date   2017-12-16
+ * @date   2017-12-16, 2018-02-05
  * Subscribes to /sys topics, publishes HomA /devices/ structure.
  *
  * @param  args - MQTT_Client structure pointer.
@@ -206,7 +206,7 @@ MqttConnected_Cb(uint32_t *args)
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason/meta/order", "3", 1, 1, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "4", 1, 1, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "5", 1, 1, 1);
-	
+	*/
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id",
 		sysCfg.device_id, os_strlen(sysCfg.device_id), 1, 1);
 	itoa(app_version, APP_VERSION);
@@ -215,8 +215,7 @@ MqttConnected_Cb(uint32_t *args)
 	rst_reason = (char *) rst_reason_text[system_get_rst_info()->reason];
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason",
 		rst_reason, os_strlen(rst_reason), 1, 1);
-*/
-/*
+
 	// do only resend start time if we reboot,
 	// do not if we got a Wifi reconnect ...
 	if (!send_start_time) {
@@ -224,7 +223,6 @@ MqttConnected_Cb(uint32_t *args)
 		os_timer_setfn(&sntp_timer, (os_timer_func_t *)CheckSntpStamp_Cb, NULL);
 		os_timer_arm(&sntp_timer, 100, true);
 	}
-*/
 }
 
 /**

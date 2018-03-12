@@ -7,3 +7,4 @@ firmware/
 *.l#?
 .cproject
 .project
+.settings
