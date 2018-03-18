@@ -41,6 +41,7 @@ extern "C" {
 #include "config.h"
 #include "wifi.h"
 #include "dst.h"
+#include "wiringESP.h"
 #include "RCSwitch.h"
 #include "plugs.h"
 
@@ -198,14 +199,6 @@ MqttConnected_Cb(uint32_t *args)
 	/*
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/room", HOMA_ROOM, os_strlen(HOMA_ROOM), 1, 1);
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/meta/name", HOMA_DEVICE, os_strlen(HOMA_DEVICE), 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/type", "text", 4, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/unit", " km/h", 5, 1, 1);
-	
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed/meta/order", "1", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Start time/meta/order", "2", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Reset reason/meta/order", "3", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id/meta/order", "4", 1, 1, 1);
-	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version/meta/order", "5", 1, 1, 1);
 	*/
 	MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Device id",
 		sysCfg.device_id, os_strlen(sysCfg.device_id), 1, 1);
@@ -471,15 +464,6 @@ LOCAL void ICACHE_FLASH_ATTR
 Main_Task(os_event_t *event_p)
 {
 	switch (event_p->sig) {
-	case SIG_SEND:
-		INFO("%s: Got signal 'SIG_SEND'." CRLF, __FUNCTION__);
-
-		if (mqtt_connected) {
-			// TODO: implement SIG_SEND
-			//MQTT_Publish(&mqttClient, "/devices/" HOMA_SYSTEM_ID "/controls/Wind speed",
-			//	speed_str, os_strlen(speed_str), 0, 1);
-		}
-		break;
 	case SIG_UPGRADE:
 		INFO("%s: Got signal 'SIG_UPGRADE'." CRLF, __FUNCTION__);
 		if (!OtaUpgrade(server_version)) {
