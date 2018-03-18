@@ -49,9 +49,9 @@ LOCAL uint16_t speed_count_0; // counts current speed sensor pulses
 LOCAL uint16_t speed_count_1; // last count pulses
 LOCAL uint16_t speed_count_2; // before last count pulses
 LOCAL os_timer_t sntp_timer; // time for NTP service
-#define SPEED_TASK_PRIO        USER_TASK_PRIO_0
-#define SPEED_TASK_QUEUE_LEN   1
-LOCAL os_event_t speed_task_queue[SPEED_TASK_QUEUE_LEN];
+#define MAIN_TASK_PRIO        USER_TASK_PRIO_0
+#define MAIN_TASK_QUEUE_LEN   1
+LOCAL os_event_t main_task_queue[MAIN_TASK_QUEUE_LEN];
 // user main task signals
 enum sig_speed_task {
 	SIG_SEND = 0,
@@ -297,7 +297,7 @@ MqttData_Cb(uint32_t * args, const char *topic, uint32_t topic_len, const char *
 			MQTT_Publish(client, "/devices/" HOMA_SYSTEM_ID "/controls/Version",
 				versionBuf, os_strlen(versionBuf), 1, 1);
 			// do the main work in a Task, not here in the callback
-			system_os_post(SPEED_TASK_PRIO, SIG_UPGRADE, 0);
+			system_os_post(MAIN_TASK_PRIO, SIG_UPGRADE, 0);
 		}
 	}
 
@@ -464,15 +464,15 @@ SpeedKeyShortPress_Cb(void)
 
 /**
  ******************************************************************
- * @brief  Main speed task for publishing data.
+ * @brief  Main task for publishing data.
  * @author Holger Mueller
- * @date   2017-11-02
+ * @date   2017-11-02, 2018-03-14
  *
  * @param  *event_p - message queue pointer set by system_os_post().
  ******************************************************************
  */
 LOCAL void ICACHE_FLASH_ATTR
-Speed_Task(os_event_t *event_p)
+Main_Task(os_event_t *event_p)
 {
 	float windspeed;
 	char speed_str[20];
@@ -518,7 +518,7 @@ Speed_Task(os_event_t *event_p)
 		ERROR("%s: Unknown signal %d." CRLF, __FUNCTION__, event_p->sig);
 		break;
 	}
-} // Speed_Task
+} // Main_Task
 
 /**
  ******************************************************************
@@ -545,7 +545,7 @@ SpeedLoop_Cb(void *arg)
 	// produce less traffic, send only if wind counter changed
 	if (speed_count_1 != speed_count_2) {
 		// do the main work in a Task, not here in the callback
-		system_os_post(SPEED_TASK_PRIO, SIG_SEND, 0);
+		system_os_post(MAIN_TASK_PRIO, SIG_SEND, 0);
 	}
 }
 
@@ -607,8 +607,8 @@ user_init(void)
 	keys.single_key = single_key;
 	key_init(&keys);
 	
-	// setup Speed_Task (for sending data)
-	system_os_task(Speed_Task, SPEED_TASK_PRIO, speed_task_queue, SPEED_TASK_QUEUE_LEN);
+	// setup Main_Task (for sending data)
+	system_os_task(Main_Task, MAIN_TASK_PRIO, main_task_queue, MAIN_TASK_QUEUE_LEN);
 
 	// setup MQTT
 	//MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
