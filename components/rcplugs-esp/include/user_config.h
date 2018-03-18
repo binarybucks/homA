@@ -13,9 +13,9 @@
 #define OTA_PATH "/esp8266fw/rcswitch/"
 
 // HomA definitions
-#define HOMA_SYSTEM_ID	"123456-rcswitch"
-#define HOMA_DEVICE		"rcswitch"
-#define HOMA_ROOM		"Plugs1"
+#define HOMA_SYSTEM_ID	"123457-rcplugs"
+//#define HOMA_DEVICE		"rcplugs"
+//#define HOMA_ROOM		"rcPlugs"
 
 // configuration of GPIO pins
 #define PIN_433TX		12

@@ -22,8 +22,8 @@ import mqtt_config		# defines host, port, user, pwd, ca_certs
 
 # config here ...
 debug = False
-systemId = "123456-rcswitch"
-room = "rcSwitch"
+systemId = "123457-rcplugs"
+room = "rcPlugs"
 # config plugs here
 # topic systemId is build from <systemId>-<systemCode>-<unitCode>
 mqtt_arr = [
