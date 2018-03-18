@@ -39,7 +39,7 @@ ESPTOOL		?= $(XTENSA_TOOLS_ROOT)/esptool.py
 ESPPORT		?= /dev/tty.SLAB_USBtoUART
 
 # gen_appbin.py Espressif's generate bin script
-GEN_APPBIN	?= $(SDK_BASE)/tools/gen_appbin.py
+GEN_APPBIN	?= python $(SDK_BASE)/tools/gen_appbin.py
 
 # Server and location on update server for new firmware
 UPDATE_SERVER	:= $(shell grep "^\#define OTA_HOST" include/user_config.h | sed 's/.*"\(.*\)".*/\1/')
