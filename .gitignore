@@ -5,6 +5,9 @@ mqtt_config.py
 *.rbc
 .bundle
 .config
+.cproject
+.project
+.settings/
 coverage
 InstalledFiles
 lib/bundler/man
