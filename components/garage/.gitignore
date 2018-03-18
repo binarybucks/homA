@@ -1,0 +1,9 @@
+user_secret.h
+build/
+firmware/
+# Eagle backup files
+*.s#?
+*.b#?
+*.l#?
+.cproject
+.project
