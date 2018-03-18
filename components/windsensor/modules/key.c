@@ -41,7 +41,7 @@ LOCAL void key_intr_handler(void *arg);
  *				  uint32 gpio_func - gpio function
  *				  key_function long_press - long press function, needed to install
  *				  key_function short_press - short press function, needed to install
- *				  fast_mode - do not wait 50ms for debouncing, call short press function at once, does not call long press function
+ *				  fast_mode - wait 1ms instead of 50ms for short press debouncing
  * Returns		: single_key_param - single key parameter, needed by key init
 *******************************************************************************/
 struct single_key_param *ICACHE_FLASH_ATTR
@@ -107,8 +107,12 @@ key_5s_cb(struct single_key_param *single_key)
 {
 	os_timer_disarm(&single_key->key_5s);
 
-	// low, then restart
+	// low, this is a long press
 	if (0 == GPIO_INPUT_GET(GPIO_ID_PIN(single_key->gpio_id))) {
+		// disable wait for positive edge, wait for next negative edge instead
+		single_key->key_level = 1;
+		gpio_pin_intr_state_set(GPIO_ID_PIN(single_key->gpio_id), GPIO_PIN_INTR_NEGEDGE);
+
 		if (single_key->long_press) {
 			single_key->long_press();
 		}
@@ -155,27 +159,27 @@ key_intr_handler(void *arg)
 
 	for (i = 0; i < keys->key_num; i++) {
 		if (gpio_status & BIT(keys->single_key[i]->gpio_id)) {
-			//disable interrupt
+			// disable interrupt
 			gpio_pin_intr_state_set(GPIO_ID_PIN(keys->single_key[i]->gpio_id), GPIO_PIN_INTR_DISABLE);
 
-			//clear interrupt status
+			// clear interrupt status
 			GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, gpio_status & BIT(keys->single_key[i]->gpio_id));
 
 			if (keys->single_key[i]->key_level == 1) {
-				// 5s, restart & enter softap mode
+				// 5s, key low check
 				os_timer_disarm(&keys->single_key[i]->key_5s);
 				os_timer_setfn(&keys->single_key[i]->key_5s, (os_timer_func_t *)key_5s_cb, keys->single_key[i]);
-				os_timer_arm(&keys->single_key[i]->key_5s, 5000, 0);
+				os_timer_arm(&keys->single_key[i]->key_5s, 5000, FALSE);
 				keys->single_key[i]->key_level = 0;
 				gpio_pin_intr_state_set(GPIO_ID_PIN(keys->single_key[i]->gpio_id), GPIO_PIN_INTR_POSEDGE);
 			} else {
-				// 50ms, check if this is a real key up
+				// 50ms or 1ms (fast), check if this is a real key up
 				os_timer_disarm(&keys->single_key[i]->key_50ms);
 				os_timer_setfn(&keys->single_key[i]->key_50ms, (os_timer_func_t *)key_50ms_cb, keys->single_key[i]);
 				if (keys->single_key[i]->fast_mode) {
-					os_timer_arm(&keys->single_key[i]->key_50ms, 1, 0);
+					os_timer_arm(&keys->single_key[i]->key_50ms, 1, FALSE);
 				} else {
-					os_timer_arm(&keys->single_key[i]->key_50ms, 50, 0);
+					os_timer_arm(&keys->single_key[i]->key_50ms, 50, FALSE);
 				}
 			}
 		}
