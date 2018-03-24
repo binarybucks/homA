@@ -1,9 +1,13 @@
+user_secret.h
 mqtt_config.py
 *.pyc
 *.gem
 *.rbc
 .bundle
 .config
+.cproject
+.project
+.settings/
 coverage
 InstalledFiles
 lib/bundler/man
