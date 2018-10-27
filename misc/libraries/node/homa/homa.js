@@ -2,6 +2,7 @@
 // 2013 Alexander Rust <mail@alr.st>
 // Use it as you like if you find id usefull
 
+const url = require('url');
 var util = require('util');
 var events = require('events');
 var mqtt = require('mqtt');
@@ -107,8 +108,11 @@ var MqttHelper = function() {
 	self.scheduledPublishes = [];
 
 	this.connect = function(host, port, extraParameters) {
-		self.mqttClient = mqtt.createClient(port || params.brokerPort, host || params.brokerHost, extraParameters);
-		log.info("MQTT", "Connecting to %s:%s", host || params.brokerHost, port || params.brokerPort);
+		const brokerUrl = url.parse(host || params.brokerHost);
+		brokerUrl.port = port || params.brokerPort;
+		brokerUrl.protocol = "mqtt://";
+		log.info("MQTT", "Connecting to %s%s:%s", brokerUrl.protocol, brokerUrl.href, brokerUrl.port);
+		self.mqttClient = mqtt.connect(brokerUrl, extraParameters);
 	
 	  self.mqttClient.on('connect', function() {
          self.emit('connect');
